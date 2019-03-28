@@ -1,5 +1,19 @@
-body{
-  .theme--dark{
-    // opacity: 0.1;
+.none{
+  display: none;
+}
+.home{
+  .step-block{
+    width: 260px;
+    max-width: 260px;
+    min-width: 260px;
+  }
+  button.next{
+    margin-top: -18px;
+  }
+  img.active-profile{
+    border: 2px solid black;
+  }
+  .v-list__tile__avatar{
+
   }
 }
