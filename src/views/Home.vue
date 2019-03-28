@@ -1,7 +1,10 @@
 <template>
   <div class="home">
+    __1__
     <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    __1.5__
+    <HelloWorld title="Hey"/>
+    __2__
   </div>
 </template>
 
