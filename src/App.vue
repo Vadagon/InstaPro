@@ -73,10 +73,10 @@
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>InstaPro</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon @click.stop="drawerRight = !drawerRight"><v-icon>account_circle</v-icon></v-btn>
+      <v-btn icon @click.stop="drawerRight = !drawerRight"><v-icon>notification_important</v-icon></v-btn>
       <!-- <v-toolbar-side-icon @click.stop="drawerRight = !drawerRight"></v-toolbar-side-icon> -->
     </v-toolbar>
-    <v-navigation-drawer v-model="drawerRight" fixed right app >
+    <v-navigation-drawer v-model="drawerRight" absolute overlap right temporary >
       <v-list dense>
         <!-- <v-list-tile>
           <v-list-tile-action>

@@ -15,12 +15,6 @@
       <v-flex>
         <v-window v-model="window" class="elevation-1" vertical>
 
-
-
-
-
-
-
           <v-window-item :key="0">
             <v-card flat>
               <v-card-text>
@@ -138,57 +132,27 @@
             </v-card>
           </v-window-item>
 
-
-
-
-
-
-
-
-
-
         </v-window>
+
         <v-btn color="primary" class="next" @click="nextStep(window)" v-if="steps[window]!=2" :disabled="steps[window]==1 || task.username.length < 2">
           <span v-if="steps[window]==0 && window<steps.length-1">continue</span>
           <v-progress-circular indeterminate color="primary" :size="20" :width="2" v-if="steps[window]==1"></v-progress-circular>
           <span v-if="window==steps.length-1">finish</span>
         </v-btn>
         <v-btn color="warning" class="next" @click="nextStep(window)" v-if="steps[window]==2">re continue</v-btn>
+
       </v-flex>
     </v-layout>
-<br><br>
 
-      <!-- <v-layout row nowrap>
-        <v-flex class="step-block ma-2" v-for="x in 6">
-          <v-card class="pa-3">
-            <h3 class="title mb-3">Enter the name of person to fetch his followers</h3>
-            <v-text-field label="username" placeholder="@the_rock" outline></v-text-field>
-            <v-radio-group>
-              <v-radio v-for="n in 3" :key="n" :label="`Radio ${n}`" :value="n"></v-radio>
-            </v-radio-group>
-            <v-list-tile-avatar v-for="s in [!0, !1, !0, !1, !1]">
-              <input type="checkbox" class="none" :checked="s">
-              <img alt="profile" src="../assets/1.jpg" v-bind:class="{'active-profile': s}">
-              <span class="caption">@username</span>
-            </v-list-tile-avatar>
-            <v-switch></v-switch>
-            <v-slider></v-slider>
-            <v-btn color="primary" class="next">next</v-btn>
-          </v-card>
-        </v-flex>
-      </v-layout> -->
+    <br><br>
   </v-container>
-
 </template>
-
-
 
 <!-- <HelloWorld title="Hey"/> -->
 
 <script>
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
-
 export default {
   name: 'target',
   data: () => ({
@@ -210,38 +174,40 @@ export default {
       settings: {
         amount: 100,
         interval: 20
-      }
+      },
+      enabled: true
     }
   }),
-  created() {
+  created () {
     for (var i = 0; i < 20; i++) {
       this.task.accounts.push(Object.assign({}, this.task.accounts[0]))
     }
   },
   computed: {
-    data() {
-      return this.$store
+    data () {
+      return this.$store.state
     }
   },
   methods: {
-    selectAllAcc() {
-      this.task.accounts.map((e)=>{
-        e.checked = this.selectAllAccModel;
-        return e;
+    selectAllAcc () {
+      this.task.accounts.map((e) => {
+        e.checked = this.selectAllAccModel
+        return e
       })
     },
-    nextStep(e) {
+    nextStep (e) {
       this.$set(this.steps, e, 1)
-      setTimeout(()=>{
+      setTimeout(() => {
         this.$set(this.steps, e, 2)
-        console.log(this.task);
-        if(e!=3){
-          this.window = e+1
-          this.length = e+2
-        }else{
-          console.log('finish');
+        console.log(this.task)
+        if (e != 3) {
+          this.window = e + 1
+          this.length = e + 2
+        } else {
+          this.$store.state.tasks.push(this.task)
+          this.$router.push({ path: '/' })
         }
-      }, 1000);
+      }, 1000)
     }
   }
   // components: {
