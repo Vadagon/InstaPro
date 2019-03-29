@@ -10,7 +10,73 @@
 
 <template>
   <v-app id="app">
-    <v-navigation-drawer v-model="drawerRight" fixed right clipped app >
+    <v-navigation-drawer v-model="drawer" fixed clipped app >
+      <v-list dense>
+
+        <v-list-tile to="/">
+          <v-list-tile-action>
+            <v-icon>exit_to_app</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Dashboard</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile to="/target">
+          <v-list-tile-action>
+            <v-icon>exit_to_app</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Target</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile to="/unfollow">
+          <v-list-tile-action>
+            <v-icon>exit_to_app</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Unfollow</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile to="/locations">
+          <v-list-tile-action>
+            <v-icon>exit_to_app</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Locations</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile to="/hashtags">
+          <v-list-tile-action>
+            <v-icon>exit_to_app</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>HashTags</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+        <v-list-tile to="/about">
+          <v-list-tile-action>
+            <v-icon>exit_to_app</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>About</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
+      </v-list>
+    </v-navigation-drawer>
+    <v-toolbar color="blue-grey" dark fixed app clipped-left>
+      <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+      <v-toolbar-title>InstaPro</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn icon @click.stop="drawerRight = !drawerRight"><v-icon>account_circle</v-icon></v-btn>
+      <!-- <v-toolbar-side-icon @click.stop="drawerRight = !drawerRight"></v-toolbar-side-icon> -->
+    </v-toolbar>
+    <v-navigation-drawer v-model="drawerRight" fixed right app >
       <v-list dense>
         <!-- <v-list-tile>
           <v-list-tile-action>
@@ -21,36 +87,6 @@
           </v-list-tile-content>
         </v-list-tile> -->
         developing...
-      </v-list>
-    </v-navigation-drawer>
-    <v-toolbar color="blue-grey" dark fixed app clipped-right >
-      <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-toolbar-title>InstaPro</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn icon @click.stop="drawerRight = !drawerRight"><v-icon>account_circle</v-icon></v-btn>
-      <!-- <v-toolbar-side-icon @click.stop="drawerRight = !drawerRight"></v-toolbar-side-icon> -->
-    </v-toolbar>
-    <v-navigation-drawer v-model="drawer" fixed app >
-      <v-list dense>
-
-        <v-list-tile to="/">
-          <v-list-tile-action>
-            <v-icon>exit_to_app</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Home</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-
-        <v-list-tile to="/about">
-          <v-list-tile-action>
-            <v-icon>exit_to_app</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>about</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-
       </v-list>
     </v-navigation-drawer>
     <v-content>
@@ -68,8 +104,8 @@
 <script>
 export default {
   data: () => ({
-    drawer: true,
-    drawerRight: null,
+    drawer: null,
+    drawerRight: false,
     test: 12312312
   }),
   props: {

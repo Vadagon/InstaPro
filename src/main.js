@@ -13,8 +13,8 @@ Vue.use(Vuex)
 Vue.config.productionTip = false
 
 const store = new Vuex.Store({
-  state: {
-    count: 2
+  data: {
+    tasks: []
   }
 })
 

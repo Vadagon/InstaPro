@@ -1,7 +1,7 @@
 .none{
   display: none;
 }
-.home{
+.target{
   .step-block{
     width: 260px;
     max-width: 260px;
@@ -14,6 +14,13 @@
     border: 2px solid black;
   }
   .v-list__tile__avatar{
-
+    .v-avatar{
+      // display: block;
+      // margin: auto;
+    }
   }
+}
+
+.theme--light.v-btn.v-btn--disabled:not(.v-btn--icon):not(.v-btn--flat):not(.v-btn--outline){
+  background-color: #dcdcdc !important;
 }

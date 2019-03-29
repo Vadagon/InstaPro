@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Home from './views/Home.vue'
+import DashBoard from './views/DashBoard.vue'
 
 Vue.use(Router)
 
@@ -11,7 +11,7 @@ export default new Router({
     {
       path: '/',
       name: 'home',
-      component: Home
+      component: DashBoard
     },
     {
       path: '/about',
@@ -20,6 +20,26 @@ export default new Router({
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import(/* webpackChunkName: "about" */ './views/About.vue')
+    },
+    {
+      path: '/hashtags',
+      name: 'hashtags',
+      component: () => import('./views/HashTags.vue')
+    },
+    {
+      path: '/locations',
+      name: 'locations',
+      component: () => import('./views/Locations.vue')
+    },
+    {
+      path: '/target',
+      name: 'target',
+      component: () => import('./views/Target.vue')
+    },
+    {
+      path: '/unfollow',
+      name: 'unfollow',
+      component: () => import('./views/UnFollow.vue')
     }
   ]
 })
