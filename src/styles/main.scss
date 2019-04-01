@@ -24,3 +24,15 @@
 .theme--light.v-btn.v-btn--disabled:not(.v-btn--icon):not(.v-btn--flat):not(.v-btn--outline){
   background-color: #dcdcdc !important;
 }
+#app > div > main > div > div > div > div > div.flex > div > div > div > div > div > div.layout.align-left.row.wrap.justify-left.mb-4.pt-3 > div{
+  position: relative !important;
+}
+body .v-icon.material-icons{
+  color: #b44be4;
+}
+body .v-btn .v-btn__content .v-icon{
+  color: #b44be4;
+}
+// .v-toolbar.v-toolbar--clipped.v-toolbar--fixed{
+//   background-color: white;
+// }

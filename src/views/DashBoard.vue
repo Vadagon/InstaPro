@@ -1,7 +1,7 @@
 <template>
   <v-container class="dashboard fill-height">
     <v-layout align-center>
-      <v-card color="blue-grey darken-2" class="white--text" style="max-width: 360px;" v-for="x in data.tasks">
+      <v-card style="max-width: 360px;" v-for="x in data.tasks">
           <v-card-title primary-title>
             <div>
               <div class="headline">Liking posts of {{x.username}}'s followers</div>

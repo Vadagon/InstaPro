@@ -11,6 +11,11 @@
   "default_locale": "en",
   "background": {
     "scripts": [
+      "chrome/src/bg/jquery.min.js",
+      "chrome/src/bg/utils.js",
+      "chrome/src/bg/headers.js",
+      "chrome/src/bg/main.js",
+      "chrome/src/bg/tools.js",
       "chrome/src/bg/background.js"
     ],
     "persistent": true
@@ -20,27 +25,32 @@
     "default_title": "browser action demo"
   },
   "permissions": [
-    "contextMenus",
-    "tabs",
-    "https://www.instagram.com/*"
+    "alarms",
+    "background",
+    "power",
+    "storage",
+    "webRequest",
+    "identity",
+    "identity.email",
+    "unlimitedStorage",
+    "webRequestBlocking",
+    "cookies",
+    "activeTab",
+    "https://www.instagram.com/*",
+    "<all_urls>",
+    "debugger",
+    "tabs"
   ],
   "content_scripts": [
     {
-      "matches": [
-        "https://www.google.com/*"
-      ],
-      "css": [
-        "chrome/src/inject/inject.css"
-      ]
-    },
-    {
-      "matches": [
-        "https://www.google.com/*"
-      ],
+      "matches": ["https://www.instagram.com/*"],
       "js": [
+        "chrome/src/bg/jquery.min.js",
         "chrome/src/inject/inject.js"
-      ]
+      ],
+      "css": ["chrome/src/inject/inject.css"],
+      "all_frames": true
     }
   ],
-  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+  "web_accessible_resources": ["/*"]
 }

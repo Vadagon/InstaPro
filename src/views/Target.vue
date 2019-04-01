@@ -19,7 +19,7 @@
             <v-card flat>
               <v-card-text>
                 <v-layout align-center mb-3>
-                  <v-avatar color="grey" class="mr-3">
+                  <v-avatar color="purple lighten-5" class="mr-3">
                     <v-icon>account_circle</v-icon>
                   </v-avatar>
                   <strong class="title">Target</strong>
@@ -44,7 +44,7 @@
             <v-card flat>
               <v-card-text>
                 <v-layout align-center mb-3>
-                  <v-avatar color="grey" class="mr-3">
+                  <v-avatar color="purple lighten-5" class="mr-3">
                     <v-icon>supervisor_account</v-icon>
                   </v-avatar>
                   <strong class="title">Accounts</strong>
@@ -72,9 +72,10 @@
                     <v-flex xs4 md3 v-for="s in task.accounts" mb-2>
                       <v-layout align-left row wrap justify-left>
                         <v-list-tile-avatar>
-                          <img @click="s.checked = !s.checked" alt="profile" src="../assets/1.jpg" v-bind:class="{'active-profile': s.checked}">
+                          <img @click="s.checked = !s.checked" alt="profile" v-bind:src="s.profile_pic_url" v-bind:class="{'active-profile': s.checked}">
                         </v-list-tile-avatar>
-                        <span class="body-2 mt-2">{{s.username}}</span>
+                        <a v-bind:href="'https://www.instagram.com/'+s.username" target="_blank" class="body-2 mt-2 overflow-hidden" style="position: absolute; left: 55px; top: -14px; font-size: 12px !important; color: grey;">{{s.username}}</a>
+                        <span class="body-2 mt-2 overflow-hidden" style="font-size: 14px!important; width: calc(100% - 80px); text-align: left; margin-top: 12px !important;">{{s.full_name}}</span>
                       </v-layout>
                     </v-flex>
                 </v-layout>
@@ -87,7 +88,7 @@
             <v-card flat>
               <v-card-text>
                 <v-layout align-center mb-3>
-                  <v-avatar color="grey" class="mr-3">
+                  <v-avatar color="purple lighten-5" class="mr-3">
                     <v-icon>group_work</v-icon>
                   </v-avatar>
                   <strong class="title">Actions</strong>
@@ -111,7 +112,7 @@
             <v-card flat>
               <v-card-text>
                 <v-layout align-center mb-3>
-                  <v-avatar color="grey" class="mr-3">
+                  <v-avatar color="purple lighten-5" class="mr-3">
                     <v-icon>group_work</v-icon>
                   </v-avatar>
                   <strong class="title">Actions</strong>
@@ -158,12 +159,13 @@ export default {
   data: () => ({
     length: 1,
     window: 0,
-    selectAllAccModel: !1,
+    selectAllAccModel: !0,
     price: 100,
     steps: [0, 0, 0, 0],
     task: {
       section: 'target',
       username: '',
+      user: {},
       accounts: [
         {
           username: 'test',
@@ -196,18 +198,43 @@ export default {
       })
     },
     nextStep (e) {
-      this.$set(this.steps, e, 1)
-      setTimeout(() => {
-        this.$set(this.steps, e, 2)
-        console.log(this.task)
+      var that = this;
+      that.$set(that.steps, e, 1)
+      var next = function(){
+        that.$set(that.steps, e, 2)
         if (e != 3) {
-          this.window = e + 1
-          this.length = e + 2
+          that.window = e + 1
+          that.length = e + 2
         } else {
-          this.$store.state.tasks.push(this.task)
-          this.$router.push({ path: '/' })
+          that.$store.state.tasks.push(that.task)
+          that.$router.push({ path: '/' })
         }
-      }, 1000)
+        for (var i = that.window.length+1; i < that.steps.length; i++) {
+          that.$set(that.steps, i, 0)
+        }
+      }
+      if(e == 0){
+        chrome.runtime.sendMessage({why: "tool", name: "getUser", value: that.task.username}, (response1) => {
+          console.log(response1);
+          if(response1){          
+            that.task.user = response1;
+            chrome.runtime.sendMessage({why: "tool", name: "getFollowers", value: that.task.user.id}, (response2) => {
+              if(response2){
+                that.task.accounts = response2;
+                next();
+              }else{
+                that.$set(that.steps, e, 0)
+              }
+            });
+          }else{
+            that.$set(that.steps, e, 0)
+            // that.$parent.noty.enabled = true;
+          }
+        });
+      }else{
+        next();
+      }
+      console.log(that.task)
     }
   }
   // components: {

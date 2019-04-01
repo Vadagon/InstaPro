@@ -69,8 +69,8 @@
 
       </v-list>
     </v-navigation-drawer>
-    <v-toolbar color="blue-grey" dark fixed app clipped-left>
-      <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+    <v-toolbar fixed app clipped-left>
+      <v-toolbar-side-icon @click.stop="drawer = !drawer" class="text-pink"></v-toolbar-side-icon>
       <v-toolbar-title>InstaPro</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click.stop="drawerRight = !drawerRight"><v-icon>notification_important</v-icon></v-btn>
@@ -94,12 +94,20 @@
         <router-view/>
       </v-container>
     </v-content>
-    <v-footer color="blue-grey" class="white--text px-4" app>
+    <v-footer color="elevation-4" class="px-4" app>
       <span>MarQuis Trill</span>
       <v-spacer></v-spacer>
       <span>&copy; 2019</span>
     </v-footer>
   </v-app>
+
+  <v-snackbar v-model="noty.enabled" :bottom="true" :multi-line="true">
+    {{ noty.text }}
+    <v-btn color="pink"flat @click="noty.enabled">
+      Close
+    </v-btn>
+  </v-snackbar>
+
 </template>
 <script>
 export default {
