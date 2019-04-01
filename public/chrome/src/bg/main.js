@@ -243,15 +243,67 @@ var a = {
 
 		});
 	},
+	section: {
+		target: function(e){
+			if(e.finished){
+				setTimeout(function() {
+					a.init();
+				}, 1000);
+				return;
+			}
+			if(!e.isPrepared){
+				e.finished = false;
+				e.collectedPosts = [];
+				console.log(1311111111);
+				var calls = $.ajax();
+				var i = 1;
+				e.accounts.forEach((t)=>{
+					calls = calls.then(()=>{
+						return a.tool.getUser(t.username, function(res){
+							res&&e.collectedPosts.push(...res.edge_owner_to_timeline_media.edges.map(e=>e.node))
+							console.log('posts collected for '+t.username);
+							i++;
+							if(e.accounts.length == i){
+								e.isPrepared = !0;
+								console.log('finished');
+								update();
+								a.init();
+							}
+						})
+					})
+				})
+			}else{
+				var calls = $.ajax();
+				e.collectedPosts.forEach((t)=>{
+					calls = calls.then(()=>{
+						return a.tool.likeIt(t.id, function(res){
+							if(Math.random()>0.65){
+								e.collectedPosts.shift();
+								e.collectedPosts.shift();
+							}
+							e.collectedPosts.shift();
+							console.log('liked one of posts on @'+t.owner.username);
+							if(!e.accounts.length){
+								e.finished = !0;
+								update();
+								a.init();
+							}
+						})
+					})
+				})
+			}
+		}
+	},
 	init: function(){
+		console.log('nit');
 		a.timeouts.forEach(clearTimeout)
 		a.requests.forEach(e=>e.abort())
 		a.timeouts = []
 		a.requests = []
 
-		if(a.tries > 1){
-			return;
-		}
+		// if(a.tries > 1){
+		// 	return;
+		// }
 		a.tries++;
 		if(!data.user.username){
 			a.readyUp()
@@ -260,15 +312,15 @@ var a = {
 		console.log('started');
 		// a.tool.getUser('_mavlon_oo7', function(e){
 		// 	console.log(e)
-		//   a.tool.getFollowers(e.id, function(v){
-		//     console.log(v);
-		//   })
+		//   // a.tool.getFollowers(e.id, function(v){
+		//   //   console.log(v);
+		//   // })
 		// })
 
-		var tasks = data.tasks.filter(e=>e.isEnabled);
+		var tasks = data.userData.tasks.filter(e=>e.enabled);
 		if(tasks.length && !!data.user.username){
 			var r = random(0, (tasks.length-1));
-			a.type[tasks[r].type](tasks[r]);
+			a.section[tasks[r].section](tasks[r]);
 		}else{
 			timer(function() {
 				a.init()

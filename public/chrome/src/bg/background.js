@@ -17,9 +17,7 @@ var data = {
 		limitTo: 500
 	},
 	userData: {
-	    tasks: [
-	      // { 'section': 'target', 'username': 'as22dad', 'accounts': [{ 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': true }, { 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': true }, { 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': true }, { 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': true }, { 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': true }, { 'username': 'test', 'checked': false }, { 'username': 'test', 'checked': false }], 'type': 'initial', 'settings': { 'amount': 100, 'interval': 20 } }
-	    ]
+	    tasks: []
 	},
 	status: 'Sleeping'
 }
@@ -34,6 +32,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 	    case 'setData':
 	    	data.userData = request.value;
 			update();
+			a.init();
 	        sendResponse(!0);
 	        break;
 	    case 'tool':

@@ -1,5 +1,5 @@
 chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
-	if(details.tabId !== -1) return;
+  if(details.tabId !== -1) return;
     var bb = (JSON.parse(JSON.stringify(details.requestHeaders)));
     for (var i = 0; i < details.requestHeaders.length; ++i) {
       if (details.requestHeaders[i].name == 'Accept') {
@@ -28,13 +28,13 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
 
 
 window.onerror = function() {
-	_gaq.push(['_trackEvent', 'error', arguments[0], arguments[1]+' : '+arguments[2]]);
-	console.log(['_trackEvent', 'error', arguments[0], arguments[1]+' : '+arguments[2]]);
+  _gaq.push(['_trackEvent', 'error', arguments[0], arguments[1]+' : '+arguments[2]]);
+  console.log(['_trackEvent', 'error', arguments[0], arguments[1]+' : '+arguments[2]]);
 }
 $( document ).ajaxError(function( event, jqxhr, settings, exception ) {
     if ( jqxhr.status== 401 ) {
-			console.log(arguments);
-			_gaq.push(['_trackEvent', 'error', arguments[0], arguments[1]+' : '+arguments[2]]);
+      console.log(arguments);
+      _gaq.push(['_trackEvent', 'error', arguments[0], arguments[1]+' : '+arguments[2]]);
     }
 });
 

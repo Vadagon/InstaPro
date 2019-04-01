@@ -1,16 +1,19 @@
 a.tool = {
   likeIt: function(id, cb){
-    a.requests.push($.ajax({
+    var ajax = $.ajax({
         url: 'https://www.instagram.com/web/likes/'+id+'/like/',
         type: 'post',
         headers: {
-          'x-csrftoken': data.user.csrf_token
+          'x-csrftoken': data.user.csrf_token,
+          'x-instagram-ajax': '1'
         }
     }).always(function(e) {
       cb(catcher(function(){
         return e.status == 'ok';
       }))
-    }));
+    });
+    a.requests.push(ajax);
+    return ajax;
   },
   getPost: function(id, cb){
     a.requests.push($.ajax({
@@ -68,14 +71,16 @@ a.tool = {
     }).fail(a.init.bind(!1)))
   },
   getUser: function(user, cb){
-    a.requests.push($.ajax({
+    var ajax = $.ajax({
         url: 'https://www.instagram.com/'+user.replace('@', '')+'/?__a=1',
         type: 'get'
     }).done(function(e){
       cb(catcher(function(){
         return e.graphql.user;
       })?e.graphql.user:!1)
-    }).fail(()=>{cb(!1)}))
+    }).fail(()=>{cb(!1)})
+    a.requests.push(ajax)
+    return ajax;
   },
   getFollowers: function(e, cb){
     console.log(e)
