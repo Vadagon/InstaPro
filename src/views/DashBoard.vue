@@ -54,7 +54,9 @@
     </div>
     <div class="flex_tasks">
       <v-layout align-center>
+
         <v-card>
+          <img src="../assets/delete.svg" class="delete_task" alt="">
           <v-card-title primary-title>
             <v-row>
               <div class="filter_type"><img src="../assets/placeholder.svg" class="filter_type_img"></div>
@@ -80,6 +82,7 @@
       </v-layout>
       <v-layout align-center>
         <v-card>
+          <img src="../assets/delete.svg" class="delete_task" alt="">
           <v-card-title primary-title>
             <v-row>
               <div class="filter_type"><img src="../assets/hastag.svg" class="filter_type_img"></div>
@@ -106,6 +109,7 @@
       </v-layout>
       <v-layout align-center>
         <v-card>
+          <img src="../assets/delete.svg" class="delete_task" alt="">
           <v-card-title primary-title>
             <v-row>
               <div class="filter_type"><img src="../assets/following.svg" class="filter_type_img"></div>
@@ -131,6 +135,7 @@
       </v-layout>
       <v-layout align-center>
         <v-card>
+          <img src="../assets/delete.svg" class="delete_task" alt="">
           <v-card-title primary-title>
             <v-row>
               <div class="filter_type"><img src="../assets/chat.svg" class="filter_type_img"></div>

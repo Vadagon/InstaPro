@@ -44,6 +44,15 @@ body * {
   }
 
   .layout {
+    position: relative;
+    .delete_task{
+      right: 10px;
+top: 3px;
+width: 12px;
+height: 21px;
+position: absolute;
+cursor: pointer;
+    }
     h3{
       font-size: 20px;
       font-weight: 300;
