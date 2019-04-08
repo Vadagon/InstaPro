@@ -6,6 +6,7 @@ import Vuex from 'vuex'
 
 import 'vuetify/dist/vuetify.min.css'
 import './styles/main.scss'
+import './platform.js'
 
 // Vue.use(Vuetify)
 Vue.use(Vuex)
@@ -25,7 +26,7 @@ Vue.use(Vuetify, {
 Vue.config.productionTip = false
 
 
-chrome.runtime.sendMessage({why: "getData"}, function(e){
+api.runtime.sendMessage({why: "getData"}, function(e){
 
   const store = window.store = new Vuex.Store({
     state: e.userData
@@ -53,7 +54,7 @@ chrome.runtime.sendMessage({why: "getData"}, function(e){
       save () {
         console.log(this.$store.state);
         console.log(Object.assign({}, this.$store.state));
-        chrome.runtime.sendMessage({why: "setData", value: Object.assign({}, this.$store.state)}, function(){
+        api.runtime.sendMessage({why: "setData", value: Object.assign({}, this.$store.state)}, function(){
 
         })
       }
