@@ -3,10 +3,11 @@ import App from './App.vue'
 import Vuetify from 'vuetify'
 import router from './router'
 import Vuex from 'vuex'
-
+import Chart from 'chart.js'
 import 'vuetify/dist/vuetify.min.css'
 import './styles/main.scss'
 import './platform.js'
+
 
 // Vue.use(Vuetify)
 Vue.use(Vuex)
