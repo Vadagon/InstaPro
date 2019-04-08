@@ -2,50 +2,69 @@
   <v-container class="dashboard fill-height">
     <div class="flex_statistic">
       <div class="canvas_wrapper">
+        <div class="canvas">
         <canvas id="followings" width="100" height="50"></canvas>
-        <h2>12739</h2>
-        <h3>followings</h3>
+        <div class="shadows"></div>
+          </div>
+          <h2>12739<img src="../assets/up-arrow.svg" class="arr"></h2>
+          <h3>FOLLOWING</h3>
       </div>
+
+
       <div class="canvas_wrapper">
+        <div class="canvas">
         <canvas id="liking" width="100" height="50"></canvas>
-          <h2>123123</h2>
-          <h3>liking</h3>
+        <div class="shadows"></div>
+          </div>
+          <h2>123123 <img src="../assets/up-arrow.svg" class="arr"></h2>
+          <h3>LIKING</h3>
       </div>
       <div class="canvas_wrapper">
+        <div class="canvas">
         <canvas id="Unfollowing" width="100" height="50"></canvas>
-          <h2>123</h2>
-          <h3>Unfollowing</h3>
+        <div class="shadows"></div>
+          </div>
+          <h2>123<img src="../assets/down-arrow.svg" class="arr"></h2>
+          <h3>UNFOLLOWING</h3>
       </div>
       <div class="canvas_wrapper">
+        <div class="canvas">
         <canvas id="followers_per_day" width="100" height="50"></canvas>
-          <h2>12</h2>
-          <h3>Followers per day</h3>
+        <div class="shadows"></div>
+          </div>
+          <h2>12<img src="../assets/up-arrow.svg" class="arr"></h2>
+          <h3>FOLLOWING/DAY </h3>
       </div>
       <div class="canvas_wrapper">
+        <div class="canvas">
           <canvas id="likes_per_day" width="100" height="50"></canvas>
-            <h2>22222</h2>
-            <h3>Likes per day</h3>
-      </div>
+          <div class="shadows"></div>
+            </div>
+            <h2>22222<img src="../assets/down-arrow.svg" class="arr"></h2>
+            <h3>LIKING/DAY </h3>
+          </div>
       <div class="canvas_wrapper">
+        <div class="canvas">
           <canvas id="comments_per_day" width="100" height="50"></canvas>
-            <h2>12332</h2>
-            <h3>Comments per day</h3>
+          <div class="shadows"></div>
+            </div>
+            <h2>12332<img src="../assets/up-arrow.svg" class="arr"></h2>
+            <h3>Comments/DAY</h3>
       </div>
     </div>
 
-    <v-layout align-center>
+    <!-- <v-layout align-center>
       <v-card style="max-width: 360px;" v-for="x in data.tasks">
         <v-card-title primary-title>
           <div>
             <div class="headline">Liking posts of {{x.username}}'s followers</div>
-            <!-- <span>Listen to your favorite artists and albums whenever and wherever, online and offline.</span> -->
           </div>
         </v-card-title>
         <v-card-actions>
           <v-switch label="enable" v-model="x.enabled" @change="save()"></v-switch>
         </v-card-actions>
       </v-card>
-    </v-layout>
+    </v-layout> -->
   </v-container>
 </template>
 <script>
@@ -88,13 +107,13 @@
 
               'rgba(102, 75, 228)'
             ],
-            borderWidth: 3
+            borderWidth: 1
           }]
         },
         options: {
           layout: {
            padding: {
-               left: 0,
+               left: -10,
                right: 0,
                top: 0,
                bottom: -10
@@ -158,13 +177,13 @@
               'rgba(102, 75, 228, 1)',
               'rgba(102, 75, 228)'
             ],
-            borderWidth: 3
+            borderWidth: 1
           }]
         },
         options: {
           layout: {
            padding: {
-               left: 0,
+               left: -10,
                right: 0,
                top: 0,
                bottom: -10
@@ -228,13 +247,13 @@
               'rgba(102, 75, 228, 1)',
               'rgba(102, 75, 228)'
             ],
-            borderWidth: 3
+            borderWidth: 1
           }]
         },
         options: {
           layout: {
            padding: {
-               left: 0,
+               left: -10,
                right: 0,
                top: 0,
                bottom: -10
@@ -298,13 +317,13 @@
               'rgba(102, 75, 228, 1)',
               'rgba(102, 75, 228)'
             ],
-            borderWidth: 3
+            borderWidth: 1
           }]
         },
         options: {
           layout: {
            padding: {
-               left: 0,
+               left: -10,
                right: 0,
                top: 0,
                bottom: -10
@@ -368,13 +387,13 @@
               'rgba(102, 75, 228, 1)',
               'rgba(102, 75, 228)'
             ],
-            borderWidth: 3
+            borderWidth: 1
           }]
         },
         options: {
           layout: {
            padding: {
-               left: 0,
+               left: -10,
                right: 0,
                top: 0,
                bottom: -10
@@ -433,13 +452,13 @@
 
               'rgba(102, 75, 228)'
             ],
-            borderWidth: 3
+            borderWidth: 1
           }]
         },
         options: {
           layout: {
            padding: {
-               left: 0,
+               left: -10,
                right: 0,
                top: 0,
                bottom: -10
