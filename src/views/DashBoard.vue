@@ -16,6 +16,7 @@
   </v-container>
 </template>
 <script>
+  console.log(123);
 export default {
   name: 'dashboard',
   data: () => ({
