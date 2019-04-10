@@ -20,7 +20,15 @@
     }
   }
 }
-
+.dashboard{
+  .v-card__actions .v-input--switch{
+    height: 35px;
+    margin-top: 0px;
+  }
+  .vertIcon{
+    margin-right: -20px;
+  }
+}
 .theme--light.v-btn.v-btn--disabled:not(.v-btn--icon):not(.v-btn--flat):not(.v-btn--outline){
   background-color: #dcdcdc !important;
 }
@@ -32,6 +40,21 @@ body .v-icon.material-icons{
 }
 body .v-btn .v-btn__content .v-icon{
   color: #b44be4;
+}
+
+
+.box-s{
+  box-sizing: border-box;
+}
+.no-padding{
+  padding: 0 !important;
+}
+.limitTo4 {
+   overflow: hidden;
+   text-overflow: ellipsis;
+   display: -webkit-box;
+   -webkit-box-orient: vertical;
+   -webkit-line-clamp: 3; /* number of lines to show */
 }
 // .v-toolbar.v-toolbar--clipped.v-toolbar--fixed{
 //   background-color: white;

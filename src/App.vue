@@ -99,14 +99,14 @@
       <v-spacer></v-spacer>
       <span>&copy; 2019</span>
     </v-footer>
-    
+
   <!--   <v-snackbar v-model="noty.enabled" :bottom="true" :multi-line="true">
       {{ noty.text }}
       <v-btn color="pink"flat @click="noty.enabled">
         Close
       </v-btn>
     </v-snackbar>
- -->  
+ -->
   </v-app>
 
 
