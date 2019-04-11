@@ -68,12 +68,13 @@
 
         </v-window>
 
-        <v-btn color="primary" class="next" @click="nextStep(window)" v-if="task.steps[window]!=2" :disabled="task.steps[window]==1">
+        <v-btn color="primary" class="next" @click="nextStep(window)" v-if="task.steps[window]!=2" :disabled="task.steps[window]>0">
           <span v-if="task.steps[window]==0 && window<task.steps.length-1">continue</span>
-          <v-progress-circular indeterminate color="primary" :size="20" :width="2" v-if="task.steps[window]==1"></v-progress-circular>
+          <v-progress-circular indeterminate color="primary" :size="20" :width="2" v-if="task.steps[window]>0"></v-progress-circular>
           <span v-if="window==task.steps.length-1">finish</span>
         </v-btn>
         <v-btn color="warning" class="next" @click="nextStep(window)" v-if="task.steps[window]==2">re continue</v-btn>
+        <v-btn @click="$set(task.steps, 0, 0)" v-if="task.steps[window]==3" style="min-width: 30px; margin-left: 0;" color="white" class="next"><v-icon color="red">close</v-icon></v-btn>
 
       </v-flex>
     </v-layout>
@@ -107,12 +108,7 @@ export default {
       section: 'unfollow',
       username: '',
       user: {},
-      accounts: [
-        {
-          username: 'test',
-          checked: !1
-        }
-      ],
+      accounts: [],
       type: 'unfollow',
       settings: {
         amount: 100,
@@ -126,7 +122,7 @@ export default {
   props: ['taskNum'],
   mounted() {
     if (this.taskNum != undefined) {
-      this.task = this.$store.state.tasks[this.taskNum];
+      this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum]);
       var num = this.task.steps.findIndex((e)=>{return !e});
       num=num==-1?this.task.steps.length-1:num;
       this.length = num+1;
@@ -135,9 +131,31 @@ export default {
     }
   },
   created () {
-    for (var i = 0; i < 10; i++) {
-      this.task.accounts.push(_.cloneDeep(this.task.accounts[0]))
-    }
+    this.$set(this.task.steps, 0, 1)
+    var started = !1;
+    api.runtime.sendMessage({why: "tool", name: "getUser", value: this.task.username}, (response1) => {
+      if(response1){
+        this.task.user = response1;
+        var loadQue = () => {
+          api.runtime.sendMessage({why: "tool", name: 'getFollowings', value: this.task.user.id, index: this.task.accounts.length}, (response2) => {
+            if(!started){
+              this.$set(this.task.steps, 0, 3)
+              started = !0
+            }
+            if(response2 && this.task.steps[0]==3){
+              this.task.accounts.push(...response2);
+              loadQue()
+            }else{
+              this.$set(this.task.steps, 0, 0)
+            }
+          });
+        }
+        loadQue();
+      }else{
+        this.$set(this.task.steps, e, 0)
+        // this.$parent.noty.enabled = true;
+      }
+    });
   },
   computed: {
     data () {
@@ -156,10 +174,10 @@ export default {
       var next = () => {
         this.$set(this.task.steps, e, 2)
         if(e==0 && !this.index){
-          this.$store.state.tasks.push(this.task);
+          this.$store.state.tasks.push(_.cloneDeep(this.task));
           this.index = this.$store.state.tasks.length-1;
         }else{
-          this.$store.state.tasks[this.index] = this.task;
+          this.$store.state.tasks[this.index] = _.cloneDeep(this.task);
         }
         if (e < this.task.steps.length-1) {
           this.window = e + 1
@@ -175,23 +193,7 @@ export default {
         }
       }
       if(e == 1){
-        // api.runtime.sendMessage({why: "tool", name: "getUser", value: this.task.username}, (response1) => {
-        //   console.log(response1);
-        //   if(response1){          
-        //     this.task.user = response1;
-        //     api.runtime.sendMessage({why: "tool", name: this.task.followType, value: this.task.user.id}, (response2) => {
-        //       if(response2){
-        //         this.task.accounts = response2;
-                next();
-        //       }else{
-        //         this.$set(this.task.steps, e, 0)
-        //       }
-        //     });
-        //   }else{
-        //     this.$set(this.task.steps, e, 0)
-        //     // this.$parent.noty.enabled = true;
-        //   }
-        // });
+        next();
       }else{
         next();
       }

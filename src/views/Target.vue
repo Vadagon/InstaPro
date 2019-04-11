@@ -160,12 +160,13 @@
 
         </v-window>
 
-        <v-btn color="primary" class="next" @click="nextStep(window)" v-if="task.steps[window]!=2" :disabled="task.steps[window]==1 || task.username.length < 2">
+        <v-btn color="primary" class="next" @click="nextStep(window)" v-if="task.steps[window]!=2" :disabled="task.steps[window]>0">
           <span v-if="task.steps[window]==0 && window<task.steps.length-1">continue</span>
-          <v-progress-circular indeterminate color="primary" :size="20" :width="2" v-if="task.steps[window]==1"></v-progress-circular>
+          <v-progress-circular indeterminate color="primary" :size="20" :width="2" v-if="task.steps[window]>0"></v-progress-circular>
           <span v-if="window==task.steps.length-1">finish</span>
         </v-btn>
         <v-btn color="warning" class="next" @click="nextStep(window)" v-if="task.steps[window]==2">re continue</v-btn>
+        <v-btn @click="$set(task.steps, 2, 0)" v-if="task.steps[window]==3" style="min-width: 30px; margin-left: 0;" color="white" class="next"><v-icon color="red">close</v-icon></v-btn>
 
       </v-flex>
     </v-layout>
@@ -199,12 +200,7 @@ export default {
       section: 'target',
       username: '',
       user: {},
-      accounts: [
-        {
-          username: 'test',
-          checked: !1
-        }
-      ],
+      accounts: [],
       type: 'like',
       settings: {
         amount: 100,
@@ -227,9 +223,7 @@ export default {
     }
   },
   created () {
-    for (var i = 0; i < 20; i++) {
-      this.task.accounts.push(_.cloneDeep(this.task.accounts[0]))
-    }
+
   },
   computed: {
     data () {
@@ -252,10 +246,10 @@ export default {
         this.$set(this.task.steps, e, 2)
 
         if(e==1 && !this.index){
-          this.$store.state.tasks.push(this.task);
+          this.$store.state.tasks.push(_.cloneDeep(this.task));
           this.index = this.$store.state.tasks.length-1;
         }else{
-          this.$store.state.tasks[this.index] = this.task;
+          this.$store.state.tasks[this.index] = _.cloneDeep(this.task);
         }
 
         if (e < this.task.steps.length-1) {
@@ -272,23 +266,33 @@ export default {
         }
       }
       if(e == 1){
-        // api.runtime.sendMessage({why: "tool", name: "getUser", value: this.task.username}, (response1) => {
-        //   console.log(response1);
-        //   if(response1){          
-        //     this.task.user = response1;
-        //     api.runtime.sendMessage({why: "tool", name: this.task.followType, value: this.task.user.id}, (response2) => {
-        //       if(response2){
-        //         this.task.accounts = response2;
-                next();
-        //       }else{
-        //         this.$set(this.task.steps, e, 0)
-        //       }
-        //     });
-        //   }else{
-        //     this.$set(this.task.steps, e, 0)
-        //     // this.$parent.noty.enabled = true;
-        //   }
-        // });
+        this.$set(this.task.steps, 2, 1)
+        next();
+        var started = !1;     
+        console.log('start')
+        api.runtime.sendMessage({why: "tool", name: "getUser", value: this.task.username}, (response1) => {
+          if(response1){
+            this.task.user = response1;
+            var loadQue = () => {
+              api.runtime.sendMessage({why: "tool", name: 'getFollowings', value: this.task.user.id, index: this.task.accounts.length}, (response2) => {
+                if(!started){
+                  this.$set(this.task.steps, 2, 3)
+                  started = !0
+                }
+                if(response2 && this.task.steps[2]==3){
+                  this.task.accounts.push(...response2);
+                  loadQue()
+                }else{
+                  this.$set(this.task.steps, 2, 0)
+                }
+              });
+            }
+            loadQue();
+          }else{
+            this.$set(this.task.steps, e, 0)
+            // this.$parent.noty.enabled = true;
+          }
+        });
       }else{
         next();
       }

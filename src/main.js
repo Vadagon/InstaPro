@@ -43,7 +43,8 @@ api.runtime.sendMessage({why: "getData"}, function(e){
       noty: {
         enabled: true,
         text: 'ssss'
-      }
+      },
+      rss: [{message: 'follow @the_rock', img: '', url: 'https://www.instagram.com'}],
     },
     created () {
       this.$store.watch(

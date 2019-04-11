@@ -124,7 +124,7 @@ export default {
   props: ['taskNum'],
   mounted() {
     if (this.taskNum != undefined) {
-      this.task = this.$store.state.tasks[this.taskNum];
+      this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum]);
       var num = this.task.steps.findIndex((e)=>{return !e});
       num=num==-1?this.task.steps.length-1:num;
       this.length = num+1;
@@ -157,10 +157,10 @@ export default {
       var next = () => {
         this.$set(this.task.steps, e, 2)
         if(e==0 && !this.index){
-          this.$store.state.tasks.push(this.task);
+          this.$store.state.tasks.push(_.cloneDeep(this.task));
           this.index = this.$store.state.tasks.length-1;
         }else{
-          this.$store.state.tasks[this.index] = this.task;
+          this.$store.state.tasks[this.index] = _.cloneDeep(this.task);
         }
         if (e < this.task.steps.length-1) {
           this.window = e + 1

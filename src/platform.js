@@ -82,15 +82,23 @@ if (process.env.NODE_ENV === 'development') {
   api.extension.onMessage.addListener(function(request, sender, sendResponse) {
     switch(request.why) {
         case 'getData':
-            sendResponse(data);
+            setTimeout(()=>{sendResponse(data)}, 700);
             break;
         case 'setData':
           data.userData = request.value;
           update();
-          sendResponse(!0);
+          setTimeout(()=>{sendResponse(!0)}, 700);
             break;
         case 'tool':
-          a.tool[request.name](request.value, sendResponse);
+          if(request.name == 'getUser'){
+            setTimeout(()=>{sendResponse({id: 123, username: 12314, }) }, 700);
+          }else if(request.name.includes('getFollow')){
+            var col = []
+            for (var i = 0; i < 10; i++) {
+              col.push({username: 'test', checked: !1 })
+            }
+            setTimeout(()=>{sendResponse(col)}, 1700);
+          }
           break;
       case 'popup':
         data.user.triedToPay = !0;
