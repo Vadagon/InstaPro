@@ -18,13 +18,13 @@
               <v-layout row pa-3 py-3>
                 <v-flex shrink>
                   <v-avatar color="purple lighten-5">
-                    <v-icon>{{data.icons[x.type]}}</v-icon>
+                    <v-icon>{{data.icons[x.section]}}</v-icon>
                     <!-- person_add_disabled -->
                   </v-avatar>
                 </v-flex>
                 <v-flex headline text-truncate text-sm-left pt-3 mt-1 px-3 text-capitalize style="position: relative;">
                   <span class="caption" style="position: absolute; top: 0;">{{x.description}}</span>
-                  {{x.section}}: {{x.username}}
+                  {{x.section}} {{x.username}}
                 </v-flex>
                 <v-flex shrink>
                   <v-menu offset-y>
@@ -35,7 +35,7 @@
                     </template>
                     <v-list>
                       <!-- array.splice(index, 1); -->
-                      <v-list-tile @click="$router.push({ name: 'target', params: { taskNum: index } })">
+                      <v-list-tile @click="$router.push({ name: x.section, params: { taskNum: index } })">
                         <v-list-tile-title>{{x.draft?'Continue editing':'Edit'}}</v-list-tile-title>
                       </v-list-tile>
                       <v-list-tile @click="data.tasks.splice(index, 1);">
@@ -51,6 +51,7 @@
             <!-- </v-card-title> -->
             <v-flex px-3 xs12 text-sm-left limitTo4>
               <span v-for="span in x.accounts" v-if="span.checked">{{span.username}} </span>
+              <span v-for="span in x.filters">{{span}} </span>
               <!-- #f4f #s4s #l4l #c4c #likeforlike #likeall #like4like #likes4likes #liking #instagood #tagblender #follow #followme #followback #followforfollow #follow4follow #followers #followher #follower #followhim #followbackteam #followall #comment #comments #commentback #comment4comment #commentbelow #shoutout #shoutouts #shoutoutback -->
             </v-flex>
             <v-flex shrink pa-2 class="box-s" v-if="!x.draft">
@@ -76,7 +77,10 @@ export default {
     data () {
       return {...this.$store.state, icons: {
         unfollow: 'person_add_disabled',
-        like: 'favorite',
+        target: 'person_pin',
+        locations: 'person_add',
+        hashtags: 'search',
+        feed: 'rss_feed',
       }}
     }
   },

@@ -15,7 +15,7 @@
 
         <v-list-tile to="/">
           <v-list-tile-action>
-            <v-icon>exit_to_app</v-icon>
+            <v-icon>dashboard</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Dashboard</v-list-tile-title>
@@ -24,7 +24,7 @@
 
         <v-list-tile to="/feed">
           <v-list-tile-action>
-            <v-icon>exit_to_app</v-icon>
+            <v-icon>rss_feed</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Feed</v-list-tile-title>
@@ -33,7 +33,7 @@
 
         <v-list-tile to="/target">
           <v-list-tile-action>
-            <v-icon>exit_to_app</v-icon>
+            <v-icon>person_pin</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Target</v-list-tile-title>
@@ -42,7 +42,7 @@
 
         <v-list-tile to="/unfollow">
           <v-list-tile-action>
-            <v-icon>exit_to_app</v-icon>
+            <v-icon>person_add_disabled</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Unfollow</v-list-tile-title>
@@ -51,7 +51,7 @@
 
         <v-list-tile to="/locations">
           <v-list-tile-action>
-            <v-icon>exit_to_app</v-icon>
+            <v-icon>location_on</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>Locations</v-list-tile-title>
@@ -60,7 +60,7 @@
 
         <v-list-tile to="/hashtags">
           <v-list-tile-action>
-            <v-icon>exit_to_app</v-icon>
+            <v-icon>search</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>HashTags</v-list-tile-title>
@@ -69,7 +69,7 @@
 
         <v-list-tile to="/about">
           <v-list-tile-action>
-            <v-icon>exit_to_app</v-icon>
+            <v-icon>info</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
             <v-list-tile-title>About</v-list-tile-title>
@@ -82,7 +82,17 @@
       <v-toolbar-side-icon @click.stop="drawer = !drawer" class="text-pink"></v-toolbar-side-icon>
       <v-toolbar-title>InstaPro</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon @click.stop="drawerRight = !drawerRight"><v-icon>notification_important</v-icon></v-btn>
+      <v-btn icon @click.stop="drawerRight = !drawerRight">
+        <v-badge>
+          <template v-slot:badge>
+            <span>6</span>
+          </template>
+          <!-- <v-icon large color="grey">
+            mail
+          </v-icon> -->
+          <v-icon>notification_important</v-icon>
+        </v-badge>
+  </v-btn>
       <!-- <v-toolbar-side-icon @click.stop="drawerRight = !drawerRight"></v-toolbar-side-icon> -->
     </v-toolbar>
     <v-navigation-drawer v-model="drawerRight" absolute overlap right temporary >
@@ -95,7 +105,22 @@
             <v-list-tile-title>Open Temporary Drawer</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile> -->
-        developing...
+        <v-list>
+          <v-list-tile v-for="item in 12" avatar @click="">
+            <v-list-tile-action>
+              <v-icon v-if="true">exit_to_app</v-icon>
+            </v-list-tile-action>
+
+            <v-list-tile-content>
+              <v-list-tile-title v-text="'follow @the_rock'"></v-list-tile-title>
+            </v-list-tile-content>
+
+            <v-list-tile-avatar>
+              <img :src="''">
+            </v-list-tile-avatar>
+          </v-list-tile>
+        </v-list>
+        <!-- developing... -->
       </v-list>
     </v-navigation-drawer>
     <v-content>

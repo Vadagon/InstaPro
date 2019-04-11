@@ -24,20 +24,6 @@
                   </v-avatar>
                   <strong class="title">Accounts</strong>
                   <v-spacer v-for="c in 14"></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
-                  <v-spacer></v-spacer>
                   <v-switch label="Select All" v-model="selectAllAccModel" @change="selectAllAcc()"></v-switch>
                 </v-layout>
                 <v-layout align-left row wrap justify-left mb-4 pt-3>
@@ -108,6 +94,12 @@ export default {
     window: 0,
     index: !1,
     selectAllAccModel: !0,
+    descs: {
+      like: 'Liking latest posts',
+      follow: 'Follow all',
+      unfollow: 'Unollow all',
+      comment: 'Comment latest posts',
+    },
     task: {
       steps: [0, 0],
       draft: !0,
@@ -121,9 +113,10 @@ export default {
           checked: !1
         }
       ],
-      type: 'like',
+      type: 'unfollow',
       settings: {
         amount: 100,
+        frequency: 2,
         interval: 20
       },
       description: 'Unfollowing my followings',
@@ -142,8 +135,8 @@ export default {
     }
   },
   created () {
-    for (var i = 0; i < 20; i++) {
-      this.task.accounts.push(Object.assign({}, this.task.accounts[0]))
+    for (var i = 0; i < 10; i++) {
+      this.task.accounts.push(_.cloneDeep(this.task.accounts[0]))
     }
   },
   computed: {
@@ -162,7 +155,7 @@ export default {
       this.$set(this.task.steps, e, 1)
       var next = () => {
         this.$set(this.task.steps, e, 2)
-        if(e==1 && !this.index){
+        if(e==0 && !this.index){
           this.$store.state.tasks.push(this.task);
           this.index = this.$store.state.tasks.length-1;
         }else{

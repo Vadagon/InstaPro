@@ -120,7 +120,7 @@
                 </v-layout>
                 <v-layout align-center justify-center mb-3>
                   <span>
-                    <v-radio-group v-model="task.type">
+                    <v-radio-group v-model="task.type" v-on:change="descriptionChange()">
                       <v-radio :label="'Like latest posts'" :value="'like'"></v-radio>
                       <v-radio :label="'Follow all'" :value="'follow'"></v-radio>
                       <v-radio :label="'Unfollow all'" :value="'unfollow'"></v-radio>
@@ -186,6 +186,12 @@ export default {
     window: 0,
     index: !1,
     selectAllAccModel: !0,
+    descs: {
+      like: 'Liking latest posts',
+      follow: 'Follow all',
+      unfollow: 'Unollow all',
+      comment: 'Comment latest posts',
+    },
     task: {
       steps: [0, 0, 0, 0, 0],
       draft: !0,
@@ -202,6 +208,7 @@ export default {
       type: 'like',
       settings: {
         amount: 100,
+        frequency: 2,
         interval: 20
       },
       description: 'liking recent posts',
@@ -211,7 +218,7 @@ export default {
   props: ['taskNum'],
   mounted() {
     if (this.taskNum != undefined) {
-      this.task = this.$store.state.tasks[this.taskNum];
+      this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum]);
       var num = this.task.steps.findIndex((e)=>{return !e});
       num=num==-1?this.task.steps.length-1:num;
       this.length = num+1;
@@ -221,7 +228,7 @@ export default {
   },
   created () {
     for (var i = 0; i < 20; i++) {
-      this.task.accounts.push(Object.assign({}, this.task.accounts[0]))
+      this.task.accounts.push(_.cloneDeep(this.task.accounts[0]))
     }
   },
   computed: {
@@ -230,6 +237,9 @@ export default {
     }
   },
   methods: {
+    descriptionChange(){
+      this.task.description = this.descs[this.task.type];
+    },
     selectAllAcc () {
       this.task.accounts.map((e) => {
         e.checked = this.selectAllAccModel
@@ -240,12 +250,14 @@ export default {
       this.$set(this.task.steps, e, 1)
       var next = () => {
         this.$set(this.task.steps, e, 2)
+
         if(e==1 && !this.index){
           this.$store.state.tasks.push(this.task);
           this.index = this.$store.state.tasks.length-1;
         }else{
           this.$store.state.tasks[this.index] = this.task;
         }
+
         if (e < this.task.steps.length-1) {
           this.window = e + 1
           this.length = e + 2

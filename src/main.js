@@ -4,7 +4,8 @@ import Vuetify from 'vuetify'
 import router from './router'
 import Vuex from 'vuex'
 
-import $ from 'jquery';
+import _ from 'lodash'
+import $ from 'jquery'
 window.$ = $;
 
 import 'vuetify/dist/vuetify.min.css'
@@ -56,8 +57,8 @@ api.runtime.sendMessage({why: "getData"}, function(e){
     methods: {
       save () {
         console.log(this.$store.state);
-        console.log(Object.assign({}, this.$store.state));
-        api.runtime.sendMessage({why: "setData", value: Object.assign({}, this.$store.state)}, function(){
+        console.log(_.cloneDeep(this.$store.state));
+        api.runtime.sendMessage({why: "setData", value: _.cloneDeep(this.$store.state)}, function(){
 
         })
       }
