@@ -22,6 +22,15 @@
           </v-list-tile-content>
         </v-list-tile>
 
+        <v-list-tile to="/feed">
+          <v-list-tile-action>
+            <v-icon>exit_to_app</v-icon>
+          </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>Feed</v-list-tile-title>
+          </v-list-tile-content>
+        </v-list-tile>
+
         <v-list-tile to="/target">
           <v-list-tile-action>
             <v-icon>exit_to_app</v-icon>
@@ -69,7 +78,7 @@
 
       </v-list>
     </v-navigation-drawer>
-    <v-toolbar fixed app clipped-left>
+    <v-toolbar fixed app clipped-left class="white">
       <v-toolbar-side-icon @click.stop="drawer = !drawer" class="text-pink"></v-toolbar-side-icon>
       <v-toolbar-title>InstaPro</v-toolbar-title>
       <v-spacer></v-spacer>
@@ -94,7 +103,7 @@
         <router-view/>
       </v-container>
     </v-content>
-    <v-footer color="elevation-4" class="px-4" app>
+    <v-footer color="elevation-4" class="px-4 white" app>
       <span>MarQuis Trill</span>
       <v-spacer></v-spacer>
       <span>&copy; 2019</span>

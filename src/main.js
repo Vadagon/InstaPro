@@ -4,7 +4,6 @@ import Vuetify from 'vuetify'
 import router from './router'
 import Vuex from 'vuex'
 
-import Chart from 'chart.js';
 import $ from 'jquery';
 window.$ = $;
 
@@ -31,7 +30,7 @@ Vue.config.productionTip = false
 
 
 api.runtime.sendMessage({why: "getData"}, function(e){
-
+  // console.log(e.userData.tasks[1])
   const store = window.store = new Vuex.Store({
     state: e.userData
   })

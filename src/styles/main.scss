@@ -1,18 +1,18 @@
 .none{
   display: none;
 }
+button.next{
+  margin-top: -18px;
+}
+img.active-profile{
+  border: 2px solid black;
+}
+.step-block{
+  width: 260px;
+  max-width: 260px;
+  min-width: 260px;
+}
 .target{
-  .step-block{
-    width: 260px;
-    max-width: 260px;
-    min-width: 260px;
-  }
-  button.next{
-    margin-top: -18px;
-  }
-  img.active-profile{
-    border: 2px solid black;
-  }
   .v-list__tile__avatar{
     .v-avatar{
       // display: block;
@@ -26,7 +26,7 @@
     margin-top: 0px;
   }
   .vertIcon{
-    margin-right: -20px;
+    margin-right: -6px;
   }
 }
 .theme--light.v-btn.v-btn--disabled:not(.v-btn--icon):not(.v-btn--flat):not(.v-btn--outline){

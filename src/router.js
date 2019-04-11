@@ -23,22 +23,32 @@ export default new Router({
     {
       path: '/hashtags',
       name: 'hashtags',
-      component: () => import('./views/HashTags.vue')
+      component: () => import('./views/HashTags.vue'),
+      props: true
     },
     {
       path: '/locations',
       name: 'locations',
-      component: () => import('./views/Locations.vue')
+      component: () => import('./views/Locations.vue'),
+      props: true
+    },
+    {
+      path: '/feed',
+      name: 'feed',
+      component: () => import('./views/Feed.vue'),
+      props: true
     },
     {
       path: '/target',
       name: 'target',
-      component: () => import('./views/Target.vue')
+      component: () => import('./views/Target.vue'),
+      props: true
     },
     {
       path: '/unfollow',
       name: 'unfollow',
-      component: () => import('./views/UnFollow.vue')
+      component: () => import('./views/UnFollow.vue'),
+      props: true
     }
   ]
 })

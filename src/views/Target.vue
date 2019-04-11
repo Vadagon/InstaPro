@@ -45,6 +45,30 @@
               <v-card-text>
                 <v-layout align-center mb-3>
                   <v-avatar color="purple lighten-5" class="mr-3">
+                    <v-icon>account_circle</v-icon>
+                  </v-avatar>
+                  <strong class="title">Target</strong>
+                  <v-spacer></v-spacer>
+                </v-layout>
+                <v-layout align-center justify-center mb-3>
+                  <span>
+                    <v-radio-group v-model="task.followType">
+                      <!-- <v-radio :label="'Like recent posts'" :value="'initial'"></v-radio> -->
+                      <v-radio :label="'Load followers'" :value="'getFollowers'"></v-radio>
+                      <v-radio :label="'Load followings'" :value="'getFollowings'"></v-radio>
+                    </v-radio-group>
+                  </span>
+                </v-layout>
+
+              </v-card-text>
+            </v-card>
+          </v-window-item>
+
+          <v-window-item :key="2">
+            <v-card flat>
+              <v-card-text>
+                <v-layout align-center mb-3>
+                  <v-avatar color="purple lighten-5" class="mr-3">
                     <v-icon>supervisor_account</v-icon>
                   </v-avatar>
                   <strong class="title">Accounts</strong>
@@ -84,7 +108,7 @@
             </v-card>
           </v-window-item>
 
-          <v-window-item :key="2">
+          <v-window-item :key="3">
             <v-card flat>
               <v-card-text>
                 <v-layout align-center mb-3>
@@ -97,9 +121,10 @@
                 <v-layout align-center justify-center mb-3>
                   <span>
                     <v-radio-group v-model="task.type">
-                      <v-radio :label="'Like recent posts'" :value="'initial'"></v-radio>
-                      <v-radio :label="'Follow all'" :value="'a1'" disabled></v-radio>
-                      <v-radio :label="'Unfollow all'" :value="'s1'" disabled></v-radio>
+                      <v-radio :label="'Like latest posts'" :value="'like'"></v-radio>
+                      <v-radio :label="'Follow all'" :value="'follow'"></v-radio>
+                      <v-radio :label="'Unfollow all'" :value="'unfollow'"></v-radio>
+                      <v-radio :label="'Comment latest posts'" :value="'comment'" disabled></v-radio>
                     </v-radio-group>
                   </span>
                 </v-layout>
@@ -108,7 +133,7 @@
             </v-card>
           </v-window-item>
 
-          <v-window-item :key="3">
+          <v-window-item :key="4">
             <v-card flat>
               <v-card-text>
                 <v-layout align-center mb-3>
@@ -120,11 +145,11 @@
                 </v-layout>
                 <v-layout align-center justify-center mb-3 wrap>
                     <v-flex xs8>
-                      <v-slider label="Amount" v-model="task.settings.amount" :max="1000" :min="2" :step="10" ></v-slider>
+                      <v-slider label="Amount" v-model="task.settings.amount" :max="1000" :min="2"></v-slider>
                     </v-flex>
                     <v-flex shrink mx-3>{{task.settings.amount}}</v-flex>
                     <v-flex xs8>
-                      <v-slider label="Actions interval" v-model="task.settings.interval" :max="300" :min="2" :step="10" ></v-slider>
+                      <v-slider label="Actions interval" v-model="task.settings.interval" :max="300" :min="2"></v-slider>
                     </v-flex>
                     <v-flex shrink mx-3>{{task.settings.interval}}s</v-flex>
                 </v-layout>
@@ -135,12 +160,12 @@
 
         </v-window>
 
-        <v-btn color="primary" class="next" @click="nextStep(window)" v-if="steps[window]!=2" :disabled="steps[window]==1 || task.username.length < 2">
-          <span v-if="steps[window]==0 && window<steps.length-1">continue</span>
-          <v-progress-circular indeterminate color="primary" :size="20" :width="2" v-if="steps[window]==1"></v-progress-circular>
-          <span v-if="window==steps.length-1">finish</span>
+        <v-btn color="primary" class="next" @click="nextStep(window)" v-if="task.steps[window]!=2" :disabled="task.steps[window]==1 || task.username.length < 2">
+          <span v-if="task.steps[window]==0 && window<task.steps.length-1">continue</span>
+          <v-progress-circular indeterminate color="primary" :size="20" :width="2" v-if="task.steps[window]==1"></v-progress-circular>
+          <span v-if="window==task.steps.length-1">finish</span>
         </v-btn>
-        <v-btn color="warning" class="next" @click="nextStep(window)" v-if="steps[window]==2">re continue</v-btn>
+        <v-btn color="warning" class="next" @click="nextStep(window)" v-if="task.steps[window]==2">re continue</v-btn>
 
       </v-flex>
     </v-layout>
@@ -159,10 +184,12 @@ export default {
   data: () => ({
     length: 1,
     window: 0,
+    index: !1,
     selectAllAccModel: !0,
-    price: 100,
-    steps: [0, 0, 0, 0],
     task: {
+      steps: [0, 0, 0, 0, 0],
+      draft: !0,
+      followType: 'getFollowers',
       section: 'target',
       username: '',
       user: {},
@@ -172,14 +199,26 @@ export default {
           checked: !1
         }
       ],
-      type: 'initial',
+      type: 'like',
       settings: {
         amount: 100,
         interval: 20
       },
-      enabled: true
+      description: 'liking recent posts',
+      enabled: false
     }
   }),
+  props: ['taskNum'],
+  mounted() {
+    if (this.taskNum != undefined) {
+      this.task = this.$store.state.tasks[this.taskNum];
+      var num = this.task.steps.findIndex((e)=>{return !e});
+      num=num==-1?this.task.steps.length-1:num;
+      this.length = num+1;
+      this.window = num;  
+      this.index = this.taskNum;
+    }
+  },
   created () {
     for (var i = 0; i < 20; i++) {
       this.task.accounts.push(Object.assign({}, this.task.accounts[0]))
@@ -198,43 +237,50 @@ export default {
       })
     },
     nextStep (e) {
-      var that = this;
-      that.$set(that.steps, e, 1)
-      var next = function(){
-        that.$set(that.steps, e, 2)
-        if (e != 3) {
-          that.window = e + 1
-          that.length = e + 2
-        } else {
-          that.$store.state.tasks.push(that.task)
-          that.$router.push({ path: '/' })
+      this.$set(this.task.steps, e, 1)
+      var next = () => {
+        this.$set(this.task.steps, e, 2)
+        if(e==1 && !this.index){
+          this.$store.state.tasks.push(this.task);
+          this.index = this.$store.state.tasks.length-1;
+        }else{
+          this.$store.state.tasks[this.index] = this.task;
         }
-        for (var i = that.window.length+1; i < that.steps.length; i++) {
-          that.$set(that.steps, i, 0)
+        if (e < this.task.steps.length-1) {
+          this.window = e + 1
+          this.length = e + 2
+        } else {
+          this.$store.state.tasks[this.index].draft = !1;
+          this.$store.state.tasks[this.index].enabled = !0;
+          // this.$store.state.tasks.push(this.task)
+          this.$router.push({ path: '/' })
+        }
+        for (var i = this.window.length+1; i < this.task.steps.length; i++) {
+          this.$set(this.task.steps, i, 0)
         }
       }
-      if(e == 0){
-        chrome.runtime.sendMessage({why: "tool", name: "getUser", value: that.task.username}, (response1) => {
-          console.log(response1);
-          if(response1){          
-            that.task.user = response1;
-            chrome.runtime.sendMessage({why: "tool", name: "getFollowers", value: that.task.user.id}, (response2) => {
-              if(response2){
-                that.task.accounts = response2;
+      if(e == 1){
+        // api.runtime.sendMessage({why: "tool", name: "getUser", value: this.task.username}, (response1) => {
+        //   console.log(response1);
+        //   if(response1){          
+        //     this.task.user = response1;
+        //     api.runtime.sendMessage({why: "tool", name: this.task.followType, value: this.task.user.id}, (response2) => {
+        //       if(response2){
+        //         this.task.accounts = response2;
                 next();
-              }else{
-                that.$set(that.steps, e, 0)
-              }
-            });
-          }else{
-            that.$set(that.steps, e, 0)
-            // that.$parent.noty.enabled = true;
-          }
-        });
+        //       }else{
+        //         this.$set(this.task.steps, e, 0)
+        //       }
+        //     });
+        //   }else{
+        //     this.$set(this.task.steps, e, 0)
+        //     // this.$parent.noty.enabled = true;
+        //   }
+        // });
       }else{
         next();
       }
-      console.log(that.task)
+      console.log(this.task)
     }
   }
   // components: {
