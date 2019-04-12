@@ -97,7 +97,7 @@ if (process.env.NODE_ENV === 'development') {
             for (var i = 0; i < 10; i++) {
               col.push({username: 'test', checked: !1 })
             }
-            setTimeout(()=>{sendResponse(col)}, 1700);
+            setTimeout(()=>{sendResponse(col)}, 700);
           }
           break;
       case 'popup':

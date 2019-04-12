@@ -258,6 +258,7 @@ export default {
         } else {
           this.$store.state.tasks[this.index].draft = !1;
           this.$store.state.tasks[this.index].enabled = !0;
+          this.$root.save()
           // this.$store.state.tasks.push(this.task)
           this.$router.push({ path: '/' })
         }
@@ -274,14 +275,14 @@ export default {
           if(response1){
             this.task.user = response1;
             var loadQue = () => {
-              api.runtime.sendMessage({why: "tool", name: 'getFollowings', value: this.task.user.id, index: this.task.accounts.length}, (response2) => {
+              api.runtime.sendMessage({why: "tool", name: this.task.followType, value: this.task.user.id, index: this.task.accounts.length}, (response2) => {
                 if(!started){
                   this.$set(this.task.steps, 2, 3)
                   started = !0
                 }
                 if(response2 && this.task.steps[2]==3){
                   this.task.accounts.push(...response2);
-                  loadQue()
+                  setTimeout(function() {loadQue()}, this.$root.randB(1000, 5000));                  
                 }else{
                   this.$set(this.task.steps, 2, 0)
                 }

@@ -79,7 +79,7 @@ a.tool = {
         return e.graphql.user;
       })?e.graphql.user:!1)
     }).fail(()=>{cb(!1)})
-    a.requests.push(ajax)
+    // a.requests.push(ajax)
     return ajax;
   },
   getFollowers: function(e, cb){
@@ -91,7 +91,7 @@ a.tool = {
     jsonvars.after = '';
     var urljsonvars = JSON.stringify(jsonvars);
     var url = 'https://www.instagram.com/graphql/query/?query_hash=37479f2b8209594dde7facb0d904896a&variables=' + encodeURIComponent(urljsonvars);
-    a.requests.push($.ajax(url).done(function(e){
+    $.ajax(url).done(function(e){
       console.log(e);
       if(e.status == 'ok'){
         cb(e.data.user.edge_followed_by.edges.map((t)=>{
@@ -99,6 +99,25 @@ a.tool = {
           return t.node;
         }))
       }
-    }).fail((e)=>{cb(!1)}))
+    }).fail((e)=>{cb(!1)})
+  },
+  getFollowings: function(e, cb){
+    console.log(e)
+    var jsonvars = {
+        id: e.toString(),
+        first: 48
+    }
+    jsonvars.after = '';
+    var urljsonvars = JSON.stringify(jsonvars);
+    var url = 'https://www.instagram.com/graphql/query/?query_hash=37479f2b8209594dde7facb0d904896a&variables=' + encodeURIComponent(urljsonvars);
+    $.ajax(url).done(function(e){
+      console.log(e);
+      if(e.status == 'ok'){
+        cb(e.data.user.edge_followed_by.edges.map((t)=>{
+          t.node.checked = !0;
+          return t.node;
+        }))
+      }
+    }).fail((e)=>{cb(!1)})
   }
 }

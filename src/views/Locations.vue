@@ -178,6 +178,7 @@ export default {
         } else {
           this.$store.state.tasks[this.index].draft = !1;
           this.$store.state.tasks[this.index].enabled = !0;
+          this.$root.save()
           // this.$store.state.tasks.push(this.task)
           this.$router.push({ path: '/' })
         }

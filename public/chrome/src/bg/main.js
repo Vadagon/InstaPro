@@ -245,53 +245,65 @@ var a = {
 	},
 	section: {
 		target: function(e){
-			if(e.finished){
-				setTimeout(function() {
-					a.init();
-				}, 1000);
-				return;
-			}
-			if(!e.isPrepared){
-				e.finished = false;
-				e.collectedPosts = [];
-				console.log(1311111111);
-				var calls = $.ajax();
-				var i = 1;
-				e.accounts.forEach((t)=>{
-					calls = calls.then(()=>{
-						return a.tool.getUser(t.username, function(res){
-							res&&e.collectedPosts.push(...res.edge_owner_to_timeline_media.edges.map(e=>e.node))
-							console.log('posts collected for '+t.username);
-							i++;
-							if(e.accounts.length == i){
-								e.isPrepared = !0;
-								console.log('finished');
-								update();
-								a.init();
-							}
-						})
-					})
-				})
-			}else{
-				var calls = $.ajax();
-				e.collectedPosts.forEach((t)=>{
-					calls = calls.then(()=>{
-						return a.tool.likeIt(t.id, function(res){
-							if(Math.random()>0.65){
-								e.collectedPosts.shift();
-								e.collectedPosts.shift();
-							}
-							e.collectedPosts.shift();
-							console.log('liked one of posts on @'+t.owner.username);
-							if(!e.accounts.length){
-								e.finished = !0;
-								update();
-								a.init();
-							}
-						})
-					})
-				})
-			}
+			// if(e.finished){
+			// 	setTimeout(function() {
+			// 		a.init();
+			// 	}, 1000);
+			// 	return;
+			// }
+			// if(!e.isPrepared){
+			// 	e.finished = false;
+			// 	e.collectedPosts = [];
+			// 	console.log(1311111111);
+			// 	var calls = $.ajax();
+			// 	var i = 1;
+			// 	e.accounts.forEach((t)=>{
+			// 		calls = calls.then(()=>{
+			// 			return a.tool.getUser(t.username, function(res){
+			// 				res&&e.collectedPosts.push(...res.edge_owner_to_timeline_media.edges.map(e=>e.node))
+			// 				console.log('posts collected for '+t.username);
+			// 				i++;
+			// 				if(e.accounts.length == i){
+			// 					e.isPrepared = !0;
+			// 					console.log('finished');
+			// 					update();
+			// 					a.init();
+			// 				}
+			// 			})
+			// 		})
+			// 	})
+			// }else{
+			// 	var calls = $.ajax();
+			// 	e.collectedPosts.forEach((t)=>{
+			// 		calls = calls.then(()=>{
+			// 			return a.tool.likeIt(t.id, function(res){
+			// 				if(Math.random()>0.65){
+			// 					e.collectedPosts.shift();
+			// 					e.collectedPosts.shift();
+			// 				}
+			// 				e.collectedPosts.shift();
+			// 				console.log('liked one of posts on @'+t.owner.username);
+			// 				if(!e.accounts.length){
+			// 					e.finished = !0;
+			// 					update();
+			// 					a.init();
+			// 				}
+			// 			})
+			// 		})
+			// 	})
+			// }
+		},
+		feed: function(e){
+
+		},
+		unfollow: function(e){
+
+		},
+		locations: function(e){
+
+		},
+		hashtags: function(e){
+			
 		}
 	},
 	init: function(){

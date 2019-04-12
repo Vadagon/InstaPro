@@ -133,7 +133,7 @@ export default {
   created () {
     this.$set(this.task.steps, 0, 1)
     var started = !1;
-    api.runtime.sendMessage({why: "tool", name: "getUser", value: this.task.username}, (response1) => {
+    api.runtime.sendMessage({why: "tool", name: "getUser", value: this.$root.user.username}, (response1) => {
       if(response1){
         this.task.user = response1;
         var loadQue = () => {
@@ -150,7 +150,7 @@ export default {
             }
           });
         }
-        loadQue();
+        setTimeout(function() {loadQue()}, this.$root.randB(1000, 5000));                          
       }else{
         this.$set(this.task.steps, e, 0)
         // this.$parent.noty.enabled = true;
@@ -185,6 +185,7 @@ export default {
         } else {
           this.$store.state.tasks[this.index].draft = !1;
           this.$store.state.tasks[this.index].enabled = !0;
+          this.$root.save()
           // this.$store.state.tasks.push(this.task)
           this.$router.push({ path: '/' })
         }

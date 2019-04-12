@@ -40,6 +40,9 @@ api.runtime.sendMessage({why: "getData"}, function(e){
     router,
     store,
     data: {
+      user: e.user,
+      rss: e.rss,
+      status: e.status,
       noty: {
         enabled: true,
         text: 'ssss'
@@ -62,6 +65,9 @@ api.runtime.sendMessage({why: "getData"}, function(e){
         api.runtime.sendMessage({why: "setData", value: _.cloneDeep(this.$store.state)}, function(){
 
         })
+      },
+      randB (e1, e2){
+        return Math.floor(Math.random()*(e2-e1+1)+e1);
       }
     },
     render: h => h(App)
