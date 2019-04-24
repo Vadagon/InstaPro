@@ -12,7 +12,7 @@
         </v-item>
       </v-item-group>
 
-      <v-flex>
+      <v-flex class="text-xs-center">
         <v-window v-model="window" class="elevation-1" vertical>
 
           <v-window-item :key="0">

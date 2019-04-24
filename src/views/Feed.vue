@@ -12,7 +12,7 @@
         </v-item>
       </v-item-group>
 
-      <v-flex>
+      <v-flex class="text-xs-center">
         <v-window v-model="window" class="elevation-1" vertical>
 
 
@@ -133,9 +133,7 @@ export default {
     }
   },
   created () {
-    for (var i = 0; i < 10; i++) {
-      this.task.accounts.push(_.cloneDeep(this.task.accounts[0]))
-    }
+
   },
   computed: {
     data () {
@@ -153,6 +151,7 @@ export default {
       })
     },
     nextStep (e) {
+      console.log(this.$store.state);
       this.$set(this.task.steps, e, 1)
       var next = () => {
         this.$set(this.task.steps, e, 2)

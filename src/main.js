@@ -4,6 +4,8 @@ import Vuetify from 'vuetify'
 import router from './router'
 import Vuex from 'vuex'
 
+
+
 import _ from 'lodash'
 import $ from 'jquery'
 window.$ = $;
@@ -30,19 +32,19 @@ Vue.use(Vuetify, {
 Vue.config.productionTip = false
 
 
-api.runtime.sendMessage({why: "getData"}, function(e){
   // console.log(e.userData.tasks[1])
   const store = window.store = new Vuex.Store({
-    state: e.userData
+    state: {}
   })
 
   window.app = new Vue({
     router,
     store,
     data: {
-      user: e.user,
-      rss: e.rss,
-      status: e.status,
+      drawer: null,
+      user: {},
+      rss: {},
+      status: '',
       noty: {
         enabled: true,
         text: 'ssss'
@@ -50,13 +52,19 @@ api.runtime.sendMessage({why: "getData"}, function(e){
       rss: [{message: 'follow @the_rock', img: '', url: 'https://www.instagram.com'}],
     },
     created () {
-      this.$store.watch(
-        (state) => (state),
-        () => {
-          this.save()
-        },
-        { deep: true }
-      )
+      api.runtime.sendMessage({why: "getData"}, (e)=>{
+        this.$root.user = e.user;
+        this.$root.rss = e.rss;
+        this.$root.status = e.status;
+        this.$store.replaceState(e.userData);
+        this.$store.watch(
+          (state) => (state),
+          () => {
+            this.save()
+          },
+          { deep: true }
+        )
+      })
     },
     methods: {
       save () {
@@ -72,6 +80,3 @@ api.runtime.sendMessage({why: "getData"}, function(e){
     },
     render: h => h(App)
   }).$mount('#app')
-
-  console.log(e)
-})

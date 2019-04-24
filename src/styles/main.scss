@@ -66,12 +66,24 @@ body .v-btn .v-btn__content .v-icon{
 // .v-toolbar.v-toolbar--clipped.v-toolbar--fixed{
 //   background-color: white;
 // }
+.theme--light.application{
+  background: #f5f5f5;
+}
+.leftDrawerMargin{
+  margin-left: 260px !important;
+  width: calc(100% - 260px);
+}
+.v-toolbar:not(.v-toolbar--fixed) .v-toolbar__content{
+  margin: auto;
+}
 
-
-
-
-
-
+main > .v-content__wrap > .container{
+  min-height: calc(80vh - 165px);
+}
+main .container.fill-height{
+  min-height: calc(80vh - 165px);
+  padding: 0 !important;
+}
 
 
 
@@ -114,4 +126,25 @@ body .v-btn .v-btn__content .v-icon{
 .location.tag-input span.v-chip::before {
     content: "location_on";
     font-family: 'Material Icons';
+}
+
+
+main.v-content{
+  margin-bottom: 82px;
+}
+
+
+
+
+.fade-enter-active, .fade-leave-active {
+  transition-property: opacity;
+  transition-duration: .25s;
+}
+
+.fade-enter-active {
+  transition-delay: .25s;
+}
+
+.fade-enter, .fade-leave-active {
+  opacity: 0
 }

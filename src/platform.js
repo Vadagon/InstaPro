@@ -67,7 +67,7 @@ if (process.env.NODE_ENV === 'development') {
   }
 
   api.storage.local.get(["data"], function(items) {
-    console.log(items)
+      console.log(items)
       if (items.data) {
         data = items.data;
       }else{

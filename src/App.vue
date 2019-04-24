@@ -10,101 +10,26 @@
 
 <template>
   <v-app id="app">
-    <v-navigation-drawer v-model="drawer" fixed clipped app >
-      <v-list dense>
 
-        <v-list-tile to="/">
-          <v-list-tile-action>
-            <v-icon>dashboard</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Dashboard</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
+    <core-drawer />
 
-        <v-list-tile to="/feed">
-          <v-list-tile-action>
-            <v-icon>rss_feed</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Feed</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-
-        <v-list-tile to="/target">
-          <v-list-tile-action>
-            <v-icon>person_pin</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Target</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-
-        <v-list-tile to="/unfollow">
-          <v-list-tile-action>
-            <v-icon>person_add_disabled</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Unfollow</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-
-        <v-list-tile to="/locations">
-          <v-list-tile-action>
-            <v-icon>location_on</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Locations</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-
-        <v-list-tile to="/hashtags">
-          <v-list-tile-action>
-            <v-icon>search</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>HashTags</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-
-        <v-list-tile to="/about">
-          <v-list-tile-action>
-            <v-icon>info</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>About</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-
-      </v-list>
-    </v-navigation-drawer>
-    <v-toolbar fixed app clipped-left class="white">
-      <v-toolbar-side-icon @click.stop="drawer = !drawer" class="text-pink"></v-toolbar-side-icon>
-      <v-toolbar-title>InstaPro</v-toolbar-title>
+    <v-toolbar flat prominent :class="{'leftDrawerMargin': $root.drawer&&$vuetify.breakpoint.name != 'sm'}">
+      <v-toolbar-side-icon @click.stop="$root.drawer = !$root.drawer" class="text-pink"></v-toolbar-side-icon>
+      <v-toolbar-title>{{$route.name?$route.name.charAt(0).toUpperCase() + $route.name.slice(1).toLowerCase():''}}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click.stop="drawerRight = !drawerRight">
         <v-badge>
           <template v-slot:badge>
             <span>6</span>
           </template>
-          <!-- <v-icon large color="grey">
-            mail
-          </v-icon> -->
           <v-icon>notification_important</v-icon>
         </v-badge>
-  </v-btn>
-      <!-- <v-toolbar-side-icon @click.stop="drawerRight = !drawerRight"></v-toolbar-side-icon> -->
+      </v-btn>
     </v-toolbar>
+
+
     <v-navigation-drawer v-model="drawerRight" absolute overlap right temporary >
       <v-list dense>
-        <!-- <v-list-tile>
-          <v-list-tile-action>
-            <v-icon>exit_to_app</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Open Temporary Drawer</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile> -->
         <v-list>
           <v-list-tile v-for="item in 12" avatar @click="">
             <v-list-tile-action>
@@ -124,20 +49,21 @@
       </v-list>
     </v-navigation-drawer>
     <v-content>
-      <v-container fluid fill-height>
-        <router-view/>
+      <v-container>
+        <transition name="fade">
+          <router-view/>
+        </transition>
       </v-container>
     </v-content>
-    <v-footer color="elevation-4" class="px-4 white" app>
-      <span>MarQuis Trill</span>
-      <v-spacer></v-spacer>
-      <span>&copy; 2019</span>
-    </v-footer>
+    <core-footer/>
   </v-app>
 
 
 </template>
 <script>
+import Drawer from './components/core/Drawer.vue'
+import Footer from './components/core/Footer.vue'
+
 export default {
   data: () => ({
     drawer: null,
@@ -146,25 +72,19 @@ export default {
   }),
   props: {
     source: String
+  },
+  components: {
+    'core-drawer': Drawer,
+    'core-footer': Footer
   }
 }
 </script>
 <style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+@import '@/styles/index.scss';
+
+/* Remove in 1.2 */
+.v-datatable thead th.column.sortable i {
+  vertical-align: unset;
 }
 </style>
+

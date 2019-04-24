@@ -12,7 +12,7 @@
         </v-item>
       </v-item-group>
 
-      <v-flex>
+      <v-flex class="text-xs-center">
         <v-window v-model="window" class="elevation-1" vertical>
 
           <v-window-item :key="0">
@@ -126,7 +126,7 @@ export default {
       var num = this.task.steps.findIndex((e)=>{return !e});
       num=num==-1?this.task.steps.length-1:num;
       this.length = num+1;
-      this.window = num;  
+      this.window = num;
       this.index = this.taskNum;
     }
   },
@@ -144,13 +144,14 @@ export default {
             }
             if(response2 && this.task.steps[0]==3){
               this.task.accounts.push(...response2);
-              loadQue()
+              setTimeout(function() {loadQue()}, this.$root.randB(1000, 5000));
+
             }else{
               this.$set(this.task.steps, 0, 0)
             }
           });
         }
-        setTimeout(function() {loadQue()}, this.$root.randB(1000, 5000));                          
+        loadQue()
       }else{
         this.$set(this.task.steps, e, 0)
         // this.$parent.noty.enabled = true;
