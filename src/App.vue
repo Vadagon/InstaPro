@@ -17,10 +17,10 @@
       <v-toolbar-side-icon @click.stop="$root.drawer = !$root.drawer" class="text-pink"></v-toolbar-side-icon>
       <v-toolbar-title>{{$route.name?$route.name.charAt(0).toUpperCase() + $route.name.slice(1).toLowerCase():''}}</v-toolbar-title>
       <v-spacer></v-spacer>
-      <v-btn icon @click.stop="drawerRight = !drawerRight">
+      <v-btn icon @click.stop="drawerRight = !drawerRight; $root.rssSeen = $root.rss.length">
         <v-badge>
-          <template v-slot:badge>
-            <span>6</span>
+          <template v-slot:badge v-if="$root.rss.length-$root.rssSeen > 0">
+            <span>{{$root.rss.length-$root.rssSeen}}</span>
           </template>
           <v-icon>notification_important</v-icon>
         </v-badge>
@@ -31,17 +31,22 @@
     <v-navigation-drawer v-model="drawerRight" absolute overlap right temporary >
       <v-list dense>
         <v-list>
-          <v-list-tile v-for="item in 12" avatar @click="">
+          <v-list-tile v-for="x in $root.rss" avatar @click="open('https://instagram.com/'+(x.type.includes('follow')?x.value.username:('p/'+x.value.shortcode)))">
             <v-list-tile-action>
-              <v-icon v-if="true">exit_to_app</v-icon>
+              <i class="material-icons"> {{icons[x.type]}} </i>
             </v-list-tile-action>
 
             <v-list-tile-content>
-              <v-list-tile-title v-text="'follow @the_rock'"></v-list-tile-title>
+              <v-list-tile-title v-if="x.type=='like' && !!x.value.owner" v-text="`Liked post ${x.value.owner.full_name?' of '+x.value.owner.full_name:''}`"></v-list-tile-title>
+              <v-list-tile-title v-if="x.type=='comment' && !!x.value.owner" v-text="`Commented post of ${x.value.owner.full_name?' of '+x.value.owner.full_name:''}`"></v-list-tile-title>
+              <v-list-tile-title v-if="x.type=='follow'" v-text="`Followed @${x.value.username}`"></v-list-tile-title>
+              <v-list-tile-title v-if="x.type=='unfollow'" v-text="`Unfollowed @${x.value.username}`"></v-list-tile-title>
             </v-list-tile-content>
 
-            <v-list-tile-avatar>
-              <img :src="''">
+            <v-list-tile-avatar v-if="!!x.value" :class="{'notAvatarUser':x.type.includes('follow')}">
+              <img v-if="x.value.display_resources" :src="x.value.display_resources[0].src">
+              <img v-if="x.value.profile_pic_url" :src="x.value.profile_pic_url">
+              <img v-if="x.value.display_url" :src="x.value.display_url">
             </v-list-tile-avatar>
           </v-list-tile>
         </v-list>
@@ -68,14 +73,25 @@ export default {
   data: () => ({
     drawer: null,
     drawerRight: false,
-    test: 12312312
+    test: 12312312,
+    icons: {
+      like: 'favorite',
+      comment: 'comment',
+      follow: 'person_pin',
+      unfollow: 'person_add_disabled'
+    }
   }),
+  methods: {
+    open(e){
+      window.open(e, '_blank');
+    }
+  },
   props: {
     source: String
   },
   components: {
     'core-drawer': Drawer,
-    'core-footer': Footer
+    'core-footer': Footer,
   }
 }
 </script>

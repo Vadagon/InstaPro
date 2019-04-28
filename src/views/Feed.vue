@@ -30,11 +30,11 @@
                   <span>
                     <v-radio-group v-model="task.type" v-on:change="descriptionChange()">
                       <v-radio :label="'Like latest posts'" :value="'like'"></v-radio>
-                      <v-radio :label="'Comment latest posts'" :value="'comment'" disabled></v-radio>
+                      <v-radio :label="'Comment latest posts'" :value="'comment'"></v-radio>
                     </v-radio-group>
                   </span>
                 </v-layout>
-
+                <l-comments :task="task" v-if="task.type=='comment'" />
               </v-card-text>
             </v-card>
           </v-window-item>
@@ -50,14 +50,14 @@
                   <v-spacer></v-spacer>
                 </v-layout>
                 <v-layout align-center justify-center mb-3 wrap>
-                    <v-flex xs8>
-                      <v-slider label="Actions interval" v-model="task.settings.interval" :max="300" :min="2" ></v-slider>
+                   <v-flex xs8>
+                      <v-slider label="Limit" v-model="task.settings.amount" :max="100" :min="1"></v-slider>
                     </v-flex>
-                    <v-flex shrink mx-3>{{task.settings.interval}} seconds</v-flex>
+                    <v-flex style="text-align: left;" px-3 xs2>{{task.settings.amount}} latest posts</v-flex>
                     <v-flex xs8>
-                      <v-slider label="Activation frequency" v-model="task.settings.frequency" :max="300" :min="1"></v-slider>
+                      <v-slider label="Activate the task every" v-model="task.settings.frequency" :max="50" :min="0"></v-slider>
                     </v-flex>
-                    <v-flex shrink mx-3>{{task.settings.frequency}} hours</v-flex>
+                    <v-flex style="text-align: left;" px-3 xs2>{{task.settings.frequency?task.settings.frequency+' hours':'One time activation'}}</v-flex>
                 </v-layout>
 
               </v-card-text>
@@ -85,6 +85,8 @@
 <script>
 // @ is an alias to /src
 // import HelloWorld from '@/components/HelloWorld.vue'
+import Comments from '@/components/Comments.vue'
+
 export default {
   name: 'target',
   data: () => ({
@@ -111,11 +113,11 @@ export default {
           checked: !1
         }
       ],
+      comments: [],
       type: 'like',
       settings: {
       	frequency: 6,
-        amount: 100,
-        interval: 20
+        amount: 10
       },
       description: 'liking my feed',
       enabled: false
@@ -165,6 +167,7 @@ export default {
           this.window = e + 1
           this.length = e + 2
         } else {
+          this.$store.state.tasks[this.index].uni = Date.now();
           this.$store.state.tasks[this.index].draft = !1;
           this.$store.state.tasks[this.index].enabled = !0;
           this.$root.save()
@@ -197,9 +200,9 @@ export default {
       }
       console.log(this.task)
     }
+  },
+  components: {
+    'l-comments': Comments
   }
-  // components: {
-  //   HelloWorld
-  // }
 }
 </script>

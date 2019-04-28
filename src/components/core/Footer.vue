@@ -29,7 +29,7 @@
 export default {
   data: () => ({
     links: [
-      { name: 'Home', Link: '/dashboard' },
+      { name: 'Home', Link: '#/' },
       { name: 'About Us', Link: 'https://www.google.com/' },
       { name: 'Blog', Link: 'https://www.google.com/' }
     ]

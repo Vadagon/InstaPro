@@ -44,6 +44,7 @@ Vue.config.productionTip = false
       drawer: null,
       user: {},
       rss: {},
+      rssSeen: 0,
       status: '',
       noty: {
         enabled: true,
@@ -54,7 +55,6 @@ Vue.config.productionTip = false
     created () {
       api.runtime.sendMessage({why: "getData"}, (e)=>{
         this.$root.user = e.user;
-        this.$root.rss = e.rss;
         this.$root.status = e.status;
         this.$store.replaceState(e.userData);
         this.$store.watch(
@@ -65,6 +65,11 @@ Vue.config.productionTip = false
           { deep: true }
         )
       })
+      setInterval(()=>{
+        api.runtime.sendMessage({why: "getRSS"}, (e)=>{
+          this.$root.rss = e;
+        })
+      }, 1400);
     },
     methods: {
       save () {

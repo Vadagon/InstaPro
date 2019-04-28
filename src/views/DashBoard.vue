@@ -2,23 +2,23 @@
   <v-container class="dashboard" pa-0>
     <!-- {{$vuetify.breakpoint.name}} -->
     <v-layout align-start justify-left row fill-height wrap>
-      <v-flex sm6 xs12 md6 lg3 v-for="x in 4" px-2>
+      <v-flex sm6 xs12 md6 lg3 v-for="x in statistic" px-2>
         <div class="v-card--material-stats v-card v-sheet theme--light" style="margin-bottom: 24px; margin-top: 48px;">
           <div class="v-offset" style="top: -24px; margin-bottom: -24px;">
-            <div class="pa-4 v-card v-sheet theme--dark green elevation-10">
-              <v-icon color="white">store</v-icon>
+            <div class="pa-4 v-card v-sheet theme--dark green elevation-10" v-bind:style="{ background: x.color+' !important' }">
+              <v-icon color="white">{{x.icon}}</v-icon>
             </div>
           </div>
           <div class="v-card__text">
             <div class="text-xs-right">
-              <p class="category grey--text font-weight-light">Revenue</p>
+              <p class="category grey--text font-weight-light">{{x.name}}</p>
               <h3 class="title display-1 font-weight-light">
-                $34,245 <small></small></h3>
+                {{x.value}} <small></small></h3>
             </div>
           </div>
           <hr class="mx-3 v-divider theme--light">
           <div class="v-card__actions">
-            <v-icon color="grey">store</v-icon> &nbsp;
+            <v-icon color="grey">update</v-icon> &nbsp;
             <span class="caption font-weight-light">Last 24 Hours</span>
           </div>
         </div>
@@ -80,13 +80,17 @@
             <span v-for="span in x.filters">{{span}} </span>
             <!-- #f4f #s4s #l4l #c4c #likeforlike #likeall #like4like #likes4likes #liking #instagood #tagblender #follow #followme #followback #followforfollow #follow4follow #followers #followher #follower #followhim #followbackteam #followall #comment #comments #commentback #comment4comment #commentbelow #shoutout #shoutouts #shoutoutback -->
           </v-flex>
-          <v-flex shrink pa-2 class="box-s" v-if="!x.draft">
+          <!-- <v-flex shrink pa-2 class="box-s" v-if="!x.draft">
             <canvas class="chart"></canvas>
-          </v-flex>
-          <v-card-actions grow>
+          </v-flex> -->
+          <v-card-actions grow v-if="!x.finished">
             <v-switch label="enabled" v-model="x.enabled" v-if="!x.draft"></v-switch>
             <p class="grey--text text--darken-0 py-0 pt-1 font-weight-thin.font-italic headline" v-if="x.draft">Draft</p>
           </v-card-actions>
+          <v-flex grow v-if="x.finished" pl-3 pb-2>
+            <v-icon @click="reStartTask(x)">play_circle_outline</v-icon>
+            <span class="grey--text text--darken-0 py-0 pt-1 font-weight-thin.font-italic headline">&nbsp;finished</span>
+          </v-flex>
         </v-layout>
       </v-flex>
     </v-layout>
@@ -111,6 +115,14 @@ export default {
           feed: 'rss_feed',
         }
       }
+    },
+    statistic(){
+      return [
+        {name: 'Followed', value: this.$root.rss.filter(e=>e.type=='follow').length, icon: 'person_pin', color: '#4ea750'},
+        {name: 'Unfollowed', value: this.$root.rss.filter(e=>e.type=='unfollow').length, icon: 'person_add_disabled', color: '#508eff'},
+        {name: 'Liked', value: this.$root.rss.filter(e=>e.type=='like').length, icon: 'favorite', color: '#ff4e4e'},
+        {name: 'Commented', value: this.$root.rss.filter(e=>e.type=='comment').length, icon: 'comment', color: '#e05f99'}
+      ]
     }
   },
   mounted() {
@@ -187,6 +199,10 @@ export default {
   methods: {
     save() {
       console.log(this.$store.state.tasks[0].enabled)
+    },
+    reStartTask(e){
+      e.timeStamp=10;
+      e.finished=false; 
     }
   }
 }

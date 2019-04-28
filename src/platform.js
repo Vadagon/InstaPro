@@ -84,12 +84,28 @@ if (process.env.NODE_ENV === 'development') {
         case 'getData':
             setTimeout(()=>{sendResponse(data)}, 700);
             break;
+        case 'getRSS':
+            sendResponse([{
+              "type":"follow",
+              "value":{
+                "checked":true,
+                "followed_by_viewer":false,
+                "full_name":"Arabella White",
+                "id":"11322587823",
+                "is_verified":false,
+                "profile_pic_url":"https://scontent-vie1-1.cdninstagram.com/vp/da1c531f42d11347b57374ea954d42cc/5D58CC7C/t51.2885-19/s150x150/54732330_368154124033086_5693443879194329088_n.jpg?_nc_ht=scontent-vie1-1.cdninstagram.com",
+                "requested_by_viewer":false,
+                "username":"arabella.white64"
+              }
+            }]);
+            break;
         case 'setData':
           data.userData = request.value;
           update();
           setTimeout(()=>{sendResponse(!0)}, 700);
             break;
         case 'tool':
+        console.log(request)
           if(request.name == 'getUser'){
             setTimeout(()=>{sendResponse({id: 123, username: 12314, }) }, 700);
           }else if(request.name.includes('getFollow')){
@@ -97,7 +113,7 @@ if (process.env.NODE_ENV === 'development') {
             for (var i = 0; i < 10; i++) {
               col.push({username: 'test', checked: !1 })
             }
-            setTimeout(()=>{sendResponse(col)}, 700);
+            setTimeout(()=>{sendResponse({nodes: col, page_info: {}})}, 700);
           }
           break;
       case 'popup':

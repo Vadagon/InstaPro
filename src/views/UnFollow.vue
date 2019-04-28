@@ -55,11 +55,9 @@
                   <strong class="title">Actions</strong>
                   <v-spacer></v-spacer>
                 </v-layout>
-                <v-layout align-center justify-center mb-3 wrap>
-                    <v-flex xs8>
-                      <v-slider label="Actions interval" v-model="task.settings.interval" :max="300" :min="2" ></v-slider>
-                    </v-flex>
-                    <v-flex shrink mx-3>{{task.settings.interval}}s</v-flex>
+                <v-layout align-center justify-center mb-4 wrap style="text-align: center">
+                   <v-flex sm8> <h2>No settings for the task</h2> </v-flex>
+                   <v-flex sm8 mb-3> <h4>It will run automatically and only once</h4> </v-flex>
                 </v-layout>
 
               </v-card-text>
@@ -87,6 +85,7 @@
 
 <script>
 // @ is an alias to /src
+import Comments from '@/components/Comments.vue'
 // import HelloWorld from '@/components/HelloWorld.vue'
 export default {
   name: 'target',
@@ -106,6 +105,7 @@ export default {
       draft: !0,
       followType: 'getFollowers',
       section: 'unfollow',
+      comments: [],
       username: '',
       user: {},
       accounts: [],
@@ -136,16 +136,17 @@ export default {
     api.runtime.sendMessage({why: "tool", name: "getUser", value: this.$root.user.username}, (response1) => {
       if(response1){
         this.task.user = response1;
+        var after = '';
         var loadQue = () => {
-          api.runtime.sendMessage({why: "tool", name: 'getFollowings', value: this.task.user.id, index: this.task.accounts.length}, (response2) => {
+          api.runtime.sendMessage({why: "tool", name: 'getFollowings', value: {id: this.task.user.id, after: after}, index: this.task.accounts.length}, (response2) => {
+            after = response2.page_info.end_cursor;
             if(!started){
               this.$set(this.task.steps, 0, 3)
               started = !0
             }
-            if(response2 && this.task.steps[0]==3){
-              this.task.accounts.push(...response2);
+            response2.nodes&&this.task.accounts.push(...response2.nodes);
+            if(response2.page_info.has_next_page && this.task.steps[0]==3){
               setTimeout(function() {loadQue()}, this.$root.randB(1000, 5000));
-
             }else{
               this.$set(this.task.steps, 0, 0)
             }
@@ -184,6 +185,8 @@ export default {
           this.window = e + 1
           this.length = e + 2
         } else {
+          this.$store.state.tasks[this.index].accounts = this.$store.state.tasks[this.index].accounts.filter(e=>e.checked);
+          this.$store.state.tasks[this.index].uni = Date.now();
           this.$store.state.tasks[this.index].draft = !1;
           this.$store.state.tasks[this.index].enabled = !0;
           this.$root.save()
@@ -200,6 +203,9 @@ export default {
         next();
       }
       console.log(this.task)
+    },
+    components: {
+      'l-comments': Comments
     }
   }
   // components: {

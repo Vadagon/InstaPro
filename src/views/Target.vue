@@ -123,12 +123,11 @@
                     <v-radio-group v-model="task.type" v-on:change="descriptionChange()">
                       <v-radio :label="'Like latest posts'" :value="'like'"></v-radio>
                       <v-radio :label="'Follow all'" :value="'follow'"></v-radio>
-                      <v-radio :label="'Unfollow all'" :value="'unfollow'"></v-radio>
-                      <v-radio :label="'Comment latest posts'" :value="'comment'" disabled></v-radio>
+                      <v-radio :label="'Comment latest posts'" :value="'comment'"></v-radio>
                     </v-radio-group>
                   </span>
                 </v-layout>
-
+                <l-comments :task="task" v-if="task.type=='comment'" />
               </v-card-text>
             </v-card>
           </v-window-item>
@@ -143,15 +142,19 @@
                   <strong class="title">Actions</strong>
                   <v-spacer></v-spacer>
                 </v-layout>
-                <v-layout align-center justify-center mb-3 wrap>
-                    <v-flex xs8>
-                      <v-slider label="Amount" v-model="task.settings.amount" :max="1000" :min="2"></v-slider>
+                <v-layout align-center justify-center mb-3 wrap v-if="task.type!='follow'">
+                   <v-flex xs8>
+                      <v-slider label="Limit" v-model="task.settings.amount" :max="100" :min="1"></v-slider>
                     </v-flex>
-                    <v-flex shrink mx-3>{{task.settings.amount}}</v-flex>
+                    <v-flex style="text-align: left;" px-3 xs2>{{task.settings.amount}} latest posts</v-flex>
                     <v-flex xs8>
-                      <v-slider label="Actions interval" v-model="task.settings.interval" :max="300" :min="2"></v-slider>
+                      <v-slider label="Activate the task every" v-model="task.settings.frequency" :max="50" :min="0"></v-slider>
                     </v-flex>
-                    <v-flex shrink mx-3>{{task.settings.interval}}s</v-flex>
+                    <v-flex style="text-align: left;" px-3 xs2>{{task.settings.frequency?task.settings.frequency+' hours':'One time activation'}}</v-flex>
+                </v-layout>
+                <v-layout align-center justify-center mb-4 wrap v-if="task.type=='follow'" style="text-align: center">
+                   <v-flex sm8> <h2>No settings for the task</h2> </v-flex>
+                   <v-flex sm8 mb-3> <h4>It will run automatically and only once</h4> </v-flex>
                 </v-layout>
 
               </v-card-text>
@@ -179,6 +182,7 @@
 
 <script>
 // @ is an alias to /src
+import Comments from '@/components/Comments.vue'
 // import HelloWorld from '@/components/HelloWorld.vue'
 export default {
   name: 'target',
@@ -197,6 +201,7 @@ export default {
       steps: [0, 0, 0, 0, 0],
       draft: !0,
       followType: 'getFollowers',
+      comments: [],
       section: 'target',
       username: '',
       user: {},
@@ -256,6 +261,8 @@ export default {
           this.window = e + 1
           this.length = e + 2
         } else {
+          this.$store.state.tasks[this.index].accounts = this.$store.state.tasks[this.index].accounts.filter(e=>e.checked);
+          this.$store.state.tasks[this.index].uni = Date.now();
           this.$store.state.tasks[this.index].draft = !1;
           this.$store.state.tasks[this.index].enabled = !0;
           this.$root.save()
@@ -274,15 +281,18 @@ export default {
         api.runtime.sendMessage({why: "tool", name: "getUser", value: this.task.username}, (response1) => {
           if(response1){
             this.task.user = response1;
+            var after = '';
             var loadQue = () => {
-              api.runtime.sendMessage({why: "tool", name: this.task.followType, value: this.task.user.id, index: this.task.accounts.length}, (response2) => {
+              api.runtime.sendMessage({why: "tool", name: this.task.followType, value: {id: this.task.user.id, after: after}, index: this.task.accounts.length}, (response2) => {
+                console.log(response2)
+                after = response2.page_info.end_cursor;
                 if(!started){
                   this.$set(this.task.steps, 2, 3)
                   started = !0
                 }
-                if(response2 && this.task.steps[2]==3){
-                  this.task.accounts.push(...response2);
-                  setTimeout(function() {loadQue()}, this.$root.randB(1000, 5000));                  
+                response2.nodes&&this.task.accounts.push(...response2.nodes);
+                if(response2.page_info.has_next_page && this.task.steps[2]==3){
+                  setTimeout(function() {loadQue()}, this.$root.randB(30, 100));                  
                 }else{
                   this.$set(this.task.steps, 2, 0)
                 }
@@ -299,6 +309,9 @@ export default {
       }
       console.log(this.task)
     }
+  },
+  components: {
+    'l-comments': Comments
   }
   // components: {
   //   HelloWorld

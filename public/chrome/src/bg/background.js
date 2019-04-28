@@ -29,13 +29,17 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 	    case 'getData':
 	        sendResponse(data);
 	        break;
+	    case 'getRSS':
+	        sendResponse(a.rss);
+	        break;
 	    case 'setData':
 	    	data.userData = request.value;
 			update();
-			a.init();
+			!a.running&&a.init();
 	        sendResponse(!0);
 	        break;
 	    case 'tool':
+	    	console.log(request)
 	    	a.tool[request.name](request.value, sendResponse);
 	    	break;
 		case 'popup':
