@@ -4,9 +4,63 @@
 button.next{
   margin-top: -18px;
 }
+button.next-v2{
+  margin-bottom: -18px;
+}
 img.active-profile{
   border: 2px solid black;
 }
+
+.postCard{
+  > div.selected{
+    box-shadow: 0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 #ee6292,0 1px 3px 0 #ee6292 !important;
+  }
+  .postDetails{
+    position: relative;
+    .hoverdetails{
+      display: none;
+      top: 0;
+      width: 100%;
+      bottom: 0;
+      height: 100%;
+      position: absolute;
+      background-color: rgba(0,0,0,.5);
+      color: white;
+      .v-input--selection-controls{
+        margin: 0;
+        margin-right: -5px;
+      }
+      .overflow-hidden.text-truncate{
+        margin-top: 10px;
+      }
+    }
+    &:hover{
+      .hoverdetails{
+        display: block;
+        cursor: pointer;
+      }
+    }
+  }
+}
+.floatingButtons{
+  position: sticky;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  > .layout{
+    border-radius: 4px;
+  }
+}
+.commentsList{
+  .v-expansion-panel__header__icon{
+    > .v-radio{
+      max-width: 26px;
+      margin-right: 0;
+    }
+  }
+}
+
+
 .step-block{
   width: 260px;
   max-width: 260px;

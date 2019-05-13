@@ -87,7 +87,7 @@
                   <v-spacer></v-spacer>
                   <v-spacer></v-spacer>
                   <v-spacer></v-spacer>
-                  <v-switch label="Select All" v-model="selectAllAccModel" @change="selectAllAcc()"></v-switch>
+                  <v-switch :label="'Select All ('+ task.accounts.length+')'" v-model="selectAllAccModel" @change="selectAllAcc()"></v-switch>
                 </v-layout>
                 <v-layout align-left row wrap justify-left mb-4 pt-3>
                     <!-- <v-flex shrink>
@@ -292,7 +292,7 @@ export default {
                 }
                 response2.nodes&&this.task.accounts.push(...response2.nodes);
                 if(response2.page_info.has_next_page && this.task.steps[2]==3){
-                  setTimeout(function() {loadQue()}, this.$root.randB(30, 100));                  
+                  setTimeout(function() {loadQue()}, this.$root.randB(10, 100));                  
                 }else{
                   this.$set(this.task.steps, 2, 0)
                 }

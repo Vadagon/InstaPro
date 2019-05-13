@@ -70,20 +70,16 @@ a.tool = {
     })
   },
   getPost: function(id, cb){
-    jax({
-        url: 'https://www.instagram.com/graphql/query/',
-        type: 'get',
-        data: {
-          query_hash: data.user.post,
-          variables: `{"shortcode":"${id}","child_comment_count":3,"fetch_comment_count":40,"parent_comment_count":24,"has_threaded_comments":false}`
-        },
-        headers: {
-          'x-instagram-gis': '2ea69d1677baf9e1d21d4f65f04c16e0'
-        }
-    }).always(function(e) {
-      // console.log(e)
-        cb(e)
-    })
+    var jsonvars = {
+      shortcode: id, 
+      child_comment_count: 3,
+      fetch_comment_count: 40,
+      parent_comment_count: 24,
+      has_threaded_comments: false
+    }
+    var urljsonvars = JSON.stringify(jsonvars);
+    jax('https://www.instagram.com/graphql/query/?query_hash=477b65a610463740ccdb83135b2014db&variables='+encodeURIComponent(urljsonvars))
+    .fail(e=>_Fail(cb)).done(e=>e.status=="ok"?cb(e.data.shortcode_media):_Fail(cb));
   },
   getRecentHashtags: function(tag, cb){
     jax('https://www.instagram.com/explore/tags/'+tag+'/?__a=1').done(function(e){
@@ -124,17 +120,11 @@ a.tool = {
   //   }).fail(a.init.bind(!1))
   // },
   getUser: function(user, cb){
-    var ajax = jax({
-        url: 'https://www.instagram.com/'+user.replace('@', '')+'/?__a=1',
-        type: 'get'
-    }).done(function(e){
-      console.log(e)
-      cb(catcher(function(){
+    jax('https://www.instagram.com/'+user.replace('@', '')+'/?__a=1').done((e)=>{
+      catcher(()=>{
         return e.graphql.user;
-      })?e.graphql.user:!1)
-    }).fail(()=>{cb(!1)})
-    // ajax)
-    return ajax;
+      })?cb(e.graphql.user):_Fail(cb)
+    }).fail(()=>{_Fail(cb)})
   },
   getFollowers: function(e, cb){
     var jsonvars = {

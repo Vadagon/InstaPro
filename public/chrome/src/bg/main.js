@@ -75,7 +75,7 @@ var a = {
 							i++;
 							e.accounts.length>i?Action():a.section.target(e, cb, true);
 						})
-					}, random(900, 14000));
+					}, random(6000, 14000));
 				}
 				Action();
 			}else if(e.type!='follow'){
@@ -90,7 +90,7 @@ var a = {
 						}
 						if(Math.random() > 0.67) e.collectedPosts.shift();
 						e.collectedPosts.length?Action():cb(e);
-					}, random(900, 14000));
+					}, random(6000, 14000));
 				}
 				Action();
 			}else{
@@ -113,7 +113,7 @@ var a = {
 						}
 						if(Math.random() > 0.67) data.shift();
 						data.length?Action():cb(e);
-					}, random(900, 14000));
+					}, random(6000, 14000));
 				}
 				Action();
 			})
@@ -121,10 +121,13 @@ var a = {
 		unfollow: function(e, cb){
 			var Action = function(){
 				timer(function() {
-					a.tool.unfollowIt(e.accounts.shift())
-					if(Math.random() > 0.67) e.accounts.shift();
+					a.tool.getUser(e.accounts.shift().username, (res)=>{
+						if((e.settings.dFollowedByMe && res.follows_viewer) || !e.settings.dFollowedByMe)
+							if((e.settings.dVerified && res.is_verified) || !e.settings.dVerified)
+								a.tool.unfollowIt(res)
+					})
 					e.accounts.length?Action():cb(e);
-				}, random(900, 14000));
+				}, random(6000, 14000));
 			}
 			Action();
 		},
@@ -147,9 +150,16 @@ var a = {
 						if(e.type=='comment'){
 							a.tool.commentIt(data.shift(), e.comments[random(0, e.comments.length-1)])
 						}
+						if(e.type=='follow'){
+							a.tool.getPost(data.shift().shortcode, (res1)=>{
+								a.tool.getUser(res1.owner.username, function(res2){
+									a.tool.followIt(res2)
+								});
+							})
+						}
 						if(Math.random() > 0.67) data.shift();
 						data.length?Action():cb(e);
-					}, random(900, 14000));
+					}, random(6000, 14000));
 				}
 				Action();
 			})
@@ -176,27 +186,20 @@ var a = {
 		}, 10*1000*60);
 	},
 	buildQue: function(tasks){
-		tasks = tasks.filter(e=>!e.draft).filter(e=>e.enabled).filter(e=>!e.finished).filter(e=>!e.running);
+		var filtered = tasks.filter(e=>!e.draft).filter(e=>e.enabled).filter(e=>!e.finished);
 		// tasks = tasks.filter(e=>e.section=='target');
-		var stopApp = a.isRunning?!0:!1;
-		tasks.forEach((t, index)=>{
+		var stopApp = true;
+		filtered.forEach((t, index)=>{
 			if(!t.settings.frequency || !t.timeStamp){
-				t.timeStamp=Date.now()
-			}else{
-				if(Date.now()-t.timeStamp>t.settings.frequency*60*60*1000){
-					t.timeStamp=Date.now()
-				}else{
-					t.timeStamp+=t.settings.frequency*60*60*1000;
-				}
+				t.timeStamp=10;
 			}
 			if(t.uni == a.isRunning){
 				stopApp = false;
 			}
 		});
-		if(stopApp){
-			a.resetOuts()
-		}
-		a.que = tasks.sort(function(a, b){return a.timeStamp - b.timeStamp});
+		if(stopApp) a.resetOuts();
+
+		a.que = filtered.sort(function(a, b){return a.timeStamp - b.timeStamp}).filter(e=>!e.running);
 		console.log(tasks, a.que)
 	},
 	init: function(){
@@ -237,6 +240,7 @@ var a = {
 				e.running = false;
 				a.isRunning = !1;
 				if(!e.settings.frequency) e.finished = true;
+				if(e.settings.frequency) e.timeStamp+=e.settings.frequency*60*60*1000;
 				a.init();
 			})
 			// var r = random(0, (tasks.length-1));

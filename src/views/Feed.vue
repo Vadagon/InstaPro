@@ -34,7 +34,12 @@
                     </v-radio-group>
                   </span>
                 </v-layout>
-                <l-comments :task="task" v-if="task.type=='comment'" />
+                <v-layout align-center justify-center row v-if="task.type=='comment'">
+                  <v-flex xs8>
+                      <v-card-title mb-2>Create a list of Comments</v-card-title>
+                      <l-comments :task="task"  />
+                  </v-flex>
+                </v-layout>
               </v-card-text>
             </v-card>
           </v-window-item>

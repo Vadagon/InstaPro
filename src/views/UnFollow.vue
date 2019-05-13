@@ -55,10 +55,15 @@
                   <strong class="title">Actions</strong>
                   <v-spacer></v-spacer>
                 </v-layout>
-                <v-layout align-center justify-center mb-4 wrap style="text-align: center">
+                <v-layout align-center justify-center mb-3>
+                  <span> <v-checkbox v-model="task.settings.dFollowedByMe" label="Don't unfolow people that follow me"></v-checkbox> </span>
+                  <br>
+                  <span> <v-checkbox v-model="task.settings.dVerified" label="Don't unfolow verified accounts"></v-checkbox> </span>
+                </v-layout>
+               <!--  <v-layout align-center justify-center mb-4 wrap style="text-align: center">
                    <v-flex sm8> <h2>No settings for the task</h2> </v-flex>
                    <v-flex sm8 mb-3> <h4>It will run automatically and only once</h4> </v-flex>
-                </v-layout>
+                </v-layout> -->
 
               </v-card-text>
             </v-card>
@@ -113,7 +118,8 @@ export default {
       settings: {
         amount: 100,
         frequency: 2,
-        interval: 20
+        dFollowedByMe: !1,
+        dVerified: !1
       },
       description: 'Unfollowing my followings',
       enabled: false
@@ -146,7 +152,7 @@ export default {
             }
             response2.nodes&&this.task.accounts.push(...response2.nodes);
             if(response2.page_info.has_next_page && this.task.steps[0]==3){
-              setTimeout(function() {loadQue()}, this.$root.randB(1000, 5000));
+              setTimeout(function() {loadQue()}, this.$root.randB(10, 100));
             }else{
               this.$set(this.task.steps, 0, 0)
             }

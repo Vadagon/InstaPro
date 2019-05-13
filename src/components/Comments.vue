@@ -2,15 +2,15 @@
   <div class="comments">
     <v-layout align-left mb-3>
       <v-flex justify-left>
-        <h3 class="display-0 mb-4 mt-0">Create a list of Comments</h3>
+        <!-- <h3 class="display-0 mb-4 mt-0">Create a list of Comments</h3> -->
         <v-layout align-left justify-center row wrap class="mb-3">
-          <v-flex sm8 v-for="(x, index) in task.comments" class="CommentsTable">
+          <v-flex sm12 v-for="(x, index) in task.comments" class="CommentsTable">
             <div>
               {{x}}
               <span @click="task.comments.splice(index, 1);"><v-icon color="accent">close</v-icon></span>
             </div>
           </v-flex>
-          <v-flex sm8 class="addNewCommentField">
+          <v-flex sm12 class="addNewCommentField">
             <span> <v-text-field label="Comment example" solo v-model="nextComment"></v-text-field> </span>
             <v-btn color="primary" @click="task.comments.push(nextComment); nextComment=''"><v-icon color="white">plus_one</v-icon></v-btn>
           </v-flex>
