@@ -24,7 +24,7 @@
                   </v-avatar>
                   <strong class="title">Accounts</strong>
                   <v-spacer v-for="c in 14"></v-spacer>
-                  <v-switch label="Select All" v-model="selectAllAccModel" @change="selectAllAcc()"></v-switch>
+                  <v-switch :label="'Select All ('+task.accounts.length+')'" v-model="selectAllAccModel" @change="selectAllAcc()"></v-switch>
                 </v-layout>
                 <v-layout align-left row wrap justify-left mb-4 pt-3>
                     <!-- <v-flex shrink>
@@ -45,7 +45,7 @@
             </v-card>
           </v-window-item>
 
-          <v-window-item :key="1">
+          <v-window-item :key="1" v-if="!created">
             <v-card flat>
               <v-card-text>
                 <v-layout align-center mb-3>
@@ -55,9 +55,9 @@
                   <strong class="title">Actions</strong>
                   <v-spacer></v-spacer>
                 </v-layout>
-                <v-layout align-center justify-center mb-3>
+                <v-layout align-center justify-center mb-3 wrap>
                   <span> <v-checkbox v-model="task.settings.dFollowedByMe" label="Don't unfolow people that follow me"></v-checkbox> </span>
-                  <br>
+                  <v-flex xs12 />
                   <span> <v-checkbox v-model="task.settings.dVerified" label="Don't unfolow verified accounts"></v-checkbox> </span>
                 </v-layout>
                <!--  <v-layout align-center justify-center mb-4 wrap style="text-align: center">
@@ -71,13 +71,13 @@
 
         </v-window>
 
-        <v-btn color="primary" class="next" @click="nextStep(window)" v-if="task.steps[window]!=2" :disabled="task.steps[window]>0">
+        <v-btn color="primary" class="next" @click="nextStep(window)" v-if="!created && task.steps[window]!=2" :disabled="task.steps[window]>0">
           <span v-if="task.steps[window]==0 && window<task.steps.length-1">continue</span>
           <v-progress-circular indeterminate color="primary" :size="20" :width="2" v-if="task.steps[window]>0"></v-progress-circular>
           <span v-if="window==task.steps.length-1">finish</span>
         </v-btn>
-        <v-btn color="warning" class="next" @click="nextStep(window)" v-if="task.steps[window]==2">re continue</v-btn>
-        <v-btn @click="$set(task.steps, 0, 0)" v-if="task.steps[window]==3" style="min-width: 30px; margin-left: 0;" color="white" class="next"><v-icon color="red">close</v-icon></v-btn>
+        <v-btn color="warning" class="next" @click="nextStep(window)" v-if="!created && task.steps[window]==2">re continue</v-btn>
+        <v-btn @click="$set(task.steps, 0, 0)" v-if="!created && task.steps[window]==3" style="min-width: 30px; margin-left: 0;" color="white" class="next"><v-icon color="red">close</v-icon></v-btn>
 
       </v-flex>
     </v-layout>
@@ -98,13 +98,8 @@ export default {
     length: 1,
     window: 0,
     index: !1,
+    created: false,
     selectAllAccModel: !0,
-    descs: {
-      like: 'Liking latest posts',
-      follow: 'Follow all',
-      unfollow: 'Unollow all',
-      comment: 'Comment latest posts',
-    },
     task: {
       steps: [0, 0],
       draft: !0,
@@ -115,55 +110,62 @@ export default {
       user: {},
       accounts: [],
       type: 'unfollow',
+      repeating: false,
+      descs: {
+        like: 'Liking latest posts',
+        follow: 'Follow all',
+        unfollow: 'Unollow all',
+        comment: 'Comment latest posts'
+      },
       settings: {
         amount: 100,
-        frequency: 2,
+        frequency: 0,
         dFollowedByMe: !1,
         dVerified: !1
       },
-      description: 'Unfollowing my followings',
-      enabled: false
+      enabled: !0
     }
   }),
   props: ['taskNum'],
-  mounted() {
+  mounted () {
     if (this.taskNum != undefined) {
-      this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum]);
-      var num = this.task.steps.findIndex((e)=>{return !e});
-      num=num==-1?this.task.steps.length-1:num;
-      this.length = num+1;
-      this.window = num;
-      this.index = this.taskNum;
+      this.created = true;
+      this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum])
+      var num = this.task.steps.findIndex((e) => { return !e })
+      num = num == -1 ? this.task.steps.length - 1 : num
+      this.length = num + 1
+      this.window = num
+      this.index = this.taskNum
     }
   },
   created () {
     this.$set(this.task.steps, 0, 1)
-    var started = !1;
-    api.runtime.sendMessage({why: "tool", name: "getUser", value: this.$root.user.username}, (response1) => {
-      if(response1){
-        this.task.user = response1;
-        var after = '';
+    var started = !1
+    api.runtime.sendMessage({ why: 'tool', name: 'getUser', value: this.$root.user.username }, (response1) => {
+      if (response1) {
+        this.task.user = response1
+        var after = ''
         var loadQue = () => {
-          api.runtime.sendMessage({why: "tool", name: 'getFollowings', value: {id: this.task.user.id, after: after}, index: this.task.accounts.length}, (response2) => {
-            after = response2.page_info.end_cursor;
-            if(!started){
+          api.runtime.sendMessage({ why: 'tool', name: 'getFollowings', value: { id: this.task.user.id, after: after }, index: this.task.accounts.length }, (response2) => {
+            after = response2.page_info.end_cursor
+            if (!started) {
               this.$set(this.task.steps, 0, 3)
               started = !0
             }
-            response2.nodes&&this.task.accounts.push(...response2.nodes);
-            if(response2.page_info.has_next_page && this.task.steps[0]==3){
-              setTimeout(function() {loadQue()}, this.$root.randB(10, 100));
-            }else{
+            response2.nodes && this.task.accounts.push(...response2.nodes)
+            if (response2.page_info.has_next_page && this.task.steps[0] == 3) {
+              setTimeout(function () { loadQue() }, this.$root.randB(10, 100))
+            } else {
               this.$set(this.task.steps, 0, 0)
             }
-          });
+          })
         }
         loadQue()
-      }else{
+      } else {
         this.$set(this.task.steps, e, 0)
         // this.$parent.noty.enabled = true;
       }
-    });
+    })
   },
   computed: {
     data () {
@@ -181,32 +183,31 @@ export default {
       this.$set(this.task.steps, e, 1)
       var next = () => {
         this.$set(this.task.steps, e, 2)
-        if(e==0 && !this.index){
-          this.$store.state.tasks.push(_.cloneDeep(this.task));
-          this.index = this.$store.state.tasks.length-1;
-        }else{
-          this.$store.state.tasks[this.index] = _.cloneDeep(this.task);
+        if (e == 0 && !this.index) {
+          this.$store.state.tasks.push(_.cloneDeep(this.task))
+          this.index = this.$store.state.tasks.length - 1
+        } else {
+          this.$store.state.tasks[this.index] = _.cloneDeep(this.task)
         }
-        if (e < this.task.steps.length-1) {
+        if (e < this.task.steps.length - 1) {
           this.window = e + 1
           this.length = e + 2
         } else {
-          this.$store.state.tasks[this.index].accounts = this.$store.state.tasks[this.index].accounts.filter(e=>e.checked);
-          this.$store.state.tasks[this.index].uni = Date.now();
-          this.$store.state.tasks[this.index].draft = !1;
-          this.$store.state.tasks[this.index].enabled = !0;
+          this.$store.state.tasks[this.index].accounts = this.$store.state.tasks[this.index].accounts.filter(e => e.checked)
+          this.$store.state.tasks[this.index].uni = Date.now()
+          this.$store.state.tasks[this.index].enabled = !0
           this.$root.save()
           // this.$store.state.tasks.push(this.task)
           this.$router.push({ path: '/' })
         }
-        for (var i = this.window.length+1; i < this.task.steps.length; i++) {
+        for (var i = this.window.length + 1; i < this.task.steps.length; i++) {
           this.$set(this.task.steps, i, 0)
         }
       }
-      if(e == 1){
-        next();
-      }else{
-        next();
+      if (e == 1) {
+        next()
+      } else {
+        next()
       }
       console.log(this.task)
     },

@@ -27,7 +27,6 @@
       </v-btn>
     </v-toolbar>
 
-
     <v-navigation-drawer v-model="drawerRight" absolute overlap right temporary >
       <v-list dense>
         <v-list>
@@ -63,7 +62,6 @@
     <core-footer/>
   </v-app>
 
-
 </template>
 <script>
 import Drawer from './components/core/Drawer.vue'
@@ -82,8 +80,8 @@ export default {
     }
   }),
   methods: {
-    open(e){
-      window.open(e, '_blank');
+    open (e) {
+      window.open(e, '_blank')
     }
   },
   props: {
@@ -91,7 +89,7 @@ export default {
   },
   components: {
     'core-drawer': Drawer,
-    'core-footer': Footer,
+    'core-footer': Footer
   }
 }
 </script>
@@ -103,4 +101,3 @@ export default {
   vertical-align: unset;
 }
 </style>
-

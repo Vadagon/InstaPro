@@ -73,7 +73,7 @@
 //   mapMutations,
 //   mapState
 // } from 'vuex'
-import logo from "@/assets/logo.png"
+import logo from '@/assets/logo.png'
 export default {
   data: () => ({
     logo: logo,
@@ -117,14 +117,14 @@ export default {
     responsive: false
   }),
   computed: {
-    image(){
+    image () {
       var images = [
         'https://demos.creative-tim.com/vue-material-dashboard/img/sidebar-1.23832d31.jpg',
         'https://demos.creative-tim.com/vue-material-dashboard/img/sidebar-2.32103624.jpg',
         'https://demos.creative-tim.com/vue-material-dashboard/img/sidebar-3.3a54f533.jpg',
         'https://demos.creative-tim.com/vue-material-dashboard/img/sidebar-4.3b7e38ed.jpg'
       ]
-      return images[this.$root.randB(0, images.length-1)];
+      return images[this.$root.randB(0, images.length - 1)]
     },
     inputValue: {
       get () {

@@ -24,12 +24,12 @@
 export default {
   name: 'Comments',
   props: ['task'],
-  data() {
+  data () {
     return {
       nextComment: ''
     }
   },
-  created(){
+  created () {
     // console.log(this.$parent.$parent)
   }
 }

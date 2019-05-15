@@ -199,7 +199,8 @@ var a = {
 		});
 		if(stopApp) a.resetOuts();
 
-		a.que = filtered.sort(function(a, b){return a.timeStamp - b.timeStamp}).filter(e=>!e.running);
+		// a.que = filtered.sort(function(a, b){return a.timeStamp - b.timeStamp}).filter(e=>!e.running);
+		a.que = [];
 		console.log(tasks, a.que)
 	},
 	init: function(){

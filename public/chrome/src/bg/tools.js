@@ -96,6 +96,60 @@ a.tool = {
     }).fail(a.init.bind(!1))
 
   },
+  getLocation: function(e, cb){
+    a.tool.search(e.name, function(res){
+      if(!res && !res.places.length){
+        cb([])
+        return;
+      }
+      var collection = [];
+      var get = function(after, id){
+        if (typeof after != 'string') after = '';
+        var jsonvars = {
+          "id": id,
+          "first": 12
+        }
+        if (after != '') {
+            jsonvars.after = after;
+        }
+        var urljsonvars = JSON.stringify(jsonvars);
+        var url = 'https://www.instagram.com/graphql/query/?query_hash=1b84447a4d8b6d6d0426fefb34514485&variables=' + encodeURIComponent(urljsonvars);
+        if(!after){
+          url = 'https://www.instagram.com/explore/locations/'+res.places[0].place.location.pk+'/'+res.places[0].place.slug+'/?__a=1';
+        }
+        jax(url)
+        .fail(e=>{
+
+        })
+        .done(data=>{
+          if(!after){
+            if(data && data.graphql.location.edge_location_to_media.page_info.has_next_page && collection.length < e.count){
+              collection.push(...data.graphql.location.edge_location_to_media.edges.map(t=>t.node));
+              get(data.graphql.location.edge_location_to_media.page_info.end_cursor, data.graphql.location.id)
+            }else{
+              cb(collection);
+            }
+          }else{
+            if(data.status=="ok"){
+              collection.push(...data.data.location.edge_location_to_media.edges.map(t=>t.node))
+              if(data.data.location.edge_location_to_media.page_info.has_next_page && collection.length < e.count){
+                get(data.data.location.edge_location_to_media.page_info.end_cursor, id)
+              }else{
+                cb(collection);
+              }
+            }else{
+              cb(collection);
+            }
+            e.status=="ok"?cb(e.data.user.edge_web_feed_timeline.edges.map(t=>t.node)):cb(collection)
+          }
+        });
+        
+
+      }
+      get()
+      // jax('https://www.instagram.com/explore/locations/'+res.places[0].place.location.pk+'/'+res.places[0].place.location.name+'/?__a=1')
+    });
+  },
   getFeed: function(after, cb) {
     if (typeof after != 'string') after = '';
     var jsonvars = {
@@ -109,22 +163,55 @@ a.tool = {
     }
     var urljsonvars = JSON.stringify(jsonvars);
     var url = 'https://www.instagram.com/graphql/query/?query_hash=615767824d774172a86e99cbaca97512&variables=' + encodeURIComponent(urljsonvars);
-    jax(url).fail(e=>cb(!1)).done(e=>e.status=="ok"?cb(e.data.user.edge_web_feed_timeline.edges.map(t=>t.node)):cb(!1));
+    jax(url).fail(e=>cb(!1)).done(e=>e.status=="ok"?cb(e.data.user.edge_web_feed_timeline.edges.map(t=>t.node), e.data.user.edge_web_feed_timeline.page_info.end_cursor):cb(!1));
   },
-  // search: function(tag, cb){
-  //   jax('https://www.instagram.com/web/search/topsearch/?context=blended&query='+tag+'&rank_token=0.806776188138403&include_reel=true').done(function(e){
-  //     cb(catcher(function(){
-  //       console.log(e);
-  //       return e.places[0].place.location;
-  //     }))
-  //   }).fail(a.init.bind(!1))
-  // },
+  myFeed: function(e, cb){
+    console.log('myFeed')
+    var collected = [];
+    var load = (af)=>{
+      var goNext = false;
+      if(e.count>collected.length){
+        a.tool.getFeed(af, (response, after)=>{
+          if(response){
+            goNext = true;
+            collected.push(...response);
+            load(after);
+          }else{
+            cb(collected.slice(0, e.count))
+          }
+        })
+      }else{
+        cb(collected.slice(0, e.count))
+      }
+    }
+    load('');
+  },
+  search: function(tag, cb){
+    jax('https://www.instagram.com/web/search/topsearch/?context=blended&query='+tag+'&rank_token=0.806776188138403&include_reel=true').done(function(e){
+      cb(catcher(function(){
+        if(e.status == 'ok'){
+          return e;
+        }else{
+          return !1;
+        }
+      }))
+    }).fail(a.init.bind(!1))
+  },
   getUser: function(user, cb){
     jax('https://www.instagram.com/'+user.replace('@', '')+'/?__a=1').done((e)=>{
       catcher(()=>{
         return e.graphql.user;
       })?cb(e.graphql.user):_Fail(cb)
     }).fail(()=>{_Fail(cb)})
+  },
+  getUserPosts: function(data, cb){
+    a.tool.getUser(data.name, (response)=>{
+      if(response && response.edge_owner_to_timeline_media){
+        cb(response.edge_owner_to_timeline_media.edges.map(t=>t.node).slice(0, data.count));
+      }else{
+        cb([])
+      }
+    })
   },
   getFollowers: function(e, cb){
     var jsonvars = {

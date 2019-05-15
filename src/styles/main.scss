@@ -8,12 +8,18 @@ button.next-v2{
   margin-bottom: -18px;
 }
 img.active-profile{
-  border: 2px solid black;
+  // border: 2px solid black;
+  box-shadow: 0 0 5px 4px #d44dda;
 }
-
+.taskHead{
+  margin-top: 50px;
+  text-align: center;
+  text-decoration: underline;
+  font-style: italic;
+}
 .postCard{
   > div.selected{
-    box-shadow: 0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 #ee6292,0 1px 3px 0 #ee6292 !important;
+    box-shadow: 0 0px 0px 4px #ee6292 !important;
   }
   .postDetails{
     position: relative;
@@ -40,6 +46,27 @@ img.active-profile{
         cursor: pointer;
       }
     }
+  }
+}
+.descriptionTask{
+  background-color: #f5f5f5;
+}
+.finishedPost{
+  .v-image__image{
+    opacity: .5;
+  }
+  .postDetails::after{
+    content: "done";
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 100%;
+    text-align: center;
+    color: #00ff0c;
+    padding: 9px;
+    font-size: 500%;
+    line-height: 250%;
+    font-family: "Material Icons";
   }
 }
 .floatingButtons{
@@ -115,7 +142,8 @@ body .v-btn .v-btn__content .v-icon{
    text-overflow: ellipsis;
    display: -webkit-box;
    -webkit-box-orient: vertical;
-   -webkit-line-clamp: 3; /* number of lines to show */
+   -webkit-line-clamp: 1; /* number of lines to show */
+   cursor: pointer;
 }
 // .v-toolbar.v-toolbar--clipped.v-toolbar--fixed{
 //   background-color: white;

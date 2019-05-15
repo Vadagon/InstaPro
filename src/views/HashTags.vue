@@ -1,212 +1,312 @@
 <template>
 
   <v-container class="hashtags fill-height">
-    <v-layout align-center>
-      <v-item-group v-model="window" class="shrink mr-4" mandatory tag="v-flex">
-        <v-item v-for="n in length" :key="n">
-          <div slot-scope="{ active, toggle }">
-            <v-btn :input-value="active" icon @click="toggle">
-              <v-icon>fiber_manual_record</v-icon>
-            </v-btn>
-          </div>
-        </v-item>
-      </v-item-group>
 
-      <v-flex class="text-xs-center">
-        <v-window v-model="window" class="elevation-1" vertical>
+    <v-layout row wrap v-if="step==-1" justify-center>
+      <v-progress-circular :size="120" :width="7" color="purple" indeterminate></v-progress-circular>
+    </v-layout>
 
-          <v-window-item :key="0">
-            <v-card flat>
-              <v-card-text>
-                <v-layout align-center mb-3>
-                  <v-avatar color="purple lighten-5" class="mr-3">
-                    <v-icon>search</v-icon>
-                  </v-avatar>
-                  <strong class="title">Hashtags</strong>
-                </v-layout>
-                <v-layout align-left row wrap justify-left mb-4 pt-3>
-                  <v-combobox multiple
-                    v-model="task.filters" 
-                    label="Tags" 
-                    append-icon
-                    chips
-                    deletable-chips
-                    class="tag-input"
-                    @keyup.tab="updateTags"
-                    @paste="updateTags">
-		          </v-combobox>
-                </v-layout>
-
-              </v-card-text>
-            </v-card>
-          </v-window-item>
-
-          <v-window-item :key="1">
-            <v-card flat>
-              <v-card-text>
-                <v-layout align-center mb-3>
-                  <v-avatar color="purple lighten-5" class="mr-3">
-                    <v-icon>group_work</v-icon>
-                  </v-avatar>
-                  <strong class="title">Settings</strong>
-                  <v-spacer></v-spacer>
-                </v-layout>
-                <v-layout align-center justify-center mb-3 wrap>
-                	<v-flex xs8>
-                      <v-slider label="Limit" v-model="task.settings.amount" :max="100" :min="1"></v-slider>
-                    </v-flex>
-                    <v-flex style="text-align: left;" px-3 xs2>{{task.settings.amount}} latest posts</v-flex>
-                    <v-flex xs8>
-                      <v-slider label="Activate the task every" v-model="task.settings.frequency" :max="50" :min="0"></v-slider>
-                    </v-flex>
-                    <v-flex style="text-align: left;" px-3 xs2>{{task.settings.frequency?task.settings.frequency+' hours':'One time activation'}}</v-flex>
-                </v-layout>
-
-              </v-card-text>
-            </v-card>
-          </v-window-item>
-
-        </v-window>
-
-        <v-btn color="primary" class="next" @click="nextStep(window)" v-if="task.steps[window]!=2" :disabled="task.steps[window]==1">
-          <span v-if="task.steps[window]==0 && window<task.steps.length-1">continue</span>
-          <v-progress-circular indeterminate color="primary" :size="20" :width="2" v-if="task.steps[window]==1"></v-progress-circular>
-          <span v-if="window==task.steps.length-1">finish</span>
-        </v-btn>
-        <v-btn color="warning" class="next" @click="nextStep(window)" v-if="task.steps[window]==2">re continue</v-btn>
+    <v-layout align-center justify-center row fill-height v-if="step==0">
+      <v-flex md8 xs10 class="elevation-1 white" px-3 pt-3>
+        <v-layout align-center column mb-3>
+          <v-avatar :size="100" color="purple lighten-5" class="mr-3 mb-3">
+            <v-icon style="font-size: 66px;">search</v-icon>
+          </v-avatar>
+          <strong class="title">Enter Hashtags to Load</strong>
+        </v-layout>
+        <v-layout align-left column wrap justify-left mb-4 pt-3>
+          <v-combobox multiple v-model="task.filters" label="Hashtags" append-icon chips deletable-chips class="tag-input hashtag" @keyup.tab="updateTags" @paste="updateTags">
+          </v-combobox>
+        </v-layout>
+        <v-layout align-center justify-center wrap>
+          <v-flex>
+            <v-slider label="Limit" v-model="task.settings.amount" :max="task.filters.length*200" :min="1"></v-slider>
+          </v-flex>
+          <v-flex style="text-align: left;" pl-3 shrink>{{task.settings.amount}} latest posts ({{Math.round(task.settings.amount/task.filters.length)}} per hashtag)</v-flex>
+        </v-layout>
+        <v-layout align-center justify-center wrap>
+          <v-btn color="primary" class="next-v2" @click="step1()" :disabled="!task.filters.length">
+            <span>continue</span>
+          </v-btn>
+        </v-layout>
 
       </v-flex>
     </v-layout>
 
-    <br><br>
+      <!--      <v-btn-toggle v-model="task.actionTools">
+              <v-btn :value="'like'" flat>
+                <span>Like</span>
+                <v-icon>favorite</v-icon>
+              </v-btn>
+              <v-btn :value="'comment'" flat @click.stop="task.actionTools.includes('comment')?0:commentModal = true">
+                <span>Comment</span>
+                <v-icon>add_comment</v-icon>
+              </v-btn>
+              <v-btn :value="'follow'" flat>
+                <span>Follow</span>
+                <v-icon>person_add</v-icon>
+              </v-btn>
+            </v-btn-toggle>
+ -->
+
+    <v-layout align-start justify-start row fill-height wrap v-if="step > 0">
+      <v-flex shrink pl-2 mt-2 v-if="step==1">
+        <v-switch :label="'Select All ('+ task.posts.length+')'" v-model="selectAllAccModel" @change="selectAllAcc()"></v-switch>
+      </v-flex>
+      <v-flex grow></v-flex>
+      <v-flex shrink pl-2 class="floatingButtons">
+        <v-btn v-if="step==1" fab color="primary" @click="TaskModal = true;">
+          <v-icon color="white">play_arrow</v-icon>
+        </v-btn>
+        <v-btn v-if="step==2" fab color="primary" @click="BgTaskModal = true;">
+          <v-icon color="white">{{task.repeating?'settings':'repeat'}}</v-icon>
+        </v-btn>
+      </v-flex>
+      <v-flex sm12></v-flex>
+      <v-flex xs12 v-if="step==2 && !task.done">
+        <span>{{task.status?task.status:'Bot will start working on this task soon'}}</span>
+        <v-progress-linear :indeterminate="true"></v-progress-linear>
+      </v-flex>
+
+      <v-flex md4 lg2 xs6 v-for="x in task.posts" pa-2 class="postCard" :class="{'finishedPost':x.done}" v-if="!x.length">
+        <v-layout class="elevation-1 white" :class="{'selected': x.selected}" column >
+          <v-flex class="postDetails">
+            <v-img :src="x.thumbnail_src"></v-img>
+            <div class="hoverdetails" @click="step!=2?x.selected=!x.selected:0">
+              <v-layout align-start justify-start row fill-height>
+                <!-- <v-flex shrink class="overflow-hidden text-truncate text-no-wrap body-1 pl-1">jisoo_kim_250</v-flex> -->
+                <v-flex></v-flex>
+                <v-flex shrink>
+                  <v-checkbox shrink type="checkbox" v-model="x.selected" v-if="step==1"></v-checkbox>
+                </v-flex>
+              </v-layout>
+            </div>
+          </v-flex>
+          <v-flex pa-1>
+            <v-layout row>
+              <v-flex shrink>
+                <v-icon color="pink lighten-2" style="font-size: 18px;" class="mx-1">favorite_border</v-icon>
+                <span class="caption grey--text text--darken-2">{{x.edge_liked_by.count}}</span>
+              </v-flex>
+              <v-flex></v-flex>
+              <a v-bind:href="'https://www.instagram.com/p/'+x.shortcode" target="_blank" flex shrink>
+                <v-icon color="grey darken-4" @click="" style="font-size: 18px;" class="mx-1">open_in_new</v-icon>
+              </a>
+            </v-layout>
+          </v-flex>
+        </v-layout>
+      </v-flex>
+      <v-flex v-else xs12 class="display-1 taskHead">{{parsedDate(x)}}</v-flex>
+
+
+
+    </v-layout>
+
+
+
+    <v-dialog v-model="commentModal" scrollable max-width="300px">
+      <v-card>
+        <v-card-title>Create a list of Comments</v-card-title>
+        <v-divider></v-divider>
+        <v-card-text style="height: 300px;">
+          <l-comments :task="task" />
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-btn color="blue darken-1" flat @click="commentModal = false; task.comments.length?task.actionTools.splice(task.actionTools.indexOf('comment'), 1):0">Close</v-btn>
+          <v-btn color="blue darken-1" flat @click="commentModal = false">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="TaskModal" scrollable max-width="300px">
+      <v-card>
+        <v-card-title>Start a task</v-card-title>
+        <v-divider></v-divider>
+        <v-card-text style="height: 300px;">
+          <v-radio-group v-model="task.type">
+            <v-radio :label="'Like all'" :value="'like'"></v-radio>
+            <v-radio :label="'Follow all'" :value="'follow'"></v-radio>
+            <v-radio :label="'Comment all'" :value="'comment'"></v-radio>
+          </v-radio-group>
+          <l-comments :task="task" v-if="task.type=='comment'"/>
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-btn color="blue darken-1" flat @click="TaskModal = false;">Close</v-btn>
+          <v-flex> </v-flex>
+          <v-btn color="blue darken-1" flat @click="step2()">Start</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="BgTaskModal" scrollable max-width="600px">
+      <v-card>
+        <v-card-title>Create a repeating task</v-card-title>
+        <v-divider></v-divider>
+        <v-card-text>
+          <l-comments :task="task" v-if="task.type=='comment'"/>
+          <v-layout align-center justify-left my-3 wrap>
+            <v-flex xs10>
+              <v-slider :label="task.type+' '+task.settings.amount+' latest posts every'" v-model="task.settings.frequency" :max="50" :min="0"></v-slider>
+            </v-flex>
+            <v-flex style="text-align: left;" px-3 xs2>{{task.settings.frequency+' hours'}}</v-flex>
+          </v-layout>
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-btn color="blue darken-1" flat @click="BgTaskModal = false;">Close</v-btn>
+          <v-flex> </v-flex>
+          <v-btn color="blue darken-1" flat @click="createTask()" :disabled="!task.settings.frequency">{{task.repeating?'Save':'Create'}}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
   </v-container>
 </template>
 
-<!-- <HelloWorld title="Hey"/> -->
-
 <script>
-// @ is an alias to /src
 import Comments from '@/components/Comments.vue'
-// import HelloWorld from '@/components/HelloWorld.vue'
 export default {
   name: 'hashtags',
   data: () => ({
     length: 1,
+    step: 0,
+    commentModal: !1,
+    TaskModal: !1,
+    BgTaskModal: !1,
     window: 0,
     index: !1,
     selectAllAccModel: !0,
-    descs: {
-      like: 'Liking latest posts',
-      follow: 'Follow all',
-      unfollow: 'Unollow all',
-      comment: 'Comment latest posts',
-    },
     task: {
-  	  filters: [],
-      steps: [0, 0],
-      draft: !0,
+      repeating: false,
+      actionTools: ['like'],
+      filters: [],
+      draft: !1,
       followType: 'getFollowers',
       section: 'hashtags',
       username: '',
+      comments: [],
       user: {},
       accounts: [],
-      type: 'like',
-      comments: [],
+      posts: [],
       settings: {
-        amount: 100,
-        frequency: 2,
+        amount: 40,
+        frequency: 0,
         interval: 20
       },
-      description: 'Liking by hashtags',
-      enabled: false
+      type: 'like',
+      descs: {
+        like: 'Liking latest posts',
+        follow: 'Follow all',
+        unfollow: 'Unollow all',
+        comment: 'Comment latest posts'
+      },
+      enabled: !0
     }
   }),
   props: ['taskNum'],
-  mounted() {
+  watch: {
+    commentModal (newVal, oldVal) {
+      if (!newVal) {
+        if (!this.task.comments.length) { this.task.actionTools.splice(this.task.actionTools.indexOf('comment'), 1) }
+      }
+    }
+  },
+  mounted () {
     if (this.taskNum != undefined) {
-      this.task = this.$store.state.tasks[this.taskNum];
-      var num = this.task.steps.findIndex((e)=>{return !e});
-      num=num==-1?this.task.steps.length-1:num;
-      this.length = num+1;
-      this.window = num;  
-      this.index = this.taskNum;
+      this.task = this.$store.state.tasks[this.taskNum]
+      console.log(this.task.posts)
+      // console.log(this.task)
+      setInterval(()=>{
+        if(this.$store.state.tasks[this.taskNum].status != this.task.status)
+          this.task = this.$store.state.tasks[this.taskNum]
+      }, 2000);
+      this.step = 2;
+      // this.task.posts[0].done = !0;
     }
   },
   created () {
-    for (var i = 0; i < 10; i++) {
-      	this.task.accounts.push({
-			username: 'test',
-			checked: !1
-        })
-    }
+
   },
   computed: {
     data () {
       return this.$store.state
-    }
+    },
   },
   methods: {
-  	updateTags() {
+    parsedDate(e){
+      var string = new Date(e).getFullYear() + "-" + (new Date(e).getMonth() + 1) + "-" + new Date(e).getDate() + " " + new Date(e).getHours() + ":" + new Date(e).getMinutes() + ":" + new Date(e).getSeconds() ;
+      return string;
+    },
+    createTask () {
+      this.BgTaskModal = false;
+      if(this.task.repeating){
+        this.$store.state.tasks[this.taskNum] = _.cloneDeep(this.task)
+      }else{
+        this.task.repeating = true;
+        this.task.posts = [];
+        this.$store.state.tasks.push(_.cloneDeep(this.task))
+        this.taskNum = this.$store.state.tasks.length-1;
+        this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum])
+      }
+    },
+    updateTags () {
       this.$nextTick(() => {
-        this.task.filters.push(...this.search.split(","));
+        this.task.filters.push(...this.search.split(','))
         this.$nextTick(() => {
-          this.search = "";
-        });
-      });
+          this.search = ''
+        })
+      })
     },
     selectAllAcc () {
-      this.task.accounts.map((e) => {
-        e.checked = this.selectAllAccModel
+      this.task.posts.map((e) => {
+        e.selected = this.selectAllAccModel
         return e
       })
     },
-    nextStep (e) {
-      this.$set(this.task.steps, e, 1)
-      var next = () => {
-        this.$set(this.task.steps, e, 2)
-        if(e==0 && !this.index){
-          this.$store.state.tasks.push(_.cloneDeep(this.task));
-          this.index = this.$store.state.tasks.length-1;
-        }else{
-          this.$store.state.tasks[this.index] = _.cloneDeep(this.task);
-        }
-        if (e < this.task.steps.length-1) {
-          this.window = e + 1
-          this.length = e + 2
-        } else {
-          this.$store.state.tasks[this.index].uni = Date.now();
-          this.$store.state.tasks[this.index].draft = !1;
-          this.$store.state.tasks[this.index].enabled = !0;
-          this.$root.save()
-          // this.$store.state.tasks.push(this.task)
-          this.$router.push({ path: '/' })
-        }
-        for (var i = this.window.length+1; i < this.task.steps.length; i++) {
-          this.$set(this.task.steps, i, 0)
-        }
+    step1 () {
+      this.step = -1
+      var pHash = Math.round(this.task.settings.amount / this.task.filters.length)
+      var i = 0
+      var loadPosts = () => {
+        api.runtime.sendMessage({ why: 'tool', name: 'getHashtag', value: { name: this.task.filters[i], count: pHash } }, (response1) => {
+          if (response1) {
+            console.log(response1)
+            response1.forEach((e) => {
+              e.selected = true
+            })
+            this.task.posts.push(...response1)
+          }
+          if (this.task.filters.length > i + 1) {
+            i++
+            loadPosts()
+          } else {
+            this.step = 1
+          }
+        })
       }
-      if(e == 1){
-        // api.runtime.sendMessage({why: "tool", name: "getUser", value: this.task.username}, (response1) => {
-        //   console.log(response1);
-        //   if(response1){          
-        //     this.task.user = response1;
-        //     api.runtime.sendMessage({why: "tool", name: this.task.followType, value: this.task.user.id}, (response2) => {
-        //       if(response2){
-        //         this.task.accounts = response2;
-                next();
-        //       }else{
-        //         this.$set(this.task.steps, e, 0)
-        //       }
-        //     });
-        //   }else{
-        //     this.$set(this.task.steps, e, 0)
-        //     // this.$parent.noty.enabled = true;
-        //   }
-        // });
-      }else{
-        next();
-      }
-      console.log(this.task)
+      loadPosts()
+    },
+    step2 () {
+      // this.$set(this.task.steps, e, 1)
+      // this.index = this.$store.state.tasks.length-1;
+      // this.$store.state.tasks[this.index].uni = Date.now();
+      // this.$store.state.tasks[this.index].draft = !1;
+      // this.$store.state.tasks[this.index].enabled = !0;
+      // this.$root.save()
+      // this.$router.push({ path: '/' })
+      this.step = 2
+      this.TaskModal = false
+      this.task.posts = this.task.posts.filter(e => e.selected)
+      this.task.posts.forEach((e) => {
+        e.selected = false
+        e.liked = false
+      })
+      this.task.dateCreated = new Date();
+      this.task.settings.frequency = 0
+      this.task.repeating = false;
+      this.$store.state.tasks.push(_.cloneDeep(this.task))
     }
   },
   components: {
