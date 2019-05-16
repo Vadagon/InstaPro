@@ -37,13 +37,13 @@
             <v-switch label="enable" v-model="x.enabled" @change="save()"></v-switch>
           </v-card-actions>
         </v-card> -->
-      <v-flex xs12 pa-2 v-for="(x, index) in data.tasks">
+      <v-flex xs12 pa-2 v-for="(x, index) in $root.tasksQUE">
         <v-layout row align-space-around justify-start fill-height>
           <!-- <v-card-title primary-title> -->
-          <v-flex shrink px-2 pt-4 pr-3 font-weight-black headline v-if="index && x.enabled">
-            {{index}}.
+          <v-flex shrink px-2 pt-4 pr-3 font-weight-black headline v-if="!x.finished">
+            {{index+1}}.
           </v-flex>
-          <v-flex elevation-2 white>
+          <v-flex :class="{'elevation-2': !x.finished}" white>
             <v-layout row pa-3 py-3>
               <v-flex shrink>
                 <v-avatar :class="{'purple lighten-5':!x.finished, 'green lighten-2':x.finished}">
@@ -53,23 +53,24 @@
                   <!-- person_add_disabled -->
                 </v-avatar>
               </v-flex>
-              <v-flex @click="$router.push({ name: x.section, params: { taskNum: index } })" shrink headline text-truncate text-sm-left pt-3 mt-1 px-3 text-capitalize style="position: relative; cursor: pointer; min-width: 140px;">
+              <v-flex @click="$router.push({ name: x.section, params: { taskNum: x.id } })" shrink headline text-truncate text-sm-left pt-3 mt-1 px-3 text-capitalize style="position: relative; cursor: pointer; min-width: 140px;">
                 <span class="caption" style="position: absolute; top: 0;">{{x.descs[x.type]}}</span>
                 {{x.section}} {{x.username}}
               </v-flex>
-              <v-flex px-2 text-sm-left limitTo4 pb-2 descriptionTask @click="$router.push({ name: x.section, params: { taskNum: index } })">
+              <v-flex px-2 text-sm-left limitTo4 pb-2 descriptionTask @click="$router.push({ name: x.section, params: { taskNum: x.id } })">
                 <span v-for="span in x.accounts" v-if="span.checked">{{span.username}} </span>
                 <span v-for="span in x.filters">{{span}} </span>
                 <!-- #f4f #s4s #l4l #c4c #likeforlike #likeall #like4like #likes4likes #liking #instagood #tagblender #follow #followme #followback #followforfollow #follow4follow #followers #followher #follower #followhim #followbackteam #followall #comment #comments #commentback #comment4comment #commentbelow #shoutout #shoutouts #shoutoutback -->
               </v-flex>
               <v-flex shrink>
-                <v-btn icon @click="data.tasks.splice(index, 1)">
+                <v-btn icon @click="data.tasks.splice(x.id, 1); $root.save();">
                   <v-icon>close</v-icon>
                 </v-btn>
               </v-flex>
             </v-layout>
             <v-card-actions grow v-if="x.settings.frequency" class="pt-0">
-              <v-switch label="enabled" v-model="x.enabled"></v-switch>
+              <v-switch shrink label="enabled" v-model="data.tasks[x.id].enabled" @change="$root.save()" style="max-width: 204px;"></v-switch>
+              <span class="grey--text text--darken-2">{{x.status?x.status:'Bot will start working on this task soon'}}</span>
             </v-card-actions>
           </v-flex>
           <!-- <div class="headline">Liking posts of {{x.username}}'s followers</div> -->

@@ -1,7 +1,7 @@
 <template>
 
   <v-container class="target fill-height">
-    <v-layout align-center v-if="step==0">
+    <v-layout align-center v-if="step==0 && !task.dateCreated">
       <v-item-group v-model="window" class="shrink mr-4" mandatory tag="v-flex">
         <v-item v-for="n in length" :key="n">
           <div slot-scope="{ active, toggle }">
@@ -129,10 +129,15 @@
                 </v-layout> -->
                 <!-- <l-comments :task="task" v-if="task.type=='comment'" /> -->
                 <v-layout align-center justify-center wrap>
-                  <v-flex>
-                    <v-slider label="Limit" v-model="task.settings.amount" :max="task.accounts.length*10" :min="1"></v-slider>
+                  <v-flex shrink>
+                    <v-checkbox label="Follow only" v-model="onlyFollow" @change="onlyFollow?task.type='follow':task.type='like'"></v-checkbox>
                   </v-flex>
-                  <v-flex style="text-align: left;" pl-3 shrink>{{task.settings.amount}} latest posts ({{Math.round(task.settings.amount/task.accounts.length)}} per user)</v-flex>
+                  <v-flex sm12 />
+                  <v-flex sm8 mb-3>
+                    <v-slider label="Limit" v-if="!onlyFollow" v-model="task.settings.amount" :max="task.accounts.length*10" :min="1"></v-slider>
+                  </v-flex>
+                  <v-flex mb-3 style="text-align: left;" v-if="!onlyFollow" pl-3 shrink>{{task.settings.amount}} latest posts ({{Math.round(task.settings.amount/task.accounts.length)}} per user)</v-flex>
+                  <v-flex v-if="onlyFollow" sm12 mb-3> </v-flex>
                 </v-layout>
               </v-card-text>
             </v-card>
@@ -153,13 +158,24 @@
 
 
 
+    <v-layout align-center justify-center content-created row wrap white elevation-2 mx-5 pa-4 v-if="task.dateCreated && task.type=='follow'">
+      <v-flex xs4 md3 v-for="s in task.accounts" mb-2>
+        <v-layout align-left row wrap justify-left style="position: relative;">
+          <v-list-tile-avatar v-bind:class="{'done-profile': s.done}">
+            <img alt="profile" v-bind:src="s.profile_pic_url" v-bind:class="{'active-profile': s.checked}">
+          </v-list-tile-avatar>
+          <a v-bind:href="'https://www.instagram.com/'+s.username" target="_blank" class="body-2 mt-2 overflow-hidden" style="position: absolute; left: 55px; top: -14px; font-size: 12px !important; color: grey;">{{s.username}}</a>
+          <span class="body-2 mt-2 overflow-hidden" style="font-size: 14px!important; width: calc(100% - 80px); text-align: left; margin-top: 12px !important;">{{s.full_name}}</span>
+        </v-layout>
+      </v-flex>
+    </v-layout>
 
 
 
 
-    <v-layout align-start justify-start row fill-height wrap v-if="step > 0">
+    <v-layout align-start justify-start row fill-height wrap v-if="step > 0" >
       <v-flex shrink pl-2 mt-2 v-if="step==1">
-        <v-switch :label="'Select All ('+ task.posts.length+')'" v-model="selectAllAccModel" @change="selectAllAcc()"></v-switch>
+        <v-switch :label="'Select All ('+ task.posts.length+')'" v-model="selectAllPostModel" @change="selectAllPost()"></v-switch>
       </v-flex>
       <v-flex grow></v-flex>
       <v-flex shrink pl-2 class="floatingButtons">
@@ -171,7 +187,7 @@
         </v-btn>
       </v-flex>
       <v-flex sm12></v-flex>
-      <v-flex xs12 v-if="step==2 && !task.done">
+      <v-flex xs12 v-if="step==2 && !task.finished">
         <span>{{task.status?task.status:'Bot will start working on this task soon'}}</span>
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </v-flex>
@@ -204,7 +220,8 @@
           </v-flex>
         </v-layout>
       </v-flex>
-      <v-flex v-else xs12 class="display-1 taskHead">{{parsedDate(x)}}</v-flex>
+      <v-flex v-else xs12 class="display-1 taskHead">{{$root.parsedDate(x)}}</v-flex>
+
 
 
 
@@ -221,7 +238,6 @@
         <v-card-text style="height: 300px;">
           <v-radio-group v-model="task.type">
             <v-radio :label="'Like all'" :value="'like'"></v-radio>
-            <v-radio :label="'Follow all'" :value="'follow'"></v-radio>
             <v-radio :label="'Comment all'" :value="'comment'"></v-radio>
           </v-radio-group>
           <l-comments :task="task" v-if="task.type=='comment'"/>
@@ -274,6 +290,7 @@ export default {
   name: 'target',
   data: () => ({
     length: 1,
+    onlyFollow: false,
     window: 0,
     index: !1,
     selectAllAccModel: !0,
@@ -310,11 +327,12 @@ export default {
   mounted () {
     if (this.taskNum != undefined) {
       this.task = this.$store.state.tasks[this.taskNum]
-      setInterval(()=>{
+      this.$root.interval(()=>{
         if(this.$store.state.tasks[this.taskNum].status != this.task.status)
           this.task = this.$store.state.tasks[this.taskNum]
       }, 2000);
-      this.step = 2;
+      if(this.task.type!='follow')
+        this.step = 2;
     }
   },
   created () {
@@ -337,6 +355,7 @@ export default {
         this.taskNum = this.$store.state.tasks.length-1;
         this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum])
       }
+      this.$root.save()
     },
     descriptionChange () {
       this.task.description = this.descs[this.task.type]
@@ -384,10 +403,11 @@ export default {
         e.selected = false
         e.liked = false
       })
-      this.task.dateCreated = new Date();
+      this.task.dateCreated = new Date().getTime();
       this.task.settings.frequency = 0
       this.task.repeating = false;
       this.$store.state.tasks.push(_.cloneDeep(this.task))
+      this.$root.save()
     },
     nextStep (e) {
       this.$set(this.task.steps, e, 1)
@@ -402,7 +422,15 @@ export default {
           this.length = e + 2
           this.task.accounts = this.task.accounts.filter(e => e.checked)
         }else {
-          this.step1();
+          if(this.onlyFollow){
+            this.task.dateCreated = new Date().getTime();
+            this.task.settings.frequency = 0
+            this.task.repeating = false;
+            this.$store.state.tasks.push(_.cloneDeep(this.task))
+            this.$root.save()
+          }else{
+            this.step1();
+          }
           // this.$store.state.tasks[this.index].accounts = this.$store.state.tasks[this.index].accounts.filter(e => e.checked)
           // this.$store.state.tasks[this.index].uni = Date.now()
           // this.$store.state.tasks[this.index].draft = !1
@@ -432,7 +460,7 @@ export default {
                 }
                 response2.nodes && this.task.accounts.push(...response2.nodes)
                 if (response2.page_info.has_next_page && this.task.steps[2] == 3) {
-                  setTimeout(function () { loadQue() }, this.$root.randB(10, 100))
+                  this.$root.timeout(function () { loadQue() }, this.$root.randB(10, 100))
                 } else {
                   this.$set(this.task.steps, 2, 0)
                 }

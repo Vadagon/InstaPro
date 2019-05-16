@@ -69,7 +69,7 @@
         </v-btn>
       </v-flex>
       <v-flex sm12></v-flex>
-      <v-flex xs12 v-if="step==2 && !task.done">
+      <v-flex xs12 v-if="step==2 && !task.finished">
         <span>{{task.status?task.status:'Bot will start working on this task soon'}}</span>
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </v-flex>
@@ -77,7 +77,7 @@
       <v-flex md4 lg2 xs6 v-for="x in task.posts" pa-2 class="postCard" :class="{'finishedPost':x.done}" v-if="!x.length">
         <v-layout class="elevation-1 white" :class="{'selected': x.selected}" column >
           <v-flex class="postDetails">
-            <v-img :src="x.thumbnail_src"></v-img>
+            <v-img :src="x.display_url"></v-img>
             <div class="hoverdetails" @click="step!=2?x.selected=!x.selected:0">
               <v-layout align-start justify-start row fill-height>
                 <!-- <v-flex shrink class="overflow-hidden text-truncate text-no-wrap body-1 pl-1">jisoo_kim_250</v-flex> -->
@@ -102,7 +102,8 @@
           </v-flex>
         </v-layout>
       </v-flex>
-      <v-flex v-else xs12 class="display-1 taskHead">{{parsedDate(x)}}</v-flex>
+      <v-flex v-else xs12 class="display-1 taskHead">{{$root.parsedDate(x)}}</v-flex>
+
 
 
 
@@ -116,7 +117,6 @@
         <v-card-text style="height: 300px;">
           <v-radio-group v-model="task.type">
             <v-radio :label="'Like all'" :value="'like'"></v-radio>
-            <v-radio :label="'Follow all'" :value="'follow'"></v-radio>
             <v-radio :label="'Comment all'" :value="'comment'"></v-radio>
           </v-radio-group>
           <l-comments :task="task" v-if="task.type=='comment'"/>
@@ -210,7 +210,7 @@ export default {
   mounted () {
     if (this.taskNum != undefined) {
       this.task = this.$store.state.tasks[this.taskNum]
-      setInterval(()=>{
+      this.$root.interval(()=>{
         if(this.$store.state.tasks[this.taskNum].status != this.task.status)
           this.task = this.$store.state.tasks[this.taskNum]
       }, 2000);
@@ -237,6 +237,7 @@ export default {
         this.taskNum = this.$store.state.tasks.length-1;
         this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum])
       }
+      this.$root.save();
     },
   	descriptionChange () {
       this.task.description = this.descs[this.task.type]
@@ -272,10 +273,11 @@ export default {
         e.selected = false
         e.liked = false
       })
-      this.task.dateCreated = new Date();
+      this.task.dateCreated = new Date().getTime();
       this.task.settings.frequency = 0
       this.task.repeating = false;
       this.$store.state.tasks.push(_.cloneDeep(this.task))
+      this.$root.save()
     }
   },
   components: {

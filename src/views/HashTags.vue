@@ -63,7 +63,7 @@
         </v-btn>
       </v-flex>
       <v-flex sm12></v-flex>
-      <v-flex xs12 v-if="step==2 && !task.done">
+      <v-flex xs12 v-if="step==2 && !task.finished">
         <span>{{task.status?task.status:'Bot will start working on this task soon'}}</span>
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </v-flex>
@@ -96,7 +96,7 @@
           </v-flex>
         </v-layout>
       </v-flex>
-      <v-flex v-else xs12 class="display-1 taskHead">{{parsedDate(x)}}</v-flex>
+      <v-flex v-else xs12 class="display-1 taskHead">{{$root.parsedDate(x)}}</v-flex>
 
 
 
@@ -218,7 +218,7 @@ export default {
       this.task = this.$store.state.tasks[this.taskNum]
       console.log(this.task.posts)
       // console.log(this.task)
-      setInterval(()=>{
+      this.$root.interval(()=>{
         if(this.$store.state.tasks[this.taskNum].status != this.task.status)
           this.task = this.$store.state.tasks[this.taskNum]
       }, 2000);
@@ -235,10 +235,6 @@ export default {
     },
   },
   methods: {
-    parsedDate(e){
-      var string = new Date(e).getFullYear() + "-" + (new Date(e).getMonth() + 1) + "-" + new Date(e).getDate() + " " + new Date(e).getHours() + ":" + new Date(e).getMinutes() + ":" + new Date(e).getSeconds() ;
-      return string;
-    },
     createTask () {
       this.BgTaskModal = false;
       if(this.task.repeating){
@@ -250,6 +246,7 @@ export default {
         this.taskNum = this.$store.state.tasks.length-1;
         this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum])
       }
+      this.$root.save()
     },
     updateTags () {
       this.$nextTick(() => {
@@ -303,10 +300,11 @@ export default {
         e.selected = false
         e.liked = false
       })
-      this.task.dateCreated = new Date();
+      this.task.dateCreated = new Date().getTime();
       this.task.settings.frequency = 0
       this.task.repeating = false;
       this.$store.state.tasks.push(_.cloneDeep(this.task))
+      this.$root.save()
     }
   },
   components: {

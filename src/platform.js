@@ -80,6 +80,7 @@ if (process.env.NODE_ENV === 'development') {
   api.extension.onMessage.addListener(function (request, sender, sendResponse) {
     switch (request.why) {
       case 'getData':
+        data.userData.tasks.forEach((n, i)=>{n.id = i})
         setTimeout(() => { sendResponse(data) }, 700)
         break
       case 'getRSS':
@@ -97,8 +98,12 @@ if (process.env.NODE_ENV === 'development') {
           }
         }])
         break
+      case 'getQUE':
+        sendResponse(data.userData.tasks)
+      break;
       case 'setData':
         data.userData = request.value
+        data.userData.tasks.forEach((n, i)=>{n.id = i});
         update()
         setTimeout(() => { sendResponse(!0) }, 700)
         break

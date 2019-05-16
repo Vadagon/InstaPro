@@ -100,33 +100,47 @@ var a = {
 			}
 		},
 		feed: function(e, cb){
-			a.tool.getFeed('', function(data){
-				data = data.slice(0, e.settings.amount)
+			var t = function(data){
 				console.log(data)
+				var i = 0;
 				var Action = function(){
 					timer(function() {
+						data[i].done = true;
 						if(e.type=='like'){
-							a.tool.likeIt(data.shift())
+							a.tool.likeIt(data[i])
 						}
 						if(e.type=='comment'){
-							a.tool.commentIt(data.shift(), e.comments[random(0, e.comments.length-1)])
+							a.tool.commentIt(data[i], e.comments[random(0, e.comments.length-1)])
 						}
-						if(Math.random() > 0.67) data.shift();
-						data.length?Action():cb(e);
+						i++;
+						data.length>i?Action():setTimeout(()=>{cb(e)}, 1000);
 					}, random(6000, 14000));
 				}
 				Action();
-			})
+			}
+			if(e.repeating){
+				a.tool.myFeed({count: e.settings.amount}, function(data){
+					e.posts.push(new Date().getTime())
+					e.posts.push(...data)
+					t(e.posts.filter(e=>e).filter(e=>!e.done))
+				})
+			}else{
+				t(e.posts);
+			}
 		},
 		unfollow: function(e, cb){
+			var i = 0;
 			var Action = function(){
 				timer(function() {
-					a.tool.getUser(e.accounts.shift().username, (res)=>{
-						if((e.settings.dFollowedByMe && res.follows_viewer) || !e.settings.dFollowedByMe)
-							if((e.settings.dVerified && res.is_verified) || !e.settings.dVerified)
-								a.tool.unfollowIt(res)
+					a.tool.getUser(e.accounts[i].username, (res)=>{
+						if(res)
+							if((e.settings.dFollowedByMe && res.follows_viewer) || !e.settings.dFollowedByMe)
+								if((e.settings.dVerified && res.is_verified) || !e.settings.dVerified)
+									a.tool.unfollowIt(res)
 					})
-					e.accounts.length?Action():cb(e);
+					e.accounts[i].done = true;
+					i++;
+					e.accounts.length>i?Action():setTimeout(()=>{cb(e)}, 1000);
 				}, random(6000, 14000));
 			}
 			Action();
@@ -186,21 +200,30 @@ var a = {
 		}, 10*1000*60);
 	},
 	buildQue: function(tasks){
-		var filtered = tasks.filter(e=>!e.draft).filter(e=>e.enabled).filter(e=>!e.finished);
+		tasks.forEach((t, index)=>{t.id = index});
+		var filtered = tasks.filter(e=>e.enabled).filter(e=>!e.finished);
 		// tasks = tasks.filter(e=>e.section=='target');
 		var stopApp = true;
 		filtered.forEach((t, index)=>{
 			if(!t.settings.frequency || !t.timeStamp){
-				t.timeStamp=10;
+				t.timeStamp=new Date().getTime()-1;
+			}else if(t.settings.frequency && t.dateCreated){
+				t.timeStamp = t.dateCreated+t.settings.frequency*60*60*1000;
 			}
 			if(t.uni == a.isRunning){
 				stopApp = false;
 			}
+			var time = Math.round((t.timeStamp - new Date().getTime())/1000/60);
+			if(time > 140){
+			   time = Math.round((t.timeStamp - new Date().getTime())/1000/60/60) + ' hours';
+			}else{
+				time += ' minutes';
+			}
+			t.status = `Bot will start working on whis task in ~${time}`;
 		});
 		if(stopApp) a.resetOuts();
-
-		// a.que = filtered.sort(function(a, b){return a.timeStamp - b.timeStamp}).filter(e=>!e.running);
-		a.que = [];
+		a.que = filtered.sort(function(a, b){return a.timeStamp - b.timeStamp}).filter(e=>!e.running);
+		// a.que = [];
 		console.log(tasks, a.que)
 	},
 	init: function(){
@@ -239,11 +262,13 @@ var a = {
 			a.section[qq.section](qq, function(e){
 				console.log('finished')
 				e.running = false;
+				e.status = 'Working on it...'
 				a.isRunning = !1;
 				if(!e.settings.frequency) e.finished = true;
 				if(e.settings.frequency) e.timeStamp+=e.settings.frequency*60*60*1000;
 				a.init();
 			})
+			a.tries = 0;
 			// var r = random(0, (tasks.length-1));
 			// a.section[tasks[r].section](tasks[r]);
 		}else{

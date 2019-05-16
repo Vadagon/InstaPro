@@ -31,6 +31,8 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 	        break;
 	    case 'getRSS':
 	        sendResponse(a.rss);
+	    case 'getQUE':
+	        sendResponse([...data.userData.tasks.filter(e=>e.running), ...a.que, ...data.userData.tasks.filter(e=>{return !e.enabled || e.finished}).filter(e=>!e.running) ].sort(function(a, b){return b.timeStamp - a.timeStamp}));
 	        break;
 	    case 'setData':
 	    	data.userData = request.value;

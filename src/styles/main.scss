@@ -11,6 +11,24 @@ img.active-profile{
   // border: 2px solid black;
   box-shadow: 0 0 5px 4px #d44dda;
 }
+.relativePos{
+  position: relative !important;
+}
+.done-profile{
+  &::after{
+    background-color: rgba(0,0,0,.5);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    content: 'done';
+    font-family: "Material Icons";
+    color: white;
+    font-size: 27px;
+    border-radius: 50%;
+  }
+}
 .taskHead{
   margin-top: 50px;
   text-align: center;

@@ -24,7 +24,7 @@
                   </v-avatar>
                   <strong class="title">Accounts</strong>
                   <v-spacer v-for="c in 14"></v-spacer>
-                  <v-switch :label="'Select All ('+task.accounts.length+')'" v-model="selectAllAccModel" @change="selectAllAcc()"></v-switch>
+                  <v-switch v-if="!created" :label="'Select All ('+task.accounts.length+')'" v-model="selectAllAccModel" @change="selectAllAcc()"></v-switch>
                 </v-layout>
                 <v-layout align-left row wrap justify-left mb-4 pt-3>
                     <!-- <v-flex shrink>
@@ -32,8 +32,8 @@
                     </v-flex> -->
                     <v-flex xs4 md3 v-for="s in task.accounts" mb-2>
                       <v-layout align-left row wrap justify-left>
-                        <v-list-tile-avatar>
-                          <img @click="s.checked = !s.checked" alt="profile" v-bind:src="s.profile_pic_url" v-bind:class="{'active-profile': s.checked}">
+                        <v-list-tile-avatar v-bind:class="{'done-profile': s.done}">
+                          <img @click="s.checked = created?created:!s.checked" alt="profile" v-bind:src="s.profile_pic_url" v-bind:class="{'active-profile': s.checked}">
                         </v-list-tile-avatar>
                         <a v-bind:href="'https://www.instagram.com/'+s.username" target="_blank" class="body-2 mt-2 overflow-hidden" style="position: absolute; left: 55px; top: -14px; font-size: 12px !important; color: grey;">{{s.username}}</a>
                         <span class="body-2 mt-2 overflow-hidden" style="font-size: 14px!important; width: calc(100% - 80px); text-align: left; margin-top: 12px !important;">{{s.full_name}}</span>
@@ -90,7 +90,6 @@
 
 <script>
 // @ is an alias to /src
-import Comments from '@/components/Comments.vue'
 // import HelloWorld from '@/components/HelloWorld.vue'
 export default {
   name: 'target',
@@ -131,41 +130,45 @@ export default {
     if (this.taskNum != undefined) {
       this.created = true;
       this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum])
+      console.log(this.task)
       var num = this.task.steps.findIndex((e) => { return !e })
       num = num == -1 ? this.task.steps.length - 1 : num
-      this.length = num + 1
+      this.length = 1;
       this.window = num
       this.index = this.taskNum
     }
+    if(!this.created){
+      this.$set(this.task.steps, 0, 1)
+      var started = !1
+      api.runtime.sendMessage({ why: 'tool', name: 'getUser', value: this.$root.user.username }, (response1) => {
+        if (response1) {
+          this.task.user = response1
+          var after = ''
+          var loadQue = () => {
+            api.runtime.sendMessage({ why: 'tool', name: 'getFollowings', value: { id: this.task.user.id, after: after }, index: this.task.accounts.length }, (response2) => {
+              after = response2.page_info.end_cursor
+              if (!started) {
+                this.$set(this.task.steps, 0, 3)
+                started = !0
+              }
+              response2.nodes && this.task.accounts.push(...response2.nodes)
+              if (response2.page_info.has_next_page && this.task.steps[0] == 3) {
+                this.$root.timeout(function () { loadQue() }, this.$root.randB(10, 100))
+              } else {
+                this.$set(this.task.steps, 0, 0)
+              }
+            })
+          }
+          loadQue()
+        } else {
+          this.$set(this.task.steps, e, 0)
+          // this.$parent.noty.enabled = true;
+        }
+      })
+    }
   },
   created () {
-    this.$set(this.task.steps, 0, 1)
-    var started = !1
-    api.runtime.sendMessage({ why: 'tool', name: 'getUser', value: this.$root.user.username }, (response1) => {
-      if (response1) {
-        this.task.user = response1
-        var after = ''
-        var loadQue = () => {
-          api.runtime.sendMessage({ why: 'tool', name: 'getFollowings', value: { id: this.task.user.id, after: after }, index: this.task.accounts.length }, (response2) => {
-            after = response2.page_info.end_cursor
-            if (!started) {
-              this.$set(this.task.steps, 0, 3)
-              started = !0
-            }
-            response2.nodes && this.task.accounts.push(...response2.nodes)
-            if (response2.page_info.has_next_page && this.task.steps[0] == 3) {
-              setTimeout(function () { loadQue() }, this.$root.randB(10, 100))
-            } else {
-              this.$set(this.task.steps, 0, 0)
-            }
-          })
-        }
-        loadQue()
-      } else {
-        this.$set(this.task.steps, e, 0)
-        // this.$parent.noty.enabled = true;
-      }
-    })
+
   },
   computed: {
     data () {
@@ -194,7 +197,8 @@ export default {
           this.length = e + 2
         } else {
           this.$store.state.tasks[this.index].accounts = this.$store.state.tasks[this.index].accounts.filter(e => e.checked)
-          this.$store.state.tasks[this.index].uni = Date.now()
+          this.$store.state.tasks[this.index].uni = new Date().getTime()
+          this.$store.state.tasks[this.index].dateCreated = new Date().getTime()
           this.$store.state.tasks[this.index].enabled = !0
           this.$root.save()
           // this.$store.state.tasks.push(this.task)
@@ -210,9 +214,6 @@ export default {
         next()
       }
       console.log(this.task)
-    },
-    components: {
-      'l-comments': Comments
     }
   }
   // components: {

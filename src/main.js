@@ -41,40 +41,74 @@ window.app = new Vue({
     drawer: null,
     user: {},
     rss: {},
+    tasksQUE: [],
     rssSeen: 0,
     status: '',
     noty: {
       enabled: true,
       text: 'ssss'
     },
-    rss: []
+    rss: [],
+    intervals: [],
+    timeouts: []
   },
   created () {
     api.runtime.sendMessage({ why: 'getData' }, (e) => {
       this.$root.user = e.user
       this.$root.status = e.status
       this.$store.replaceState(e.userData)
-      this.$store.watch(
-        (state) => (state),
-        () => {
-          this.save()
-        },
-        { deep: true }
-      )
+      // this.$store.watch(
+      //   (state) => (state),
+      //   () => {
+      //     this.$root.save()
+      //   },
+      //   { deep: true }
+      // )
     })
-    setInterval(() => {
+    var getPerData = () => {
+      api.runtime.sendMessage({ why: 'getData' }, (e) => {
+        this.$store.state.tasks.forEach((t, n)=>{
+          if(t.running){
+            t.posts = e.userData.tasks[n].posts
+            t.accounts = e.userData.tasks[n].accounts
+          }
+          t.status = e.userData.tasks[n].status;
+        })
+      })
       api.runtime.sendMessage({ why: 'getRSS' }, (e) => {
         this.$root.rss = e
       })
-    }, 1400)
+      api.runtime.sendMessage({ why: 'getQUE' }, (e) => {
+        this.$root.tasksQUE = e
+      })
+    }
+    getPerData();
+    setInterval(getPerData, 1400)
+  },
+  watch:{
+    $route (to, from){
+      this.$root.intervals.forEach((e)=>{clearInterval(e)})
+      this.$root.timeouts.forEach((e)=>{clearTimeout(e)})
+    }
   },
   methods: {
     save () {
       console.log(this.$store.state)
       console.log(_.cloneDeep(this.$store.state))
-      api.runtime.sendMessage({ why: 'setData', value: _.cloneDeep(this.$store.state) }, function () {
-
+      setTimeout(function() {
+        api.runtime.sendMessage({ why: 'setData', value: _.cloneDeep(this.$store.state) }, function () {
+      }, 100);
       })
+    },
+    interval(fn, t){
+      this.$root.intervals.push(setInterval(fn, t))
+    },
+    timeout(fn, t){
+      this.$root.timeouts.push(setTimeout(fn, t))
+    },
+    parsedDate(e){
+      var string = new Date(e).getFullYear() + "-" + (new Date(e).getMonth() + 1) + "-" + new Date(e).getDate() + " " + new Date(e).getHours() + ":" + new Date(e).getMinutes() + ":" + new Date(e).getSeconds() 
+      return string;
     },
     randB (e1, e2) {
       return Math.floor(Math.random() * (e2 - e1 + 1) + e1)
