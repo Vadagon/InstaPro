@@ -7,6 +7,14 @@ var a = {
 	sleepTime: 0,
 	switchTask: 0,
 	tries: 0,
+	createI: function(data){
+		var i = 0;
+		data.forEach((t,n)=>{
+			if(t.done)
+				i = n;
+		})
+		return i;
+	},
 	readyUp: function(){
 		console.log('readyUp');
 		$.get('https://www.instagram.com')
@@ -46,7 +54,7 @@ var a = {
 				
 				data.userData.tasks.forEach((t)=>{
 					if(!t.settings.frequency && t.running){
-						t.finished = true;
+						t.finished = false;
 						t.running = false;
 					} 
 					t.running = !1
@@ -57,52 +65,84 @@ var a = {
 	},
 	section: {
 		target: function(e, cb, second){
-			if(!e.collectedPosts){
-				e.collectedPosts = [];	
-			}
-			console.log(e.accounts, e.collectedPosts)
-			if(!second){
-				if(e.accounts.length != e.collectedPosts.length){
-					e.collectedPosts = [];
+			if(e.repeating){
+				if(!e.posts){
+					e.posts = [];	
 				}
-				var i = 0;
-				var Action = function(){
-					timer(function() {
-						a.tool.getUser(e.accounts[i].username, function(res){
-							res&&e.type!='follow'&&e.collectedPosts.push(...res.edge_owner_to_timeline_media.edges.slice(0, e.settings.amount).map(e=>e.node))
-							res&&e.type=='follow'&&a.tool.followIt(e.accounts[i])
-							update();
+				if(!second){
+					if(e.accounts.length != e.posts.length){
+						e.posts = [];
+					}
+					var i = a.createI(e.accounts);
+					var Action = function(){
+						timer(function() {
+							e.accounts[i] = true;
+							a.tool.getUser(e.accounts[i].username, function(res){
+								res&&e.type!='follow'&&e.posts.push(...res.edge_owner_to_timeline_media.edges.slice(0, e.settings.amount).map(e=>e.node))
+								res&&e.type=='follow'&&a.tool.followIt(e.accounts[i])
+								update();
+								i++;
+								e.accounts.length>i?Action():a.section.target(e, cb, true);
+							})
+						}, random(6000, 14000));
+					}
+					Action();
+				}else if(e.type!='follow'){
+					var i = a.createI(e.posts);
+					var Action = function(){
+						timer(function() {
+							e.posts[i].done = true;
+							if(e.type=='like'){
+								a.tool.likeIt(e.posts[i])
+							}
+							if(e.type=='comment'){
+								a.tool.commentIt(e.posts[i], e.comments[random(0, e.comments.length-1)])
+							}
 							i++;
-							e.accounts.length>i?Action():a.section.target(e, cb, true);
-						})
-					}, random(6000, 14000));
+							e.posts.length>i?Action():cb(e);
+						}, random(6000, 14000));
+					}
+					Action();
+				}else{
+					console.log('target finished')
+					e.finished = !0;
+					cb(e)
 				}
-				Action();
-			}else if(e.type!='follow'){
-				var Action = function(){
-					console.log(e)
-					timer(function() {
-						if(e.type=='like'){
-							a.tool.likeIt(e.collectedPosts.shift())
-						}
-						if(e.type=='comment'){
-							a.tool.commentIt(e.collectedPosts.shift(), e.comments[random(0, e.comments.length-1)])
-						}
-						if(Math.random() > 0.67) e.collectedPosts.shift();
-						e.collectedPosts.length?Action():cb(e);
-					}, random(6000, 14000));
-				}
-				Action();
 			}else{
-				console.log('target finished')
-				e.finished = !0;
-				cb(e)
+				if(e.posts.length){
+					var i = a.createI(e.posts);
+					var Action = function(){
+						timer(function() {
+							e.posts[i].done = true;
+							if(e.type=='like'){
+								a.tool.likeIt(e.posts[i])
+							}
+							if(e.type=='comment'){
+								a.tool.commentIt(e.posts[i], e.comments[random(0, e.comments.length-1)])
+							}
+							i++;
+							e.posts.length>i?Action():cb(e);
+						}, random(6000, 14000));
+					}
+					Action();
+				}else{
+					var i = a.createI(e.accounts);
+					var Action = function(){
+						timer(function() {
+							e.accounts[i].done = true;
+							a.tool.followIt(e.accounts[i])
+							i++;
+							e.accounts.length>i?Action():cb(e);
+						}, random(6000, 14000));
+					}
+					Action();
+				}
 			}
 		},
 		feed: function(e, cb){
 			var t = function(data){
 				console.log(data)
-				var i = 0;
+				var i = a.createI(data);
 				var Action = function(){
 					timer(function() {
 						data[i].done = true;
@@ -113,7 +153,7 @@ var a = {
 							a.tool.commentIt(data[i], e.comments[random(0, e.comments.length-1)])
 						}
 						i++;
-						data.length>i?Action():setTimeout(()=>{cb(e)}, 1000);
+						data.length>i?Action():cb(e);
 					}, random(6000, 14000));
 				}
 				Action();
@@ -129,7 +169,7 @@ var a = {
 			}
 		},
 		unfollow: function(e, cb){
-			var i = 0;
+			var i = a.createI(e.accounts);
 			var Action = function(){
 				timer(function() {
 					a.tool.getUser(e.accounts[i].username, (res)=>{
@@ -140,7 +180,7 @@ var a = {
 					})
 					e.accounts[i].done = true;
 					i++;
-					e.accounts.length>i?Action():setTimeout(()=>{cb(e)}, 1000);
+					e.accounts.length>i?Action():cb(e);
 				}, random(6000, 14000));
 			}
 			Action();
@@ -152,31 +192,56 @@ var a = {
 			a.section.locTag(e, cb);
 		},
 		locTag: function(e, cb){
-			var filter = e.filters[random(0, e.filters.length-1)]
-			a.tool['getRecent'+e.section.charAt(0).toUpperCase() + e.section.slice(1)](filter, function(data){
-				data = data.slice(0, e.settings.amount)
-				console.log(data)
+			if(e.repeating){
+				var filter = e.filters[random(0, e.filters.length-1)]
+				a.tool['getRecent'+e.section.charAt(0).toUpperCase() + e.section.slice(1)](filter, function(data){
+					data = data.slice(0, e.settings.amount)
+					console.log(data)
+					var Action = function(){
+						timer(function() {
+							if(e.type=='like'){
+								a.tool.likeIt(data.shift())
+							}
+							if(e.type=='comment'){
+								a.tool.commentIt(data.shift(), e.comments[random(0, e.comments.length-1)])
+							}
+							if(e.type=='follow'){
+								a.tool.getPost(data.shift().shortcode, (res1)=>{
+									a.tool.getUser(res1.owner.username, function(res2){
+										a.tool.followIt(res2)
+									});
+								})
+							}
+							if(Math.random() > 0.67) data.shift();
+							data.length?Action():cb(e);
+						}, random(6000, 14000));
+					}
+					Action();
+				})
+			}else{
+				var i = a.createI(e.posts);
 				var Action = function(){
 					timer(function() {
 						if(e.type=='like'){
-							a.tool.likeIt(data.shift())
+							a.tool.likeIt(e.posts[i])
 						}
 						if(e.type=='comment'){
-							a.tool.commentIt(data.shift(), e.comments[random(0, e.comments.length-1)])
+							a.tool.commentIt(e.posts[i], e.comments[random(0, e.comments.length-1)])
 						}
 						if(e.type=='follow'){
-							a.tool.getPost(data.shift().shortcode, (res1)=>{
+							a.tool.getPost(e.posts[i].shortcode, (res1)=>{
 								a.tool.getUser(res1.owner.username, function(res2){
 									a.tool.followIt(res2)
 								});
 							})
 						}
-						if(Math.random() > 0.67) data.shift();
-						data.length?Action():cb(e);
+						e.posts[i].done = true;
+						i++;
+						e.posts.length>i?Action():cb(e);
 					}, random(6000, 14000));
 				}
 				Action();
-			})
+			}
 		}
 	},
 	resetOuts: function(e){
@@ -188,7 +253,7 @@ var a = {
 		a.isRunning = !1
 		data.userData.tasks.forEach((t)=>{
 			if(!t.settings.frequency && t.running){
-				t.finished = true;
+				t.finished = false;
 				t.running = false;
 			} 
 			t.running = !1
@@ -200,11 +265,18 @@ var a = {
 		}, 10*1000*60);
 	},
 	buildQue: function(tasks){
+		tasks.sort(function(a, b){
+			return a.timeStamp - b.timeStamp
+		}).sort(function(a, b) {
+	        return (a.enabled === b.enabled)? 0 : a.enabled? -1 : 1;
+	    }).sort(function(a, b) {
+	        return (!a.finished === !b.finished)? 0 : !a.finished? -1 : 1;
+	    })
 		tasks.forEach((t, index)=>{t.id = index});
-		var filtered = tasks.filter(e=>e.enabled).filter(e=>!e.finished);
+		// var filtered = tasks.filter(e=>e.enabled).filter(e=>!e.finished);
 		// tasks = tasks.filter(e=>e.section=='target');
 		var stopApp = true;
-		filtered.forEach((t, index)=>{
+		tasks.forEach((t, index)=>{
 			if(!t.settings.frequency || !t.timeStamp){
 				t.timeStamp=new Date().getTime()-1;
 			}else if(t.settings.frequency && t.dateCreated){
@@ -215,16 +287,21 @@ var a = {
 			}
 			var time = Math.round((t.timeStamp - new Date().getTime())/1000/60);
 			if(time > 140){
-			   time = Math.round((t.timeStamp - new Date().getTime())/1000/60/60) + ' hours';
+			   time = 'in ~'+Math.round((t.timeStamp - new Date().getTime())/1000/60/60) + ' hours';
+			}else if(time > 1){
+				time = 'in ~'+time+' minutes';
 			}else{
-				time += ' minutes';
+				time = 'soon'
 			}
-			t.status = `Bot will start working on whis task in ~${time}`;
+			t.status = `Bot will start working on this task ${time}.`;
+			if(!t.enabled) t.status = `Task is disabled`;
+			if(t.finished) t.status = `Task is completed`;
 		});
 		if(stopApp) a.resetOuts();
-		a.que = filtered.sort(function(a, b){return a.timeStamp - b.timeStamp}).filter(e=>!e.running);
-		// a.que = [];
-		console.log(tasks, a.que)
+		// data.userData.tasks = filtered.sort(function(a, b){return a.timeStamp - b.timeStamp});
+		// data.userData.tasks = [];
+		console.log(tasks)
+		return tasks;
 	},
 	init: function(){
 		console.log('init')
@@ -254,19 +331,21 @@ var a = {
 		// //   // })
 		// // })
 
-		a.buildQue(data.userData.tasks);
-		if(a.que.length && !!data.user.csrf_token && !a.isRunning && a.que[0].timeStamp<=Date.now()){
-			var qq = a.que.shift();
-			qq.running = true;
-			a.isRunning = qq.uni;
-			a.section[qq.section](qq, function(e){
+		data.userData.tasks = a.buildQue(data.userData.tasks);
+		if(data.userData.tasks.length && !!data.user.csrf_token && !a.isRunning && data.userData.tasks[0].timeStamp<=Date.now() && !data.userData.tasks[0].finished){
+			data.userData.tasks[0].running = true;
+			data.userData.tasks[0].status = 'Working on it...'
+			a.isRunning = data.userData.tasks[0].uni;
+			update();
+			a.section[data.userData.tasks[0].section](data.userData.tasks[0], function(e){
 				console.log('finished')
 				e.running = false;
-				e.status = 'Working on it...'
 				a.isRunning = !1;
 				if(!e.settings.frequency) e.finished = true;
 				if(e.settings.frequency) e.timeStamp+=e.settings.frequency*60*60*1000;
-				a.init();
+				setTimeout(function() {
+					a.init();
+				}, 1000);
 			})
 			a.tries = 0;
 			// var r = random(0, (tasks.length-1));

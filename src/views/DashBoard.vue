@@ -37,7 +37,7 @@
             <v-switch label="enable" v-model="x.enabled" @change="save()"></v-switch>
           </v-card-actions>
         </v-card> -->
-      <v-flex xs12 pa-2 v-for="(x, index) in $root.tasksQUE">
+      <v-flex xs12 pa-2 v-for="(x, index) in data.tasks">
         <v-layout row align-space-around justify-start fill-height>
           <!-- <v-card-title primary-title> -->
           <v-flex shrink px-2 pt-4 pr-3 font-weight-black headline v-if="!x.finished">

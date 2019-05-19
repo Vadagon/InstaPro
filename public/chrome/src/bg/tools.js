@@ -88,6 +88,61 @@ a.tool = {
       }))
     }).fail(a.init.bind(!1))
   },
+  getHashtag: function(e, cb){
+    a.tool.search(e.name, function(res){
+      if(!res && !res.hashtags.length){
+        cb([])
+        return;
+      }
+      var collection = [];
+      var get = function(after, id){
+        if (typeof after != 'string') after = '';
+        var jsonvars = {
+          "tag_name": res.hashtags[0].hashtag.name,
+          "id": id,
+          "first": 12
+        }
+        if (after != '') {
+            jsonvars.after = after;
+        }
+        var urljsonvars = JSON.stringify(jsonvars);
+        var url = 'https://www.instagram.com/graphql/query/?query_hash=f92f56d47dc7a55b606908374b43a314&variables=' + encodeURIComponent(urljsonvars);
+        if(!after){
+          url = 'https://www.instagram.com/explore/tags/'+res.hashtags[0].hashtag.name+'/?__a=1';
+        }
+        jax(url)
+        .fail(e=>{
+          cb(collection.slice(0, e.count));
+        })
+        .done(data=>{
+          if(!after){
+            if(data && data.graphql.hashtag.edge_hashtag_to_media.page_info.has_next_page && collection.length < e.count){
+              collection.push(...data.graphql.hashtag.edge_hashtag_to_media.edges.map(t=>t.node));
+              get(data.graphql.hashtag.edge_hashtag_to_media.page_info.end_cursor, data.graphql.hashtag.id)
+            }else{
+              cb(collection.slice(0, e.count));
+            }
+          }else{
+            if(data.status=="ok"){
+              collection.push(...data.data.hashtag.edge_hashtag_to_media.edges.map(t=>t.node))
+              if(data.data.hashtag.edge_hashtag_to_media.page_info.has_next_page && collection.length < e.count){
+                get(data.data.hashtag.edge_hashtag_to_media.page_info.end_cursor, id)
+              }else{
+                cb(collection.slice(0, e.count));
+              }
+            }else{
+              cb(collection.slice(0, e.count));
+            }
+            // e.status=="ok"?cb(e.data.user.edge_web_feed_timeline.edges.map(t=>t.node)):cb(collection)
+          }
+        });
+        
+
+      }
+      get()
+      // jax('https://www.instagram.com/explore/locations/'+res.places[0].place.location.pk+'/'+res.places[0].place.location.name+'/?__a=1')
+    });
+  },
   getRecentLocations: function(tag, cb) {
     jax('https://www.instagram.com/explore/tags/'+tag+'/?__a=1').done(function(e){
       cb(catcher(function(){
@@ -119,7 +174,7 @@ a.tool = {
         }
         jax(url)
         .fail(e=>{
-
+          cb(collection.slice(0, e.count));
         })
         .done(data=>{
           if(!after){
@@ -127,7 +182,7 @@ a.tool = {
               collection.push(...data.graphql.location.edge_location_to_media.edges.map(t=>t.node));
               get(data.graphql.location.edge_location_to_media.page_info.end_cursor, data.graphql.location.id)
             }else{
-              cb(collection);
+              cb(collection.slice(0, e.count));
             }
           }else{
             if(data.status=="ok"){
@@ -135,12 +190,12 @@ a.tool = {
               if(data.data.location.edge_location_to_media.page_info.has_next_page && collection.length < e.count){
                 get(data.data.location.edge_location_to_media.page_info.end_cursor, id)
               }else{
-                cb(collection);
+                cb(collection.slice(0, e.count));
               }
             }else{
-              cb(collection);
+              cb(collection.slice(0, e.count));
             }
-            e.status=="ok"?cb(e.data.user.edge_web_feed_timeline.edges.map(t=>t.node)):cb(collection)
+            // e.status=="ok"?cb(e.data.user.edge_web_feed_timeline.edges.map(t=>t.node)):cb(collection)
           }
         });
         

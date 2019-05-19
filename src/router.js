@@ -49,6 +49,12 @@ export default new Router({
       name: 'unfollow',
       component: () => import('./views/UnFollow.vue'),
       props: true
+    },
+    {
+      path: '/plans',
+      name: 'plans',
+      component: () => import('./views/Plans.vue'),
+      props: true
     }
   ]
 })

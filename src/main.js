@@ -53,33 +53,38 @@ window.app = new Vue({
     timeouts: []
   },
   created () {
-    api.runtime.sendMessage({ why: 'getData' }, (e) => {
-      this.$root.user = e.user
-      this.$root.status = e.status
-      this.$store.replaceState(e.userData)
-      // this.$store.watch(
-      //   (state) => (state),
-      //   () => {
-      //     this.$root.save()
-      //   },
-      //   { deep: true }
-      // )
-    })
+    var getGloData = ()=>{
+      api.runtime.sendMessage({ why: 'getData' }, (e) => {
+        this.$root.user = e.user
+        this.$root.status = e.status
+        this.$store.replaceState(e.userData)
+
+        // this.$store.watch(
+        //   (state) => (state),
+        //   () => {
+        //     this.$root.save()
+        //   },
+        //   { deep: true }
+        // )
+      })
+    }
+    getGloData();
+    setInterval(getGloData, 5000)
     var getPerData = () => {
       api.runtime.sendMessage({ why: 'getData' }, (e) => {
-        this.$store.state.tasks.forEach((t, n)=>{
-          if(t.running){
-            t.posts = e.userData.tasks[n].posts
-            t.accounts = e.userData.tasks[n].accounts
-          }
-          t.status = e.userData.tasks[n].status;
+        this.$store.state.tasks.forEach((t1, n1)=>{
+          e.userData.tasks.forEach((t2, n2)=>{
+            if(t1.uni == t2.uni){
+              var dump = t1.settings;
+              t1 = t2;
+              t1.settings = dump;
+            }
+          });
+        
         })
       })
       api.runtime.sendMessage({ why: 'getRSS' }, (e) => {
         this.$root.rss = e
-      })
-      api.runtime.sendMessage({ why: 'getQUE' }, (e) => {
-        this.$root.tasksQUE = e
       })
     }
     getPerData();
@@ -95,10 +100,9 @@ window.app = new Vue({
     save () {
       console.log(this.$store.state)
       console.log(_.cloneDeep(this.$store.state))
-      setTimeout(function() {
-        api.runtime.sendMessage({ why: 'setData', value: _.cloneDeep(this.$store.state) }, function () {
+      setTimeout(()=>{
+        api.runtime.sendMessage({ why: 'setData', value: _.cloneDeep(this.$store.state) })
       }, 100);
-      })
     },
     interval(fn, t){
       this.$root.intervals.push(setInterval(fn, t))

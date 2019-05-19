@@ -50,13 +50,13 @@
           />
         </v-list-tile>
         <v-list-tile
-          disabled
           active-class="primary"
           class="v-list-item v-list__tile--buy"
-          to="/upgrade"
+          to="/plans"
         >
+          <span>Free Trial expires in 3 days</span>
           <v-list-tile-action>
-            <v-icon color="white">dashboard</v-icon>
+            <v-icon color="white">payment</v-icon>
           </v-list-tile-action>
           <v-list-tile-title class="font-weight-light">
             Upgrade To PRO

@@ -92,7 +92,7 @@
             <v-layout row>
               <v-flex shrink>
                 <v-icon color="pink lighten-2" style="font-size: 18px;" class="mx-1">favorite_border</v-icon>
-                <span class="caption grey--text text--darken-2">{{x.edge_liked_by.count}}</span>
+                <span class="caption grey--text text--darken-2">{{x.edge_media_preview_like.count}}</span>
               </v-flex>
               <v-flex></v-flex>
               <a v-bind:href="'https://www.instagram.com/p/'+x.shortcode" target="_blank" flex shrink>
@@ -178,6 +178,8 @@ export default {
     TaskModal: !1,
     BgTaskModal: !1,
     task: {
+      uni: new Date().getTime(),
+      repeating: false,
       steps: [0],
       draft: !0,
       followType: 'getFollowers',
@@ -210,11 +212,10 @@ export default {
   mounted () {
     if (this.taskNum != undefined) {
       this.task = this.$store.state.tasks[this.taskNum]
-      this.$root.interval(()=>{
-        if(this.$store.state.tasks[this.taskNum].status != this.task.status)
-          this.task = this.$store.state.tasks[this.taskNum]
-      }, 2000);
       this.step = 2;
+      this.$root.interval(()=>{
+        this.task = this.$store.state.tasks[this.taskNum]
+      }, 2000);
     }
   },
   created () {

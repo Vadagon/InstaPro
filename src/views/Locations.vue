@@ -181,6 +181,7 @@ export default {
     index: !1,
     selectAllAccModel: !0,
     task: {
+      uni: new Date().getTime(),
       repeating: false,
       actionTools: ['like'],
   	  filters: [],
@@ -219,8 +220,7 @@ export default {
     if (this.taskNum != undefined) {
       this.task = this.$store.state.tasks[this.taskNum]
       this.$root.interval(()=>{
-        if(this.$store.state.tasks[this.taskNum].status != this.task.status)
-          this.task = this.$store.state.tasks[this.taskNum]
+        this.task = this.$store.state.tasks[this.taskNum]
       }, 2000);
       this.step = 2;
       // this.task.posts[0].done = !0;

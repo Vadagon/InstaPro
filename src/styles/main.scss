@@ -1,6 +1,22 @@
 .none{
   display: none;
 }
+
+.v-list__tile--buy{
+  position: relative;
+  > a > span{
+    position: absolute;
+    top: -25px;
+    color: white;
+    font-weight: lighter;
+    font-family: monospace;
+    font-size: 12px;
+    text-align: center;
+    margin-left: -15px;
+    width: 100%;
+  }
+}
+
 button.next{
   margin-top: -18px;
 }
@@ -316,4 +332,76 @@ main.v-content{
 
 .fade-enter, .fade-leave-active {
   opacity: 0
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.plans{
+  .price{
+    color: #c23346;
+  }
+  .yes{
+    color: #63a378;
+  }
+  .no{
+    color: #c23346;
+  }
+  .small-title{
+    font-size: 10px;
+  }
+  .v-card.theme--dark{
+    margin-right: -0px;
+    z-index: 2;
+    background-color: #370042 !important;
+  }
+  .v-card{    
+    border-radius: 10px;
+    padding-bottom: 20px;
+  }
+  button{
+    background-color: #F48FB1 !important;
+  }
+  .custom-btn{
+    background-color: #d1313d !important;
+    color: white;
+    font-weight: bold;
+  }
+  .v-card__title{
+    padding-bottom:0px;
+  }
+  .custom-box{
+    padding-top:30px !important; 
+  }
+  .center-box{
+     box-shadow: 0 0 0 10px #370042;
+  }
+  .third-box{
+     padding-left:0px !important;
+  }
 }

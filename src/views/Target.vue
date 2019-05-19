@@ -299,6 +299,8 @@ export default {
     TaskModal: !1,
     BgTaskModal: !1,
     task: {
+      uni: new Date().getTime(),
+      repeating: false,
       steps: [0, 0, 0, 0],
       draft: !0,
       followType: 'getFollowers',
@@ -328,8 +330,7 @@ export default {
     if (this.taskNum != undefined) {
       this.task = this.$store.state.tasks[this.taskNum]
       this.$root.interval(()=>{
-        if(this.$store.state.tasks[this.taskNum].status != this.task.status)
-          this.task = this.$store.state.tasks[this.taskNum]
+        this.task = this.$store.state.tasks[this.taskNum]
       }, 2000);
       if(this.task.type!='follow')
         this.step = 2;

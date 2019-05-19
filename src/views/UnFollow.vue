@@ -136,6 +136,9 @@ export default {
       this.length = 1;
       this.window = num
       this.index = this.taskNum
+      this.$root.interval(()=>{
+        this.task = this.$store.state.tasks[this.taskNum]
+      }, 2000);
     }
     if(!this.created){
       this.$set(this.task.steps, 0, 1)
