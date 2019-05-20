@@ -44,8 +44,8 @@
 
             <v-list-tile-avatar v-if="!!x.value" :class="{'notAvatarUser':x.type.includes('follow')}">
               <img v-if="x.value.display_resources" :src="x.value.display_resources[0].src">
-              <img v-if="x.value.profile_pic_url" :src="x.value.profile_pic_url">
-              <img v-if="x.value.display_url" :src="x.value.display_url">
+              <img v-else-if="x.value.profile_pic_url" :src="x.value.profile_pic_url">
+              <img v-else-if="x.value.display_url" :src="x.value.display_url">
             </v-list-tile-avatar>
           </v-list-tile>
         </v-list>

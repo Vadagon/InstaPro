@@ -1,5 +1,6 @@
 function update(){
 	chrome.storage.local.set({ "data": data });
+	chrome.storage.local.set({ "rss": a.rss });
 }
 function random(x, y){
 	return Math.floor(Math.random()*(y-x+1)+x);

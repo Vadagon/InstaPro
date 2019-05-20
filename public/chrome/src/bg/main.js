@@ -255,7 +255,7 @@ var a = {
 			if(!t.settings.frequency && t.running){
 				t.finished = false;
 				t.running = false;
-			} 
+			}
 			t.running = !1
 		})
 		a.tries = 0;
@@ -265,13 +265,6 @@ var a = {
 		}, 10*1000*60);
 	},
 	buildQue: function(tasks){
-		tasks.sort(function(a, b){
-			return a.timeStamp - b.timeStamp
-		}).sort(function(a, b) {
-	        return (a.enabled === b.enabled)? 0 : a.enabled? -1 : 1;
-	    }).sort(function(a, b) {
-	        return (!a.finished === !b.finished)? 0 : !a.finished? -1 : 1;
-	    })
 		tasks.forEach((t, index)=>{t.id = index});
 		// var filtered = tasks.filter(e=>e.enabled).filter(e=>!e.finished);
 		// tasks = tasks.filter(e=>e.section=='target');
@@ -282,7 +275,7 @@ var a = {
 			}else if(t.settings.frequency && t.dateCreated){
 				t.timeStamp = t.dateCreated+t.settings.frequency*60*60*1000;
 			}
-			if(t.uni == a.isRunning){
+			if(t.uni == a.isRunning && t.enabled){
 				stopApp = false;
 			}
 			var time = Math.round((t.timeStamp - new Date().getTime())/1000/60);
@@ -300,8 +293,17 @@ var a = {
 		if(stopApp) a.resetOuts();
 		// data.userData.tasks = filtered.sort(function(a, b){return a.timeStamp - b.timeStamp});
 		// data.userData.tasks = [];
-		console.log(tasks)
-		return tasks;
+		a.que = JSON.parse(JSON.stringify(tasks)).sort(function(a, b){
+			return a.timeStamp - b.timeStamp
+		}).sort(function(a, b) {
+	        return (a.enabled === b.enabled)? 0 : a.enabled? -1 : 1;
+	    }).sort(function(a, b) {
+	        return (!a.finished === !b.finished)? 0 : !a.finished? -1 : 1;
+	    })
+		data.userData.tasks = tasks;
+		a.que.forEach((t)=>{
+			data.userData.tasks[t.id] = t
+		})
 	},
 	init: function(){
 		console.log('init')
@@ -331,13 +333,13 @@ var a = {
 		// //   // })
 		// // })
 
-		data.userData.tasks = a.buildQue(data.userData.tasks);
-		if(data.userData.tasks.length && !!data.user.csrf_token && !a.isRunning && data.userData.tasks[0].timeStamp<=Date.now() && !data.userData.tasks[0].finished){
-			data.userData.tasks[0].running = true;
-			data.userData.tasks[0].status = 'Working on it...'
-			a.isRunning = data.userData.tasks[0].uni;
+		a.buildQue(data.userData.tasks);
+		if(a.que.length && !!data.user.csrf_token && !a.isRunning && a.que[0].enabled && a.que[0].timeStamp<=Date.now() && !a.que[0].finished){
+			a.que[0].running = true;
+			a.que[0].status = 'Working on it...'
+			a.isRunning = a.que[0].uni;
 			update();
-			a.section[data.userData.tasks[0].section](data.userData.tasks[0], function(e){
+			a.section[a.que[0].section](a.que[0], function(e){
 				console.log('finished')
 				e.running = false;
 				a.isRunning = !1;

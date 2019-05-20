@@ -69,19 +69,18 @@ window.app = new Vue({
       })
     }
     getGloData();
-    setInterval(getGloData, 5000)
+    // setInterval(getGloData, 5000)
     var getPerData = () => {
       api.runtime.sendMessage({ why: 'getData' }, (e) => {
         this.$store.state.tasks.forEach((t1, n1)=>{
-          e.userData.tasks.forEach((t2, n2)=>{
-            if(t1.uni == t2.uni){
-              var dump = t1.settings;
-              t1 = t2;
-              t1.settings = dump;
-            }
-          });
-        
+          var dump = t1.settings;
+          this.$store.state.tasks[n1] = e.userData.tasks[n1]
+          this.$store.state.tasks[n1].settings = dump;
         })
+      })
+
+      api.runtime.sendMessage({ why: 'getQUE' }, (e) => {
+        this.$root.tasksQUE = e
       })
       api.runtime.sendMessage({ why: 'getRSS' }, (e) => {
         this.$root.rss = e

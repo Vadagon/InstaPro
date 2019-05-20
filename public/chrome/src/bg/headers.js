@@ -28,22 +28,22 @@ chrome.webRequest.onBeforeSendHeaders.addListener(function(details) {
 
 
 window.onerror = function() {
-  _gaq.push(['_trackEvent', 'error', arguments[0], arguments[1]+' : '+arguments[2]]);
+  // _gaq.push(['_trackEvent', 'error', arguments[0], arguments[1]+' : '+arguments[2]]);
   console.log(['_trackEvent', 'error', arguments[0], arguments[1]+' : '+arguments[2]]);
 }
 $( document ).ajaxError(function( event, jqxhr, settings, exception ) {
     if ( jqxhr.status== 401 ) {
       console.log(arguments);
-      _gaq.push(['_trackEvent', 'error', arguments[0], arguments[1]+' : '+arguments[2]]);
+      // _gaq.push(['_trackEvent', 'error', arguments[0], arguments[1]+' : '+arguments[2]]);
     }
 });
 
-var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'UA-131310674-2']);
-_gaq.push(['_trackPageview']);
+// var _gaq = _gaq || [];
+// _gaq.push(['_setAccount', 'UA-131310674-2']);
+// _gaq.push(['_trackPageview']);
 
-(function() {
-  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-  ga.src = 'https://ssl.google-analytics.com/ga.js';
-  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-})();
+// (function() {
+//   var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+//   ga.src = 'https://ssl.google-analytics.com/ga.js';
+//   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+// })();

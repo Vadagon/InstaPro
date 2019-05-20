@@ -328,13 +328,18 @@ export default {
   props: ['taskNum'],
   mounted () {
     if (this.taskNum != undefined) {
-      this.task = this.$store.state.tasks[this.taskNum]
-      this.$root.interval(()=>{
-        this.task = this.$store.state.tasks[this.taskNum]
-      }, 2000);
+      this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum])
       if(this.task.type!='follow')
         this.step = 2;
     }
+    this.$root.interval(()=>{
+      if (this.taskNum != undefined) {
+        var task = _.cloneDeep(this.$store.state.tasks[this.taskNum]);
+        var dump = task.settings;
+        this.task = task
+        this.task.settings = dump
+      }
+    }, 2000);
   },
   created () {
 
@@ -357,6 +362,7 @@ export default {
         this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum])
       }
       this.$root.save()
+      this.$router.push({ path: '/' })
     },
     descriptionChange () {
       this.task.description = this.descs[this.task.type]
@@ -408,7 +414,9 @@ export default {
       this.task.settings.frequency = 0
       this.task.repeating = false;
       this.$store.state.tasks.push(_.cloneDeep(this.task))
+      this.taskNum = this.$store.state.tasks.length-1;
       this.$root.save()
+      this.$router.push({ path: '/' })
     },
     nextStep (e) {
       this.$set(this.task.steps, e, 1)
@@ -429,6 +437,7 @@ export default {
             this.task.repeating = false;
             this.$store.state.tasks.push(_.cloneDeep(this.task))
             this.$root.save()
+            this.$router.push({ path: '/' })
           }else{
             this.step1();
           }

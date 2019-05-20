@@ -13,6 +13,8 @@ var data = {
 	tasks: [],
 	user: {
 		lastDay: dayToday(),
+		firstDay: dayToday(),
+		firstInit: new Date().getTime(),
 		isMember: !1,
 		limitTo: 500
 	},
@@ -32,7 +34,7 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 	    case 'getRSS':
 	        sendResponse(a.rss);
 	    case 'getQUE':
-	        sendResponse(data.userData.tasks);
+	        sendResponse(a.que);
 	        break;
 	    case 'setData':
 	    	data.userData = request.value;
@@ -56,12 +58,19 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 });
 
 
-chrome.storage.local.get(["data"], function(items) {
+chrome.storage.local.get(["data", "rss"], function(items) {
 	console.log(items)
     if (items.data) {
     	data = items.data;
+    	a.rss = items.rss
     }else{
     	update()
     }
     a.readyUp();
 });
+
+setInterval(function() {
+	if(data.user.lastDay != dayToday())
+		a.rss = [];
+	data.user.lastDay = dayToday()
+}, 600000);
