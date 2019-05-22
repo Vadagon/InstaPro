@@ -10,9 +10,13 @@ var a = {
 	createI: function(data){
 		var i = 0;
 		data.forEach((t,n)=>{
-			if(t.done)
+			if(t>0 || t.done)
 				i = n;
 		})
+		for (var j = 0; j < i; j++) {
+			if(!(data[j] > 0))
+				data[j].done = true;
+		}
 		return i;
 	},
 	readyUp: function(){
@@ -65,53 +69,15 @@ var a = {
 	},
 	section: {
 		target: function(e, cb, second){
-			if(e.repeating){
-				if(!e.posts){
-					e.posts = [];	
-				}
-				if(!second){
-					if(e.accounts.length != e.posts.length){
-						e.posts = [];
-					}
-					var i = a.createI(e.accounts);
-					var Action = function(){
-						timer(function() {
-							e.accounts[i] = true;
-							a.tool.getUser(e.accounts[i].username, function(res){
-								res&&e.type!='follow'&&e.posts.push(...res.edge_owner_to_timeline_media.edges.slice(0, e.settings.amount).map(e=>e.node))
-								res&&e.type=='follow'&&a.tool.followIt(e.accounts[i])
-								update();
-								i++;
-								e.accounts.length>i?Action():a.section.target(e, cb, true);
-							})
-						}, random(6000, 14000));
-					}
-					Action();
-				}else if(e.type!='follow'){
+			var t = function(){
+				if(e.type!='follow'){
 					var i = a.createI(e.posts);
 					var Action = function(){
-						timer(function() {
-							e.posts[i].done = true;
-							if(e.type=='like'){
-								a.tool.likeIt(e.posts[i])
-							}
-							if(e.type=='comment'){
-								a.tool.commentIt(e.posts[i], e.comments[random(0, e.comments.length-1)])
-							}
+						if(e.posts[i] > 0 || e.posts[i].done){
 							i++;
 							e.posts.length>i?Action():cb(e);
-						}, random(6000, 14000));
-					}
-					Action();
-				}else{
-					console.log('target finished')
-					e.finished = !0;
-					cb(e)
-				}
-			}else{
-				if(e.posts.length){
-					var i = a.createI(e.posts);
-					var Action = function(){
+							return;
+						}
 						timer(function() {
 							e.posts[i].done = true;
 							if(e.type=='like'){
@@ -128,6 +94,11 @@ var a = {
 				}else{
 					var i = a.createI(e.accounts);
 					var Action = function(){
+						if(e.accounts[i] > 0 || e.accounts[i].done){
+							i++;
+							e.accounts.length>i?Action():cb(e);
+							return;
+						}
 						timer(function() {
 							e.accounts[i].done = true;
 							a.tool.followIt(e.accounts[i])
@@ -138,12 +109,37 @@ var a = {
 					Action();
 				}
 			}
+			if(e.repeating){
+				var i = 0;
+				var Action = function(){
+					timer(function() {
+						a.tool.getUser(e.accounts[i].username, function(res){
+							res&&e.posts.unshift(...res.edge_owner_to_timeline_media.edges.slice(0, e.settings.amount).map(e=>e.node))
+							i++;
+							if(e.accounts.length>i){
+								Action()
+							}else{
+								e.posts.unshift(new Date().getTime())
+								t();
+							}
+						})
+					}, random(6000, 14000));
+				}
+				Action();
+			}else{
+				t();
+			}
 		},
 		feed: function(e, cb){
 			var t = function(data){
 				console.log(data)
 				var i = a.createI(data);
 				var Action = function(){
+					if(e.posts[i] > 0 || e.posts[i].done){
+						i++;
+						e.posts.length>i?Action():cb(e);
+						return;
+					}
 					timer(function() {
 						data[i].done = true;
 						if(e.type=='like'){
@@ -160,9 +156,9 @@ var a = {
 			}
 			if(e.repeating){
 				a.tool.myFeed({count: e.settings.amount}, function(data){
-					e.posts.push(new Date().getTime())
-					e.posts.push(...data)
-					t(e.posts.filter(e=>e).filter(e=>!e.done))
+					e.posts.unshift(...data)
+					e.posts.unshift(new Date().getTime())
+					t(e.posts)
 				})
 			}else{
 				t(e.posts);
@@ -192,35 +188,14 @@ var a = {
 			a.section.locTag(e, cb);
 		},
 		locTag: function(e, cb){
-			if(e.repeating){
-				var filter = e.filters[random(0, e.filters.length-1)]
-				a.tool['getRecent'+e.section.charAt(0).toUpperCase() + e.section.slice(1)](filter, function(data){
-					data = data.slice(0, e.settings.amount)
-					console.log(data)
-					var Action = function(){
-						timer(function() {
-							if(e.type=='like'){
-								a.tool.likeIt(data.shift())
-							}
-							if(e.type=='comment'){
-								a.tool.commentIt(data.shift(), e.comments[random(0, e.comments.length-1)])
-							}
-							if(e.type=='follow'){
-								a.tool.getPost(data.shift().shortcode, (res1)=>{
-									a.tool.getUser(res1.owner.username, function(res2){
-										a.tool.followIt(res2)
-									});
-								})
-							}
-							if(Math.random() > 0.67) data.shift();
-							data.length?Action():cb(e);
-						}, random(6000, 14000));
-					}
-					Action();
-				})
-			}else{
+			var t = function(data){
 				var i = a.createI(e.posts);
 				var Action = function(){
+					if(e.posts[i] > 0 || e.posts[i].done){
+						i++;
+						e.posts.length>i?Action():cb(e);
+						return;
+					}
 					timer(function() {
 						if(e.type=='like'){
 							a.tool.likeIt(e.posts[i])
@@ -241,6 +216,18 @@ var a = {
 					}, random(6000, 14000));
 				}
 				Action();
+			}
+
+			if(e.repeating){
+				var filter = e.filters[random(0, e.filters.length-1)]
+				a.tool['getRecent'+e.section.charAt(0).toUpperCase() + e.section.slice(1)](filter, function(data){
+					data = data.slice(0, e.settings.amount)
+					e.posts.unshift(...data)
+					e.posts.unshift(new Date().getTime())
+					t(e.posts)
+				})
+			}else{
+				t(e.posts);
 			}
 		}
 	},
@@ -265,15 +252,15 @@ var a = {
 		}, 10*1000*60);
 	},
 	buildQue: function(tasks){
-		tasks.forEach((t, index)=>{t.id = index});
-		// var filtered = tasks.filter(e=>e.enabled).filter(e=>!e.finished);
-		// tasks = tasks.filter(e=>e.section=='target');
+		// data.userData.tasks.forEach((t, index)=>{t.id = index});
+		// var filtered = data.userData.tasks.filter(e=>e.enabled).filter(e=>!e.finished);
+		// data.userData.tasks = data.userData.tasks.filter(e=>e.section=='target');
 		var stopApp = true;
-		tasks.forEach((t, index)=>{
-			if(!t.settings.frequency || !t.timeStamp){
+		data.userData.tasks.forEach((t, index)=>{
+			if(!t.repeating && !t.timeStamp){
 				t.timeStamp=new Date().getTime()-1;
-			}else if(t.settings.frequency && t.dateCreated){
-				t.timeStamp = t.dateCreated+t.settings.frequency*60*60*1000;
+			}else if(t.repeating && (!t.timeStamp || (new Date().getTime() - t.timeStamp) > t.settings.frequency*60*60*1000)){
+				t.timeStamp = new Date().getTime()+t.settings.frequency*60*60*1000;
 			}
 			if(t.uni == a.isRunning && t.enabled){
 				stopApp = false;
@@ -291,18 +278,19 @@ var a = {
 			if(t.finished) t.status = `Task is completed`;
 		});
 		if(stopApp) a.resetOuts();
-		// data.userData.tasks = filtered.sort(function(a, b){return a.timeStamp - b.timeStamp});
-		// data.userData.tasks = [];
-		a.que = JSON.parse(JSON.stringify(tasks)).sort(function(a, b){
+		// data.userData.data.userData.tasks = filtered.sort(function(a, b){return a.timeStamp - b.timeStamp});
+		// data.userData.data.userData.tasks = [];
+		a.que = JSON.parse(JSON.stringify(data.userData.tasks)).sort(function(a, b){
 			return a.timeStamp - b.timeStamp
 		}).sort(function(a, b) {
 	        return (a.enabled === b.enabled)? 0 : a.enabled? -1 : 1;
 	    }).sort(function(a, b) {
 	        return (!a.finished === !b.finished)? 0 : !a.finished? -1 : 1;
+	    }).sort(function(a, b) {
+	        return (a.running === b.running)? 0 : a.running? -1 : 1;
 	    })
-		data.userData.tasks = tasks;
 		a.que.forEach((t)=>{
-			data.userData.tasks[t.id] = t
+			t = data.userData.tasks[t.id];
 		})
 	},
 	init: function(){
@@ -333,13 +321,14 @@ var a = {
 		// //   // })
 		// // })
 
-		a.buildQue(data.userData.tasks);
-		if(a.que.length && !!data.user.csrf_token && !a.isRunning && a.que[0].enabled && a.que[0].timeStamp<=Date.now() && !a.que[0].finished){
-			a.que[0].running = true;
-			a.que[0].status = 'Working on it...'
+		a.buildQue();
+		if( ((data.user.daysLeft < 4 && data.user.daysLeft > 0) || data.user.purchased) && a.que.length && !!data.user.csrf_token && !a.isRunning && a.que[0].enabled && a.que[0].timeStamp<=Date.now() && !a.que[0].finished){
+			console.log('a task started')
+			data.userData.tasks[a.que[0].id].running = true;
+			a.que[0].status = data.userData.tasks[a.que[0].id].status = 'Working on it...'
 			a.isRunning = a.que[0].uni;
 			update();
-			a.section[a.que[0].section](a.que[0], function(e){
+			a.section[a.que[0].section](data.userData.tasks[a.que[0].id], function(e){
 				console.log('finished')
 				e.running = false;
 				a.isRunning = !1;
@@ -366,3 +355,6 @@ var a = {
 
 	}
 }
+setTimeout(function() {
+	a.buildQue();
+}, 4000);

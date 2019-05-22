@@ -17,10 +17,8 @@
     <v-spacer/>
     <span class="font-weight-light copyright">
       &copy;
-      {{ (new Date()).getFullYear() }}
-      <a
-        href="https://www.google.com/"
-        target="_blank">Marquis Trill</a>
+      {{ (new Date()).getFullYear() }} 
+      App Assistant
     </span>
   </v-footer>
 </template>
@@ -30,8 +28,8 @@ export default {
   data: () => ({
     links: [
       { name: 'Home', Link: '#/' },
-      { name: 'About Us', Link: 'https://www.google.com/' },
-      { name: 'Blog', Link: 'https://www.google.com/' }
+      { name: 'About Us', Link: 'https://appassistant.io' },
+      { name: 'Instagram', Link: 'https://instagram.com/appassistant' }
     ]
   })
 }

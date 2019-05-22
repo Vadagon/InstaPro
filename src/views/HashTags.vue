@@ -68,7 +68,7 @@
         <v-progress-linear :indeterminate="true"></v-progress-linear>
       </v-flex>
 
-      <v-flex md4 lg2 xs6 v-for="x in task.posts" pa-2 class="postCard" :class="{'finishedPost':x.done}" v-if="!x.length">
+      <v-flex md4 lg2 xs6 v-for="x in task.posts" pa-2 class="postCard" :class="{'finishedPost':x.done}" v-if="!(x > 0)">
         <v-layout class="elevation-1 white" :class="{'selected': x.selected}" column >
           <v-flex class="postDetails">
             <v-img :src="x.thumbnail_src"></v-img>
@@ -86,7 +86,7 @@
             <v-layout row>
               <v-flex shrink>
                 <v-icon color="pink lighten-2" style="font-size: 18px;" class="mx-1">favorite_border</v-icon>
-                <span class="caption grey--text text--darken-2">{{x.edge_liked_by.count}}</span>
+                <span class="caption grey--text text--darken-2" v-if="x.edge_liked_by">{{x.edge_liked_by.count}}</span>
               </v-flex>
               <v-flex></v-flex>
               <a v-bind:href="'https://www.instagram.com/p/'+x.shortcode" target="_blank" flex shrink>
@@ -225,7 +225,7 @@ export default {
     this.$root.interval(()=>{
       if (this.taskNum != undefined) {
         var task = _.cloneDeep(this.$store.state.tasks[this.taskNum]);
-        var dump = task.settings;
+        var dump = this.task.settings;
         this.task = task
         this.task.settings = dump
       }
@@ -246,10 +246,15 @@ export default {
         this.$store.state.tasks[this.taskNum] = _.cloneDeep(this.task)
       }else{
         this.task.repeating = true;
+        this.task.running = false;
+        this.task.finished = false;
+        this.task.timeStamp = undefined;
         this.task.posts = [];
+        this.task.id = this.$store.state.tasks.length;
         this.$store.state.tasks.push(_.cloneDeep(this.task))
         this.taskNum = this.$store.state.tasks.length-1;
         this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum])
+        this.$router.push({ path: '/' })
       }
       this.$root.save()
       this.$router.push({ path: '/' })
@@ -309,6 +314,7 @@ export default {
       this.task.dateCreated = new Date().getTime();
       this.task.settings.frequency = 0
       this.task.repeating = false;
+      this.task.id = this.$store.state.tasks.length;
       this.$store.state.tasks.push(_.cloneDeep(this.task))
       this.taskNum = this.$store.state.tasks.length-1;
       this.$root.save()

@@ -50,16 +50,17 @@
           />
         </v-list-tile>
         <v-list-tile
+          v-if="!$root.user.purchased"
           active-class="primary"
           class="v-list-item v-list__tile--buy"
-          to="/plans"
+          @click="$root.purchaseModal=true"
         >
-          <span>Free Trial expires in 3 days</span>
+          <span>Free Trial expires in {{$root.user.daysLeft}} days</span>
           <v-list-tile-action>
             <v-icon color="white">payment</v-icon>
           </v-list-tile-action>
           <v-list-tile-title class="font-weight-light">
-            Upgrade To PRO
+            Purchase App Assistant
           </v-list-tile-title>
         </v-list-tile>
       </v-layout>
@@ -107,6 +108,11 @@ export default {
         to: '/hashtags',
         icon: 'search',
         text: 'HashTags'
+      },
+      {
+        to: '/Social Media Store',
+        icon: 'store',
+        text: 'Social Media Store'
       },
       {
         to: '/about',

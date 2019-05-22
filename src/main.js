@@ -44,6 +44,7 @@ window.app = new Vue({
     tasksQUE: [],
     rssSeen: 0,
     status: '',
+    purchaseModal: false,
     noty: {
       enabled: true,
       text: 'ssss'
@@ -72,6 +73,7 @@ window.app = new Vue({
     // setInterval(getGloData, 5000)
     var getPerData = () => {
       api.runtime.sendMessage({ why: 'getData' }, (e) => {
+        this.$root.user = e.user;
         this.$store.state.tasks.forEach((t1, n1)=>{
           var dump = t1.settings;
           this.$store.state.tasks[n1] = e.userData.tasks[n1]
@@ -97,11 +99,14 @@ window.app = new Vue({
   },
   methods: {
     save () {
-      console.log(this.$store.state)
       console.log(_.cloneDeep(this.$store.state))
+      this.$store.state.tasks.forEach((t, index)=>{this.$store.state.tasks[index].id = index});
       setTimeout(()=>{
         api.runtime.sendMessage({ why: 'setData', value: _.cloneDeep(this.$store.state) })
       }, 100);
+    },
+    pay(){
+      api.runtime.sendMessage({ why: 'pay', value: {} })
     },
     interval(fn, t){
       this.$root.intervals.push(setInterval(fn, t))

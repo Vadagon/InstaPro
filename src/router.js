@@ -51,8 +51,8 @@ export default new Router({
       props: true
     },
     {
-      path: '/plans',
-      name: 'plans',
+      path: '/Social Media Store',
+      name: 'Social Media Store',
       component: () => import('./views/Plans.vue'),
       props: true
     }

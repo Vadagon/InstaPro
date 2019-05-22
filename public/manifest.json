@@ -1,8 +1,8 @@
 {
-  "name": "InstaPro",
-  "version": "0.0.1",
+  "name": "App Assistant",
+  "version": "0.9.8",
   "manifest_version": 2,
-  "description": "InstaPro",
+  "description": "App Assistant For Instagram™",
   "icons": {
     "16": "chrome/icons/icon16.png",
     "48": "chrome/icons/icon48.png",
@@ -16,7 +16,8 @@
       "chrome/src/bg/headers.js",
       "chrome/src/bg/main.js",
       "chrome/src/bg/tools.js",
-      "chrome/src/bg/background.js"
+      "chrome/src/bg/background.js",
+      "chrome/src/bg/buy.js"
     ],
     "persistent": true
   },

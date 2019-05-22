@@ -140,7 +140,7 @@ export default {
     this.$root.interval(()=>{
       if (this.taskNum != undefined) {
         var task = _.cloneDeep(this.$store.state.tasks[this.taskNum]);
-        var dump = task.settings;
+        var dump = this.task.settings;
         this.task = task
         this.task.settings = dump
       }
@@ -196,9 +196,11 @@ export default {
       var next = () => {
         this.$set(this.task.steps, e, 2)
         if (e == 0 && !this.index) {
+          this.task.id = this.$store.state.tasks.length;
           this.$store.state.tasks.push(_.cloneDeep(this.task))
           this.taskNum = this.$store.state.tasks.length - 1;
           this.index = this.$store.state.tasks.length - 1
+
         } else {
           this.$store.state.tasks[this.index] = _.cloneDeep(this.task)
         }

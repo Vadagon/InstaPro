@@ -363,6 +363,9 @@ main.v-content{
 
 
 .plans{
+  .v-card__text{
+    padding-top: 6px;
+  }
   .price{
     color: #c23346;
   }
@@ -376,6 +379,7 @@ main.v-content{
     font-size: 10px;
   }
   .v-card.theme--dark{
+    box-shadow: 0 0 0 10px #370042;
     margin-right: -0px;
     z-index: 2;
     background-color: #370042 !important;
@@ -399,7 +403,6 @@ main.v-content{
     padding-top:30px !important; 
   }
   .center-box{
-     box-shadow: 0 0 0 10px #370042;
   }
   .third-box{
      padding-left:0px !important;

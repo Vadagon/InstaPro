@@ -12,11 +12,12 @@ chrome.browserAction.onClicked.addListener(function () {
 var data = {
 	tasks: [],
 	user: {
+		daysLeft: 3,
 		lastDay: dayToday(),
 		firstDay: dayToday(),
 		firstInit: new Date().getTime(),
-		isMember: !1,
-		limitTo: 500
+		purchased: !1,
+		products: []
 	},
 	userData: {
 	    tasks: []
@@ -37,7 +38,16 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 	        sendResponse(a.que);
 	        break;
 	    case 'setData':
-	    	data.userData = request.value;
+	    	if(request.value.tasks.length == data.userData.tasks.length){
+		    	request.value.tasks.forEach((t,n)=>{
+		    		data.userData.tasks[n].settings = t.settings;
+		    		data.userData.tasks[n].enabled = t.enabled;
+		    	})
+		    }else if(request.value.tasks.length > data.userData.tasks.length){
+		    	data.userData.tasks.push(request.value.tasks[request.value.tasks.length-1])
+		    }else{
+	    		data.userData = request.value;
+		    }
 			update();
 			!a.running&&a.init();
 	        sendResponse(!0);
@@ -46,6 +56,9 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 	    	console.log(request)
 	    	a.tool[request.name](request.value, sendResponse);
 	    	break;
+	   	case 'pay':
+	        pay()
+	        break;
 		case 'popup':
 			data.user.triedToPay = !0;
 			_gaq.push(['_trackEvent', 'popup', request.what]);
@@ -67,10 +80,22 @@ chrome.storage.local.get(["data", "rss"], function(items) {
     	update()
     }
     a.readyUp();
+	memberShip()
 });
 
-setInterval(function() {
+// chrome.google.payments.inapp.getSkuDetails({
+//   'parameters': {'env': 'prod'},
+//   'success': function(){
+//   	console.log(arguments)
+//   },
+//   'failure': function(){
+//   	console.log(arguments)
+//   }
+// });
+function memberShip(){
 	if(data.user.lastDay != dayToday())
 		a.rss = [];
-	data.user.lastDay = dayToday()
-}, 600000);
+	data.user.lastDay = dayToday();
+	data.user.daysLeft = data.user.lastDay - data.user.firstDay;
+}
+setInterval(memberShip, 600000);

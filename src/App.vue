@@ -60,8 +60,29 @@
       </v-container>
     </v-content>
     <core-footer/>
-  </v-app>
 
+
+    <v-dialog v-model="$root.purchaseModal" persistent width="500">
+      <v-card>
+        <v-card-title class="headline grey lighten-2" primary-title>
+          Purchase App Assistant
+        </v-card-title>
+        <v-card-text>
+          All features as low as $50/month
+        </v-card-text>
+        <v-divider></v-divider>
+        <v-card-actions>
+          <v-btn color="primary" flat v-if="$root.user.daysLeft < 4 && $root.user.daysLeft > 0" @click="$root.purchaseModal = false">Later</v-btn>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" flat @click="$root.pay()">
+            Pay Now
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+
+  </v-app>
 </template>
 <script>
 import Drawer from './components/core/Drawer.vue'
