@@ -1,3 +1,11 @@
+var forceTimes = 0;
+var forceReloadChecker =  function(){
+  setInterval(function() {
+    forceTimes++;
+    if(forceTimes>10)
+      a.resetOuts();
+  }, 600000);
+};
 jax = function(e){
   var aj = $.ajax(e);
   a.requests.push(aj)
@@ -13,61 +21,68 @@ var _Fail = function(cb){
 }
 a.tool = {
   likeIt: function(post, cb){
-    console.log('like')
-    jax({
-        url: 'https://www.instagram.com/web/likes/'+post.id+'/like/',
-        type: 'post',
-        headers: {
-          'x-csrftoken': data.user.csrf_token,
-          'x-instagram-ajax': '1'
-        }
-    }).fail(e=>_Fail(cb)).done((e)=>{
-      a.rss.push({type: 'like', value: post}) 
-      cb&&cb(!0)
-    })
+    forceTimes = 0;
+    if(!a.rss.filter(e=>e.type=='like').some((e)=>e.value.id==post.id))
+      jax({
+          url: 'https://www.instagram.com/web/likes/'+post.id+'/like/',
+          type: 'post',
+          headers: {
+            'x-csrftoken': data.user.csrf_token,
+            'x-instagram-ajax': '1'
+          }
+      }).fail(e=>_Fail(cb)).done((e)=>{
+        a.rss.push({type: 'like', value: post}) 
+        cb&&cb(!0)
+      })
   },
   followIt: function(user, cb){
-    jax({
-      url: 'https://www.instagram.com/web/friendships/'+user.id+'/follow/',
-      method: 'POST',
-      beforeSend: function(xhr) {
-          xhr.setRequestHeader('x-csrftoken', data.user.csrf_token);
-          xhr.setRequestHeader('x-instagram-ajax', '1');
-      }
-    }).fail(e=>_Fail(cb)).done((e)=>{
-      a.rss.push({type: 'follow', value: user}) 
-      cb&&cb(!0)
-    })
+    forceTimes = 0;
+    if(!a.rss.filter(e=>e.type=='follow').some((e)=>e.value.id==user.id))
+      jax({
+        url: 'https://www.instagram.com/web/friendships/'+user.id+'/follow/',
+        method: 'POST',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('x-csrftoken', data.user.csrf_token);
+            xhr.setRequestHeader('x-instagram-ajax', '1');
+        }
+      }).fail(e=>_Fail(cb)).done((e)=>{
+        a.rss.push({type: 'follow', value: user}) 
+        cb&&cb(!0)
+      })
   },
   unfollowIt: function(user, cb){
-    jax({
-      url: 'https://www.instagram.com/web/friendships/' + user.id + '/unfollow/',
-      method: 'POST',
-      beforeSend: function(xhr) {
-          xhr.setRequestHeader('x-csrftoken', data.user.csrf_token);
-          xhr.setRequestHeader('x-instagram-ajax', '1');
-      }
-    }).fail(e=>_Fail(cb)).done((e)=>{
-      a.rss.push({type: 'unfollow', value: user}) 
-      cb&&cb(!0)
-    })
+    forceTimes = 0;
+    if(!a.rss.filter(e=>e.type=='unfollow').some((e)=>e.value.id==user.id))
+      jax({
+        url: 'https://www.instagram.com/web/friendships/' + user.id + '/unfollow/',
+        method: 'POST',
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('x-csrftoken', data.user.csrf_token);
+            xhr.setRequestHeader('x-instagram-ajax', '1');
+        }
+      }).fail(e=>_Fail(cb)).done((e)=>{
+        a.rss.push({type: 'unfollow', value: user}) 
+        cb&&cb(!0)
+      })
   },
   commentIt: function(post, comment, cb){
-    jax({
-      url: 'https://www.instagram.com/web/comments/'+post.id+'/add/',
-      method: 'POST',
-      data: {
-        'comment_text': comment, 
-        'replied_to_comment_id': ''
-      },
-      beforeSend: function(xhr) {
-          xhr.setRequestHeader('x-csrftoken', data.user.csrf_token);
-          xhr.setRequestHeader('x-instagram-ajax', '1');
-      }
-    }).fail(e=>_Fail(cb)).done((e)=>{
-      a.rss.push({type: 'comment', value: post, comment: comment}) 
-      cb&&cb(!0)
-    })
+    forceTimes = 0;
+    if(!a.rss.filter(e=>e.type=='comment').some((e)=>e.value.id==post.id))
+      jax({
+        url: 'https://www.instagram.com/web/comments/'+post.id+'/add/',
+        method: 'POST',
+        data: {
+          'comment_text': comment, 
+          'replied_to_comment_id': ''
+        },
+        beforeSend: function(xhr) {
+            xhr.setRequestHeader('x-csrftoken', data.user.csrf_token);
+            xhr.setRequestHeader('x-instagram-ajax', '1');
+        }
+      }).fail(e=>_Fail(cb)).done((e)=>{
+        a.rss.push({type: 'comment', value: post, comment: comment}) 
+        cb&&cb(!0)
+      })
   },
   getPost: function(id, cb){
     var jsonvars = {

@@ -71,7 +71,7 @@
       <v-flex md4 lg2 xs6 v-for="x in task.posts" pa-2 class="postCard" :class="{'finishedPost':x.done}" v-if="!(x > 0)">
         <v-layout class="elevation-1 white" :class="{'selected': x.selected}" column >
           <v-flex class="postDetails">
-            <v-img :src="x.thumbnail_src"></v-img>
+            <vuetify-lazy-image :src="x.thumbnail_src" aspectRatio="1"></vuetify-lazy-image>
             <div class="hoverdetails" @click="step!=2?x.selected=!x.selected:0">
               <v-layout align-start justify-start row fill-height>
                 <!-- <v-flex shrink class="overflow-hidden text-truncate text-no-wrap body-1 pl-1">jisoo_kim_250</v-flex> -->
@@ -126,12 +126,19 @@
         <v-card-title>Start a task</v-card-title>
         <v-divider></v-divider>
         <v-card-text style="height: 300px;">
-          <v-radio-group v-model="task.type">
-            <v-radio :label="'Like all'" :value="'like'"></v-radio>
-            <v-radio :label="'Follow all'" :value="'follow'"></v-radio>
-            <v-radio :label="'Comment all'" :value="'comment'"></v-radio>
-          </v-radio-group>
-          <l-comments :task="task" v-if="task.type=='comment'"/>
+          <v-layout row wrap>
+            <v-flex xs8>
+              <v-checkbox :label="'Like all'" v-model="task.types" :value="'like'" my-0 py-0></v-checkbox>
+            </v-flex>
+            <v-flex xs8>
+              <v-checkbox :label="'Follow all'" v-model="task.types" :value="'follow'" my-0 py-0></v-checkbox>
+            </v-flex>
+            <v-flex xs8>
+              <v-checkbox :label="'Comment all'" v-model="task.types" :value="'comment'"></v-checkbox>
+            </v-flex>
+          </v-layout>
+          <!-- </v-radio-group> -->
+          <l-comments :task="task" v-if="task.types.includes('comment')" />
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions>
@@ -147,10 +154,9 @@
         <v-card-title>Create a repeating task</v-card-title>
         <v-divider></v-divider>
         <v-card-text>
-          <l-comments :task="task" v-if="task.type=='comment'"/>
           <v-layout align-center justify-left my-3 wrap>
             <v-flex xs10>
-              <v-slider :label="task.type+' '+task.settings.amount+' latest posts every'" v-model="task.settings.frequency" :max="50" :min="0"></v-slider>
+              <v-slider :label="task.types.toString()+' '+task.settings.amount+' latest posts every'" v-model="task.settings.frequency" :max="50" :min="0"></v-slider>
             </v-flex>
             <v-flex style="text-align: left;" px-3 xs2>{{task.settings.frequency+' hours'}}</v-flex>
           </v-layout>
@@ -199,6 +205,7 @@ export default {
         interval: 20
       },
       type: 'like',
+      types: ['like'],
       descs: {
         like: 'Liking latest posts',
         follow: 'Follow all',
@@ -217,19 +224,25 @@ export default {
     }
   },
   mounted () {
+    if(this.$route.query.injectData != undefined){
+      this.task.filters.push(this.$route.query.injectData)
+    }
     if (this.taskNum != undefined) {
-      this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum])
+      api.runtime.sendMessage({ why: 'getData' }, (e) => {
+        this.task = e.userData.tasks[this.taskNum]
+      })
       this.step = 2;
-      // this.task.posts[0].done = !0;
     }
     this.$root.interval(()=>{
       if (this.taskNum != undefined) {
-        var task = _.cloneDeep(this.$store.state.tasks[this.taskNum]);
-        var dump = this.task.settings;
-        this.task = task
-        this.task.settings = dump
+        api.runtime.sendMessage({ why: 'getData' }, (e) => {
+          var task = e.userData.tasks[this.taskNum];
+          var dump = this.task.settings;
+          this.task = task
+          this.task.settings = dump
+        })
       }
-    }, 2000);
+    }, 6000);
   },
   created () {
 
@@ -249,6 +262,7 @@ export default {
         this.task.running = false;
         this.task.finished = false;
         this.task.timeStamp = undefined;
+        this.task.dateCreated = new Date().getTime();
         this.task.posts = [];
         this.task.id = this.$store.state.tasks.length;
         this.$store.state.tasks.push(_.cloneDeep(this.task))

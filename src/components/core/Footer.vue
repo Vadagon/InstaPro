@@ -29,7 +29,9 @@ export default {
     links: [
       { name: 'Home', Link: '#/' },
       { name: 'About Us', Link: 'https://appassistant.io' },
-      { name: 'Instagram', Link: 'https://instagram.com/appassistant' }
+      { name: 'Instagram', Link: 'https://instagram.com/appassistant' },
+      { name: 'Privacy Policy', Link: 'https://appassistant.io/privacypolicy' },
+      { name: 'Terms of service', Link: 'https://appassistant.io/termsofservice' }
     ]
   })
 }

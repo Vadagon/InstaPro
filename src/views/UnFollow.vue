@@ -108,6 +108,7 @@ export default {
       username: '',
       user: {},
       accounts: [],
+      types: ['unfollow'],
       type: 'unfollow',
       repeating: false,
       descs: {
@@ -129,22 +130,26 @@ export default {
   mounted () {
     if (this.taskNum != undefined) {
       this.created = true;
-      this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum])
-      console.log(this.task)
-      var num = this.task.steps.findIndex((e) => { return !e })
-      num = num == -1 ? this.task.steps.length - 1 : num
-      this.length = 1;
-      this.window = num
-      this.index = this.taskNum
+      api.runtime.sendMessage({ why: 'getData' }, (e) => {
+        this.task = e.userData.tasks[this.taskNum]
+        console.log(this.task)
+        var num = this.task.steps.findIndex((e) => { return !e })
+        num = num == -1 ? this.task.steps.length - 1 : num
+        this.length = 1;
+        this.window = num
+        this.index = this.taskNum
+      })
     }
     this.$root.interval(()=>{
       if (this.taskNum != undefined) {
-        var task = _.cloneDeep(this.$store.state.tasks[this.taskNum]);
-        var dump = this.task.settings;
-        this.task = task
-        this.task.settings = dump
+        api.runtime.sendMessage({ why: 'getData' }, (e) => {
+          var task = e.userData.tasks[this.taskNum];
+          var dump = this.task.settings;
+          this.task = task
+          this.task.settings = dump
+        })
       }
-    }, 2000);
+    }, 6000);
     if(!this.created){
       this.$set(this.task.steps, 0, 1)
       var started = !1
@@ -198,7 +203,7 @@ export default {
         if (e == 0 && !this.index) {
           this.task.id = this.$store.state.tasks.length;
           this.$store.state.tasks.push(_.cloneDeep(this.task))
-          this.taskNum = this.$store.state.tasks.length - 1;
+          // this.taskNum = this.$store.state.tasks.length - 1;
           this.index = this.$store.state.tasks.length - 1
 
         } else {

@@ -9,18 +9,19 @@
   },
   "dependencies": {
     "chart.js": "^2.8.0",
-    "jquery": "^3.3.1",
+    "jquery": "^3.4.1",
     "lodash": "^4.17.11",
     "vue": "^2.6.6",
     "vue-chartjs": "^3.4.2",
     "vue-router": "^3.0.1",
     "vuetify": "^1.5.7",
+    "vuetify-lazy-image": "^1.2.4",
     "vuex": "^3.1.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.5.0",
     "@vue/cli-plugin-eslint": "^3.5.0",
-    "@vue/cli-service": "^3.5.0",
+    "@vue/cli-service": "^3.8.0",
     "@vue/eslint-config-standard": "^4.0.0",
     "babel-eslint": "^10.0.1",
     "eslint": "^5.8.0",

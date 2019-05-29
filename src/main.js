@@ -4,13 +4,16 @@ import Vuetify from 'vuetify'
 import router from './router'
 import Vuex from 'vuex'
 
+import { VuetifyLazyImagePlugin } from "vuetify-lazy-image"; 
+Vue.use(VuetifyLazyImagePlugin);
+
 import _ from 'lodash'
 import $ from 'jquery'
 
 import 'vuetify/dist/vuetify.min.css'
 import './styles/main.scss'
 import './platform.js'
-window.$ = $
+window.$ = $;
 
 // Vue.use(Vuetify)
 Vue.use(Vuex)
@@ -71,25 +74,38 @@ window.app = new Vue({
     }
     getGloData();
     // setInterval(getGloData, 5000)
-    var getPerData = () => {
+    var getPerData = (isFirstTime) => {
       api.runtime.sendMessage({ why: 'getData' }, (e) => {
         this.$root.user = e.user;
+        if((this.$root.user.daysLeft > 4 || this.$root.user.daysLeft < 0) && !this.$root.user.purchased){
+          this.$root.purchaseModal = true;
+        }
         this.$store.state.tasks.forEach((t1, n1)=>{
-          var dump = t1.settings;
-          this.$store.state.tasks[n1] = e.userData.tasks[n1]
-          this.$store.state.tasks[n1].settings = dump;
-        })
-      })
+          if(e.userData.tasks[n1]){
+            this.$store.state.tasks[n1].finished = e.userData.tasks[n1].finished
+            this.$store.state.tasks[n1].running = e.userData.tasks[n1].running
 
-      api.runtime.sendMessage({ why: 'getQUE' }, (e) => {
-        this.$root.tasksQUE = e
+            if(isFirstTime === true){
+              this.$store.state.tasks[n1] = _.clone(e.userData.tasks[n1])
+              this.$store.state.tasks[n1].settings = e.userData.tasks[n1].settings;
+              console.log(this.$store.state.tasks[n1])
+            }
+          }
+        })
       })
       api.runtime.sendMessage({ why: 'getRSS' }, (e) => {
         this.$root.rss = e
       })
     }
-    getPerData();
-    setInterval(getPerData, 1400)
+    var getPerQUE = () => {
+      api.runtime.sendMessage({ why: 'getQUE' }, (e) => {
+        this.$root.tasksQUE = e
+      })
+    }
+    getPerData(true);
+    setInterval(getPerData, 6000)
+    getPerQUE()
+    setInterval(getPerQUE, 600)
   },
   watch:{
     $route (to, from){

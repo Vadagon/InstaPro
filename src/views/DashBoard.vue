@@ -54,7 +54,7 @@
                 </v-avatar>
               </v-flex>
               <v-flex @click="$router.push({ name: x.section, params: { taskNum: x.id } })" shrink headline text-truncate text-sm-left pt-3 mt-1 px-3 text-capitalize style="position: relative; cursor: pointer; min-width: 140px;">
-                <span class="caption" style="position: absolute; top: 0;">{{x.descs[x.type]}}</span>
+                <span class="caption" style="position: absolute; top: 0;">{{x.descs[x.types[0]]}}</span>
                 {{x.section}} {{x.username}}
               </v-flex>
               <v-flex px-2 text-sm-left limitTo4 pb-2 descriptionTask @click="$router.push({ name: x.section, params: { taskNum: x.id } })">
@@ -69,7 +69,7 @@
               </v-flex>
             </v-layout>
             <v-card-actions grow v-if="x.settings.frequency" class="pt-0">
-              <v-switch shrink label="enabled" v-model="data.tasks[x.id].enabled" @change="$root.save()" style="max-width: 204px;"></v-switch>
+              <v-switch shrink label="enabled" v-if="data.tasks[x.id]" v-model="data.tasks[x.id].enabled" @change="$root.save()" style="max-width: 204px;"></v-switch>
               <span class="grey--text text--darken-2">{{x.status?x.status:'Bot will start working on this task soon'}}</span>
             </v-card-actions>
           </v-flex>
@@ -106,10 +106,10 @@ export default {
     },
     statistic(){
       return [
-        {name: 'Followed', value: this.$root.rss.filter(e=>e.type=='follow').length, icon: 'person_pin', color: '#4ea750'},
-        {name: 'Unfollowed', value: this.$root.rss.filter(e=>e.type=='unfollow').length, icon: 'person_add_disabled', color: '#508eff'},
-        {name: 'Liked', value: this.$root.rss.filter(e=>e.type=='like').length, icon: 'favorite', color: '#ff4e4e'},
-        {name: 'Commented', value: this.$root.rss.filter(e=>e.type=='comment').length, icon: 'comment', color: '#e05f99'}
+        {name: 'Followed', value: this.$root.rss.filter(e=>e.type == 'follow').length, icon: 'person_pin', color: '#4ea750'},
+        {name: 'Unfollowed', value: this.$root.rss.filter(e=>e.type == 'unfollow').length, icon: 'person_add_disabled', color: '#508eff'},
+        {name: 'Liked', value: this.$root.rss.filter(e=>e.type == 'like').length, icon: 'favorite', color: '#ff4e4e'},
+        {name: 'Commented', value: this.$root.rss.filter(e=>e.type == 'comment').length, icon: 'comment', color: '#e05f99'}
       ]
     }
   },

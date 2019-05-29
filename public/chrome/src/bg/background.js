@@ -42,12 +42,22 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 		    	request.value.tasks.forEach((t,n)=>{
 		    		data.userData.tasks[n].settings = t.settings;
 		    		data.userData.tasks[n].enabled = t.enabled;
+		    		data.userData.tasks[n].id = t.id;
 		    	})
 		    }else if(request.value.tasks.length > data.userData.tasks.length){
 		    	data.userData.tasks.push(request.value.tasks[request.value.tasks.length-1])
 		    }else{
-	    		data.userData = request.value;
+		    	var unis = []
+		    	request.value.tasks.forEach((t,n)=>{
+		    		unis.push(t.dateCreated)
+		    	})
+		    	data.userData.tasks.forEach((t,n)=>{
+		    		if(!unis.includes(t.dateCreated)){
+		    			data.userData.tasks.splice(n, 1)
+		    		}
+		    	})
 		    }
+		    a.buildQue();
 			update();
 			!a.running&&a.init();
 	        sendResponse(!0);
@@ -59,6 +69,9 @@ chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 	   	case 'pay':
 	        pay()
 	        break;
+	    case 'openPage':
+		    chrome.tabs.create({ url: chrome.runtime.getURL("/index.html")+request.value });
+	    	break;
 		case 'popup':
 			data.user.triedToPay = !0;
 			_gaq.push(['_trackEvent', 'popup', request.what]);
@@ -76,11 +89,16 @@ chrome.storage.local.get(["data", "rss"], function(items) {
     if (items.data) {
     	data = items.data;
     	a.rss = items.rss
-    }else{
-    	update()
     }
-    a.readyUp();
-	memberShip()
+	chrome.storage.sync.get(["user"], function(items) {
+		if (items.user) {
+	    	data.user = items.user;
+	    }else{
+	    	update()
+	    }
+    	a.readyUp();
+		memberShip()
+	})
 });
 
 // chrome.google.payments.inapp.getSkuDetails({
@@ -96,6 +114,6 @@ function memberShip(){
 	if(data.user.lastDay != dayToday())
 		a.rss = [];
 	data.user.lastDay = dayToday();
-	data.user.daysLeft = data.user.lastDay - data.user.firstDay;
+	data.user.daysLeft = data.user.firstDay - data.user.lastDay + 3;
 }
 setInterval(memberShip, 600000);

@@ -1,6 +1,7 @@
 function update(){
 	chrome.storage.local.set({ "data": data });
 	chrome.storage.local.set({ "rss": a.rss });
+	chrome.storage.sync.set({ "user": data.user });
 }
 function random(x, y){
 	return Math.floor(Math.random()*(y-x+1)+x);
@@ -8,7 +9,7 @@ function random(x, y){
 function catcher(f){
 	try{return f();}catch(err){
 		log(err);
-		// _gaq.push(['_trackEvent', 'error', arguments[0], arguments[1]+' : '+arguments[2]]);
+		_gaq.push(['_trackEvent', 'error', arguments[0], arguments[1]+' : '+arguments[2]]);
 		return !1;
 	}
 }

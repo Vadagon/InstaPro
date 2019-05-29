@@ -31,12 +31,6 @@
                   </v-flex>
                   <v-flex style="text-align: left;" px-3 xs2>{{task.settings.amount}} latest posts</v-flex>
                 </v-layout>
-                <v-layout align-center justify-center row v-if="task.type=='comment'">
-                  <v-flex xs8>
-                      <v-card-title mb-2>Create a list of Comments</v-card-title>
-                      <l-comments :task="task"  />
-                  </v-flex>
-                </v-layout>
               </v-card-text>
             </v-card>
           </v-window-item>
@@ -77,7 +71,7 @@
       <v-flex md4 lg2 xs6 v-for="x in task.posts" pa-2 class="postCard" :class="{'finishedPost':x.done}" v-if="!(x > 0)">
         <v-layout class="elevation-1 white" :class="{'selected': x.selected}" column >
           <v-flex class="postDetails">
-            <v-img :src="x.display_url"></v-img>
+            <vuetify-lazy-image :src="x.display_url" aspectRatio="1"></vuetify-lazy-image>
             <div class="hoverdetails" @click="step!=2?x.selected=!x.selected:0">
               <v-layout align-start justify-start row fill-height>
                 <!-- <v-flex shrink class="overflow-hidden text-truncate text-no-wrap body-1 pl-1">jisoo_kim_250</v-flex> -->
@@ -115,11 +109,16 @@
         <v-card-title>Start a task</v-card-title>
         <v-divider></v-divider>
         <v-card-text style="height: 300px;">
-          <v-radio-group v-model="task.type">
-            <v-radio :label="'Like all'" :value="'like'"></v-radio>
-            <v-radio :label="'Comment all'" :value="'comment'"></v-radio>
-          </v-radio-group>
-          <l-comments :task="task" v-if="task.type=='comment'"/>
+          <v-layout row wrap>
+            <v-flex xs8>
+              <v-checkbox :label="'Like all'" v-model="task.types" :value="'like'" my-0 py-0></v-checkbox>
+            </v-flex>
+            <v-flex xs8>
+              <v-checkbox :label="'Comment all'" v-model="task.types" :value="'comment'"></v-checkbox>
+            </v-flex>
+          </v-layout>
+          <!-- </v-radio-group> -->
+          <l-comments :task="task" v-if="task.types.includes('comment')" />
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions>
@@ -135,10 +134,9 @@
         <v-card-title>Create a repeating task</v-card-title>
         <v-divider></v-divider>
         <v-card-text>
-          <l-comments :task="task" v-if="task.type=='comment'"/>
           <v-layout align-center justify-left my-3 wrap>
             <v-flex xs10>
-              <v-slider :label="task.type+' '+task.settings.amount+' latest posts every'" v-model="task.settings.frequency" :max="50" :min="0"></v-slider>
+              <v-slider :label="task.types.toString()+' '+task.settings.amount+' latest posts every'" v-model="task.settings.frequency" :max="50" :min="0"></v-slider>
             </v-flex>
             <v-flex style="text-align: left;" px-3 xs2>{{task.settings.frequency+' hours'}}</v-flex>
           </v-layout>
@@ -194,6 +192,7 @@ export default {
         }
       ],
       comments: [],
+      types: ['like'],
       type: 'like',
       descs: {
         like: 'Liking my feed',
@@ -211,17 +210,21 @@ export default {
   props: ['taskNum'],
   mounted () {
     if (this.taskNum != undefined) {
-      this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum])
+      api.runtime.sendMessage({ why: 'getData' }, (e) => {
+        this.task = e.userData.tasks[this.taskNum]
+      })
       this.step = 2;
     }
     this.$root.interval(()=>{
       if (this.taskNum != undefined) {
-        var task = _.cloneDeep(this.$store.state.tasks[this.taskNum]);
-        var dump = this.task.settings;
-        this.task = task
-        this.task.settings = dump
+        api.runtime.sendMessage({ why: 'getData' }, (e) => {
+          var task = e.userData.tasks[this.taskNum];
+          var dump = this.task.settings;
+          this.task = task
+          this.task.settings = dump
+        })
       }
-    }, 2000);
+    }, 6000);
   },
   created () {
     
@@ -238,6 +241,7 @@ export default {
         this.$store.state.tasks[this.taskNum] = _.cloneDeep(this.task)
       }else{
         this.task.repeating = true;
+        this.task.dateCreated = new Date().getTime();
         this.task.running = false;
         this.task.finished = false;
         this.task.timeStamp = undefined;
@@ -251,7 +255,7 @@ export default {
       this.$root.save();
     },
   	descriptionChange () {
-      this.task.description = this.descs[this.task.type]
+      this.task.description = this.descs[this.task.types[0]]
     },
     selectAllAcc () {
       this.task.posts.map((e) => {

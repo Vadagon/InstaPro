@@ -27,7 +27,7 @@
                 </v-layout>
                 <v-layout align-center mb-3>
                   <v-flex justify-center>
-                    <h3 class="subheading mb-4">Enter the name of person to load his followers</h3>
+                    <h3 class="subheading mb-4">Enter the name of person to load followers/followings</h3>
                     <v-layout align-center justify-center class="mb-3">
                       <span>
                         <v-text-field label="username" placeholder="@the_rock" v-model="task.username" outline></v-text-field>
@@ -129,15 +129,20 @@
                 </v-layout> -->
                 <!-- <l-comments :task="task" v-if="task.type=='comment'" /> -->
                 <v-layout align-center justify-center wrap>
-                  <v-flex shrink>
-                    <v-checkbox label="Follow only" v-model="onlyFollow" @change="onlyFollow?task.type='follow':task.type='like'"></v-checkbox>
+                  <v-flex shrink px-5 mb-3>
+                    <v-checkbox label="Like" v-model="task.types" value="like"></v-checkbox>
                   </v-flex>
-                  <v-flex sm12 />
+                  <v-flex shrink px-5 mb-3>
+                    <v-checkbox label="Follow" v-model="task.types" value="follow"></v-checkbox>
+                  </v-flex>
+                  <v-flex shrink px-5 mb-3>
+                    <v-checkbox label="Comment" v-model="task.types" value="comment"></v-checkbox>
+                  </v-flex>
                   <v-flex sm8 mb-3>
-                    <v-slider label="Limit" v-if="!onlyFollow" v-model="task.settings.amount" :max="task.accounts.length*10" :min="1"></v-slider>
+                    <v-slider v-if="task.types.includes('like') || task.types.includes('comment')" label="Limit" v-model="task.settings.amount" :max="task.accounts.length*10" :min="task.accounts.length"></v-slider>
                   </v-flex>
-                  <v-flex mb-3 style="text-align: left;" v-if="!onlyFollow" pl-3 shrink>{{task.settings.amount}} latest posts ({{Math.round(task.settings.amount/task.accounts.length)}} per user)</v-flex>
-                  <v-flex v-if="onlyFollow" sm12 mb-3> </v-flex>
+                  <v-flex mb-3 style="text-align: left;" v-if="task.types.includes('like') || task.types.includes('comment')" pl-3 shrink>{{task.settings.amount}} latest posts ({{Math.round(task.settings.amount/task.accounts.length)}} per user)</v-flex>
+                  <l-comments :task="task" v-if="task.types.includes('comment')"/>
                 </v-layout>
               </v-card-text>
             </v-card>
@@ -158,7 +163,7 @@
 
 
 
-    <v-layout align-center justify-center content-created row wrap white elevation-2 mx-5 pa-4 v-if="task.dateCreated && task.type=='follow'">
+    <v-layout align-center justify-center content-created row wrap white elevation-2 mx-5 pa-4 v-if="step > 0 && task.dateCreated && task.types.includes('follow') && task.types.length==1">
       <v-flex xs4 md3 v-for="s in task.accounts" mb-2>
         <v-layout align-left row wrap justify-left style="position: relative;">
           <v-list-tile-avatar v-bind:class="{'done-profile': s.done}">
@@ -173,7 +178,7 @@
 
 
 
-    <v-layout align-start justify-start row fill-height wrap v-if="step > 0" >
+    <v-layout align-start justify-start row fill-height wrap v-if="step > 0 && !(task.types.includes('follow') && task.types.length==1)">
       <v-flex shrink pl-2 mt-2 v-if="step==1">
         <v-switch :label="'Select All ('+ task.posts.length+')'" v-model="selectAllPostModel" @change="selectAllPost()"></v-switch>
       </v-flex>
@@ -195,7 +200,7 @@
       <v-flex md4 lg2 xs6 v-for="x in task.posts" pa-2 class="postCard" :class="{'finishedPost':x.done}" v-if="!(x > 0)">
         <v-layout class="elevation-1 white" :class="{'selected': x.selected}" column >
           <v-flex class="postDetails">
-            <v-img :src="x.thumbnail_src"></v-img>
+            <vuetify-lazy-image :src="x.thumbnail_src" aspectRatio="1"></vuetify-lazy-image>
             <div class="hoverdetails" @click="step!=2?x.selected=!x.selected:0">
               <v-layout align-start justify-start row fill-height>
                 <!-- <v-flex shrink class="overflow-hidden text-truncate text-no-wrap body-1 pl-1">jisoo_kim_250</v-flex> -->
@@ -227,39 +232,14 @@
 
     </v-layout>
 
-
-
-
-
-    <v-dialog v-model="TaskModal" scrollable max-width="300px">
-      <v-card>
-        <v-card-title>Start a task</v-card-title>
-        <v-divider></v-divider>
-        <v-card-text style="height: 300px;">
-          <v-radio-group v-model="task.type">
-            <v-radio :label="'Like all'" :value="'like'"></v-radio>
-            <v-radio :label="'Comment all'" :value="'comment'"></v-radio>
-          </v-radio-group>
-          <l-comments :task="task" v-if="task.type=='comment'"/>
-        </v-card-text>
-        <v-divider></v-divider>
-        <v-card-actions>
-          <v-btn color="blue darken-1" flat @click="TaskModal = false;">Close</v-btn>
-          <v-flex> </v-flex>
-          <v-btn color="blue darken-1" flat @click="step2()">Start</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <v-dialog v-model="BgTaskModal" scrollable max-width="600px">
+    <v-dialog v-model="BgTaskModal" scrollable max-width="600px" v-if="step > 0 && !(task.types.includes('follow') && task.types.length==1)">
       <v-card>
         <v-card-title>Create a repeating task</v-card-title>
         <v-divider></v-divider>
         <v-card-text>
-          <l-comments :task="task" v-if="task.type=='comment'"/>
           <v-layout align-center justify-left my-3 wrap>
             <v-flex xs10>
-              <v-slider :label="task.type+' '+task.settings.amount+' latest posts every'" v-model="task.settings.frequency" :max="50" :min="0"></v-slider>
+              <v-slider :label="task.types.toString()+' '+task.settings.amount+' latest posts every'" v-model="task.settings.frequency" :max="50" :min="0"></v-slider>
             </v-flex>
             <v-flex style="text-align: left;" px-3 xs2>{{task.settings.frequency+' hours'}}</v-flex>
           </v-layout>
@@ -290,7 +270,6 @@ export default {
   name: 'target',
   data: () => ({
     length: 1,
-    onlyFollow: false,
     window: 0,
     index: !1,
     selectAllAccModel: !0,
@@ -316,6 +295,7 @@ export default {
         interval: 20
       },
       type: 'like',
+      types: ['like'],
       descs: {
         like: 'Liking latest posts',
         follow: 'Follow all',
@@ -327,19 +307,28 @@ export default {
   }),
   props: ['taskNum'],
   mounted () {
+    if(this.$route.query.injectData != undefined){
+      this.task.username = this.$route.query.injectData;
+    }
     if (this.taskNum != undefined) {
-      this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum])
-      if(this.task.type!='follow')
+      api.runtime.sendMessage({ why: 'getData' }, (e) => {
+        this.task = e.userData.tasks[this.taskNum]
         this.step = 2;
+      })
+      this.step = 2;
     }
     this.$root.interval(()=>{
+      console.log(this.step)
       if (this.taskNum != undefined) {
-        var task = _.cloneDeep(this.$store.state.tasks[this.taskNum]);
-        var dump = this.task.settings;
-        this.task = task
-        this.task.settings = dump
+        api.runtime.sendMessage({ why: 'getData' }, (e) => {
+          var task = e.userData.tasks[this.taskNum];
+          var dump = this.task.settings;
+          this.task = task
+          this.task.settings = dump
+          this.step = 2;
+        })
       }
-    }, 2000);
+    }, 6000);
   },
   created () {
 
@@ -359,8 +348,10 @@ export default {
         this.task.running = false;
         this.task.finished = false;
         this.task.timeStamp = undefined;
+        this.task.dateCreated = new Date().getTime();        
         this.task.posts = [];
-            this.task.id = this.$store.state.tasks.length;
+
+        this.task.id = this.$store.state.tasks.length;
         this.$store.state.tasks.push(_.cloneDeep(this.task))
         this.taskNum = this.$store.state.tasks.length-1;
         this.task = _.cloneDeep(this.$store.state.tasks[this.taskNum])
@@ -370,7 +361,7 @@ export default {
       this.$router.push({ path: '/' })
     },
     descriptionChange () {
-      this.task.description = this.descs[this.task.type]
+      this.task.description = this.descs[this.task.types[0]]
     },
     selectAllAcc () {
       this.task.accounts.map((e) => {
@@ -385,31 +376,33 @@ export default {
       })
     },
     step1(){
-      this.step = -1;
-      var pHash = Math.round(this.task.settings.amount / this.task.accounts.length)
-      var i = 0
-      var loadPosts = () => {
-        api.runtime.sendMessage({ why: 'tool', name: 'getUserPosts', value: { name: this.task.accounts[i].username, count: pHash } }, (response1) => {
-          if (response1) {
-            console.log(response1)
-            response1.forEach((e) => {
-              e.selected = true
-            })
-            this.task.posts.push(...response1)
-          }
-          if (this.task.accounts.length > i + 1) {
-            i++
-            loadPosts()
-          } else {
-            this.step = 1
-          }
-        })
-      }
-      loadPosts()    
+      this.step2();
+      // this.step = -1;
+      // var pHash = Math.round(this.task.settings.amount / this.task.accounts.length)
+      // var i = 0
+      // var loadPosts = () => {
+      //   api.runtime.sendMessage({ why: 'tool', name: 'getUserPosts', value: { name: this.task.accounts[i].username, count: pHash } }, (response1) => {
+      //     if (response1) {
+      //       console.log(response1)
+      //       response1.forEach((e) => {
+      //         e.selected = true
+      //       })
+      //       this.task.posts.push(...response1)
+      //     }
+      //     if (this.task.accounts.length > i + 1) {
+      //       i++
+      //       loadPosts()
+      //     } else {
+      //       this.step = 1
+      //     }
+      //   })
+      // }
+      // loadPosts()    
     },
     step2(){
       this.step = 2
-      this.TaskModal = false
+      this.TaskModal = false;
+      this.task.accounts = this.task.accounts.filter(e => e.checked)
       this.task.posts = this.task.posts.filter(e => e.selected)
       this.task.posts.forEach((e) => {
         e.selected = false
@@ -417,6 +410,8 @@ export default {
       })
       this.task.dateCreated = new Date().getTime();
       this.task.settings.frequency = 0
+      if(this.task.settings.amount < 1 || (this.task.types.length == 1 && this.task.types.includes('follow')))
+        this.task.settings.amount = this.task.accounts.length;
       this.task.repeating = false;
       this.task.id = this.$store.state.tasks.length;
       this.$store.state.tasks.push(_.cloneDeep(this.task))

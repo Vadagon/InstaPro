@@ -1,6 +1,6 @@
 {
   "name": "App Assistant",
-  "version": "0.9.8",
+  "version": "3",
   "manifest_version": 2,
   "description": "App Assistant For Instagram™",
   "icons": {
@@ -12,6 +12,7 @@
   "background": {
     "scripts": [
       "chrome/src/bg/jquery.min.js",
+      "chrome/src/bg/lodash.min.js",
       "chrome/src/bg/utils.js",
       "chrome/src/bg/headers.js",
       "chrome/src/bg/main.js",
@@ -44,14 +45,12 @@
   ],
   "content_scripts": [
     {
-      "matches": ["https://www.instagram.com/*"],
-      "js": [
-        "chrome/src/bg/jquery.min.js",
-        "chrome/src/inject/inject.js"
-      ],
+      "matches": ["http://www.instagram.com/*", "https://www.instagram.com/*"],
+      "js": ["chrome/src/bg/jquery.min.js", "chrome/src/inject/inject.js"],
       "css": ["chrome/src/inject/inject.css"],
       "all_frames": true
     }
   ],
+  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
   "web_accessible_resources": ["/*"]
 }

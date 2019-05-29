@@ -72,7 +72,7 @@
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions>
-          <v-btn color="primary" flat v-if="$root.user.daysLeft < 4 && $root.user.daysLeft > 0" @click="$root.purchaseModal = false">Later</v-btn>
+          <v-btn color="primary" flat v-if="($root.user.daysLeft < 4 && $root.user.daysLeft > -1) || $root.user.purchased" @click="$root.purchaseModal = false">Later</v-btn>
           <v-spacer></v-spacer>
           <v-btn color="green darken-1" flat @click="$root.pay()">
             Pay Now

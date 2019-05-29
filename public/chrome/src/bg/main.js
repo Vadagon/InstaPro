@@ -69,66 +69,57 @@ var a = {
 	},
 	section: {
 		target: function(e, cb, second){
-			var t = function(){
-				if(e.type!='follow'){
-					var i = a.createI(e.posts);
-					var Action = function(){
-						if(e.posts[i] > 0 || e.posts[i].done){
-							i++;
-							e.posts.length>i?Action():cb(e);
-							return;
-						}
-						timer(function() {
-							e.posts[i].done = true;
-							if(e.type=='like'){
-								a.tool.likeIt(e.posts[i])
-							}
-							if(e.type=='comment'){
-								a.tool.commentIt(e.posts[i], e.comments[random(0, e.comments.length-1)])
-							}
-							i++;
-							e.posts.length>i?Action():cb(e);
-						}, random(6000, 14000));
-					}
-					Action();
-				}else{
-					var i = a.createI(e.accounts);
-					var Action = function(){
-						if(e.accounts[i] > 0 || e.accounts[i].done){
-							i++;
-							e.accounts.length>i?Action():cb(e);
-							return;
-						}
-						timer(function() {
-							e.accounts[i].done = true;
-							a.tool.followIt(e.accounts[i])
-							i++;
-							e.accounts.length>i?Action():cb(e);
-						}, random(6000, 14000));
-					}
-					Action();
-				}
-			}
-			if(e.repeating){
-				var i = 0;
+			var t = function(cb){
+				var i = a.createI(e.posts);
 				var Action = function(){
+					if(!e.posts[i]){
+						cb(e)
+						return;
+					}
+					if(e.posts[i] > 0 || e.posts[i].done){
+						i++;
+						e.posts.length>i?Action():cb(e);
+						return;
+					}
 					timer(function() {
-						a.tool.getUser(e.accounts[i].username, function(res){
-							res&&e.posts.unshift(...res.edge_owner_to_timeline_media.edges.slice(0, e.settings.amount).map(e=>e.node))
-							i++;
+						e.posts[i].done = true;
+						if(e.types.includes('like')){
+							a.tool.likeIt(e.posts[i])
+						}
+						if(e.types.includes('comment')){
+							a.tool.commentIt(e.posts[i], e.comments[random(0, e.comments.length-1)])
+						}
+						if(e.types.includes('follow')){
+							a.tool.followIt(e.posts[i].owner)
+						}
+						i++;
+						e.posts.length>i?Action():cb(e);
+					}, random(e.types.length*6000, e.types.length*9000));
+				}
+				Action();
+			}
+			var i = a.createI(e.accounts);
+			var Action = function(){
+				timer(function() {
+					e.accounts[i].done = true;
+					a.tool.getUserPosts({name: e.accounts[i].username, count: Math.round(e.settings.amount / e.accounts.length)}, function(res){
+						console.log(res)
+						res&&e.posts.push(...res)
+						i++;
+						t(function(){
 							if(e.accounts.length>i){
 								Action()
 							}else{
-								e.posts.unshift(new Date().getTime())
-								t();
+								if(e.repeating)
+									e.posts.unshift(new Date().getTime())
+								console.log(e)
+								cb(e);
 							}
 						})
-					}, random(6000, 14000));
-				}
-				Action();
-			}else{
-				t();
+					})
+				}, random(6000, 16000));
 			}
+			Action();
 		},
 		feed: function(e, cb){
 			var t = function(data){
@@ -142,15 +133,15 @@ var a = {
 					}
 					timer(function() {
 						data[i].done = true;
-						if(e.type=='like'){
+						if(e.types.includes('like')){
 							a.tool.likeIt(data[i])
 						}
-						if(e.type=='comment'){
+						if(e.types.includes('comment')){
 							a.tool.commentIt(data[i], e.comments[random(0, e.comments.length-1)])
 						}
 						i++;
 						data.length>i?Action():cb(e);
-					}, random(6000, 14000));
+					}, random(e.types.length*6000, e.types.length*9000));
 				}
 				Action();
 			}
@@ -177,7 +168,7 @@ var a = {
 					e.accounts[i].done = true;
 					i++;
 					e.accounts.length>i?Action():cb(e);
-				}, random(6000, 14000));
+				}, random(6000, 9000));
 			}
 			Action();
 		},
@@ -197,13 +188,13 @@ var a = {
 						return;
 					}
 					timer(function() {
-						if(e.type=='like'){
+						if(e.types.includes('like')){
 							a.tool.likeIt(e.posts[i])
 						}
-						if(e.type=='comment'){
+						if(e.types.includes('comment')){
 							a.tool.commentIt(e.posts[i], e.comments[random(0, e.comments.length-1)])
 						}
-						if(e.type=='follow'){
+						if(e.types.includes('follow')){
 							a.tool.getPost(e.posts[i].shortcode, (res1)=>{
 								a.tool.getUser(res1.owner.username, function(res2){
 									a.tool.followIt(res2)
@@ -213,7 +204,7 @@ var a = {
 						e.posts[i].done = true;
 						i++;
 						e.posts.length>i?Action():cb(e);
-					}, random(6000, 14000));
+					}, random(e.types.length*6000, e.types.length*9000));
 				}
 				Action();
 			}
@@ -251,8 +242,8 @@ var a = {
 			a.readyUp()
 		}, 10*1000*60);
 	},
-	buildQue: function(tasks){
-		// data.userData.tasks.forEach((t, index)=>{t.id = index});
+	buildQue: function(isInterval){
+		// data.userData.tasks.forEach((t, index)=>{data.userData.tasks[index].id = index});
 		// var filtered = data.userData.tasks.filter(e=>e.enabled).filter(e=>!e.finished);
 		// data.userData.tasks = data.userData.tasks.filter(e=>e.section=='target');
 		var stopApp = true;
@@ -277,10 +268,10 @@ var a = {
 			if(!t.enabled) t.status = `Task is disabled`;
 			if(t.finished) t.status = `Task is completed`;
 		});
-		if(stopApp) a.resetOuts();
+		if(stopApp && !isInterval) a.resetOuts();
 		// data.userData.data.userData.tasks = filtered.sort(function(a, b){return a.timeStamp - b.timeStamp});
 		// data.userData.data.userData.tasks = [];
-		a.que = JSON.parse(JSON.stringify(data.userData.tasks)).sort(function(a, b){
+		a.que = _.cloneDeep(data.userData.tasks).sort(function(a, b){
 			return a.timeStamp - b.timeStamp
 		}).sort(function(a, b) {
 	        return (a.enabled === b.enabled)? 0 : a.enabled? -1 : 1;
@@ -289,9 +280,9 @@ var a = {
 	    }).sort(function(a, b) {
 	        return (a.running === b.running)? 0 : a.running? -1 : 1;
 	    })
-		a.que.forEach((t)=>{
-			t = data.userData.tasks[t.id];
-		})
+	    a.que.forEach((t, n)=>{
+	    	delete a.que[n].posts;
+	    })
 	},
 	init: function(){
 		console.log('init')
@@ -322,7 +313,7 @@ var a = {
 		// // })
 
 		a.buildQue();
-		if( ((data.user.daysLeft < 4 && data.user.daysLeft > 0) || data.user.purchased) && a.que.length && !!data.user.csrf_token && !a.isRunning && a.que[0].enabled && a.que[0].timeStamp<=Date.now() && !a.que[0].finished){
+		if( a.que[0] && data.userData.tasks[a.que[0].id] && ((data.user.daysLeft < 4 && data.user.daysLeft > -1) || data.user.purchased) && a.que.length && !!data.user.csrf_token && !a.isRunning && a.que[0].enabled && a.que[0].timeStamp<=Date.now() && !a.que[0].finished){
 			console.log('a task started')
 			data.userData.tasks[a.que[0].id].running = true;
 			a.que[0].status = data.userData.tasks[a.que[0].id].status = 'Working on it...'
@@ -332,8 +323,8 @@ var a = {
 				console.log('finished')
 				e.running = false;
 				a.isRunning = !1;
-				if(!e.settings.frequency) e.finished = true;
-				if(e.settings.frequency) e.timeStamp+=e.settings.frequency*60*60*1000;
+				if(!e.repeating) e.finished = true;
+				if(e.repeating) e.timeStamp+=e.settings.frequency*60*60*1000;
 				setTimeout(function() {
 					a.init();
 				}, 1000);
@@ -349,12 +340,12 @@ var a = {
 			a.tries++;
 			timer(function() {
 				a.init()
-			}, 60000);
+			}, 600000);
 		}
 
 
 	}
 }
-setTimeout(function() {
-	a.buildQue();
+setInterval(function() {
+	a.buildQue(true);
 }, 4000);
