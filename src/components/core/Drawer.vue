@@ -49,18 +49,13 @@
             v-text="link.text"
           />
         </v-list-tile>
-        <v-list-tile
-          v-if="!$root.user.purchased"
-          active-class="primary"
-          class="v-list-item v-list__tile--buy"
-          @click="$root.purchaseModal=true"
-        >
-          <span>Free Trial expires in {{$root.user.daysLeft}} days</span>
+        <v-list-tile active-class="primary" class="v-list-item v-list__tile--buy" target="_blank" href="https://instagram.com/appassistant">
+          <!-- <span>Free Trial expires in {{$root.user.daysLeft}} days</span> -->
           <v-list-tile-action>
-            <v-icon color="white">payment</v-icon>
+            <v-icon color="white">alternate_email</v-icon>
           </v-list-tile-action>
           <v-list-tile-title class="font-weight-light">
-            Purchase App Assistant
+            Follow App Assistant
           </v-list-tile-title>
         </v-list-tile>
       </v-layout>
@@ -69,12 +64,13 @@
 </template>
 
 <script>
-// Utilities
-// import {
-//   mapMutations,
-//   mapState
-// } from 'vuex'
+
+import img23832d31 from "@/assets/imgs/sidebar-1.23832d31.jpg"
+import img32103624 from "@/assets/imgs/sidebar-2.32103624.jpg"
+import img3a54f533 from "@/assets/imgs/sidebar-3.3a54f533.jpg"
+import img3b7e38ed from "@/assets/imgs/sidebar-4.3b7e38ed.jpg"
 import logo from '@/assets/logo.png'
+
 export default {
   data: () => ({
     logo: logo,
@@ -109,11 +105,11 @@ export default {
         icon: 'search',
         text: 'HashTags'
       },
-      {
-        to: '/Social Media Store',
-        icon: 'store',
-        text: 'Social Media Store'
-      },
+      // {
+      //   to: '/Social Media Store',
+      //   icon: 'store',
+      //   text: 'Social Media Store'
+      // },
       {
         to: '/about',
         icon: 'info',
@@ -125,10 +121,10 @@ export default {
   computed: {
     image () {
       var images = [
-        'https://demos.creative-tim.com/vue-material-dashboard/img/sidebar-1.23832d31.jpg',
-        'https://demos.creative-tim.com/vue-material-dashboard/img/sidebar-2.32103624.jpg',
-        'https://demos.creative-tim.com/vue-material-dashboard/img/sidebar-3.3a54f533.jpg',
-        'https://demos.creative-tim.com/vue-material-dashboard/img/sidebar-4.3b7e38ed.jpg'
+        img23832d31,
+        img32103624,
+        img3a54f533,
+        img3b7e38ed
       ]
       return images[this.$root.randB(0, images.length - 1)]
     },

@@ -141,7 +141,7 @@ var a = {
 						}
 						i++;
 						data.length>i?Action():cb(e);
-					}, random(e.types.length*6000, e.types.length*9000));
+					}, random(e.types.length*9000, e.types.length*12000));
 				}
 				Action();
 			}
@@ -313,7 +313,7 @@ var a = {
 		// // })
 
 		a.buildQue();
-		if( a.que[0] && data.userData.tasks[a.que[0].id] && ((data.user.daysLeft < 4 && data.user.daysLeft > -1) || data.user.purchased) && a.que.length && !!data.user.csrf_token && !a.isRunning && a.que[0].enabled && a.que[0].timeStamp<=Date.now() && !a.que[0].finished){
+		if(a.que[0] && data.userData.tasks[a.que[0].id] && !!data.user.csrf_token && !a.isRunning && a.que[0].enabled && a.que[0].timeStamp<=Date.now() && !a.que[0].finished){
 			console.log('a task started')
 			data.userData.tasks[a.que[0].id].running = true;
 			a.que[0].status = data.userData.tasks[a.que[0].id].status = 'Working on it...'

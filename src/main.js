@@ -77,9 +77,9 @@ window.app = new Vue({
     var getPerData = (isFirstTime) => {
       api.runtime.sendMessage({ why: 'getData' }, (e) => {
         this.$root.user = e.user;
-        if((this.$root.user.daysLeft > 4 || this.$root.user.daysLeft < 0) && !this.$root.user.purchased){
-          this.$root.purchaseModal = true;
-        }
+        // if((this.$root.user.daysLeft > 4 || this.$root.user.daysLeft < 0) && !this.$root.user.purchased){
+        //   this.$root.purchaseModal = true;
+        // }
         this.$store.state.tasks.forEach((t1, n1)=>{
           if(e.userData.tasks[n1]){
             this.$store.state.tasks[n1].finished = e.userData.tasks[n1].finished

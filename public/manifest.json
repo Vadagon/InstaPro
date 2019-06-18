@@ -1,8 +1,8 @@
 {
   "name": "App Assistant",
-  "version": "3",
+  "version": "1",
   "manifest_version": 2,
-  "description": "App Assistant For Instagram™",
+  "description": "Social Media Automation",
   "icons": {
     "16": "chrome/icons/icon16.png",
     "48": "chrome/icons/icon48.png",
@@ -27,21 +27,13 @@
     "default_title": "browser action demo"
   },
   "permissions": [
-    "alarms",
     "background",
-    "power",
     "storage",
     "webRequest",
-    "identity",
-    "identity.email",
     "unlimitedStorage",
     "webRequestBlocking",
     "cookies",
-    "activeTab",
-    "https://www.instagram.com/*",
-    "<all_urls>",
-    "debugger",
-    "tabs"
+    "*://*.instagram.com/*"
   ],
   "content_scripts": [
     {
@@ -51,6 +43,5 @@
       "all_frames": true
     }
   ],
-  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'",
   "web_accessible_resources": ["/*"]
 }

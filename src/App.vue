@@ -62,7 +62,7 @@
     <core-footer/>
 
 
-    <v-dialog v-model="$root.purchaseModal" persistent width="500">
+    <!-- <v-dialog v-model="$root.purchaseModal" persistent width="500">
       <v-card>
         <v-card-title class="headline grey lighten-2" primary-title>
           Purchase App Assistant
@@ -79,7 +79,7 @@
           </v-btn>
         </v-card-actions>
       </v-card>
-    </v-dialog>
+    </v-dialog> -->
 
 
   </v-app>
