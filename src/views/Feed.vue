@@ -110,15 +110,18 @@
         <v-divider></v-divider>
         <v-card-text style="height: 300px;">
           <v-layout row wrap>
-            <v-flex xs8>
+            <v-flex xs12>
               <v-checkbox :label="'Like all'" v-model="task.types" :value="'like'" my-0 py-0></v-checkbox>
             </v-flex>
-            <v-flex xs8>
+            <v-flex xs12>
               <v-checkbox :label="'Comment all'" v-model="task.types" :value="'comment'"></v-checkbox>
+              <l-comments :task="task" v-if="task.types.includes('comment')" />
+            </v-flex>
+            <v-flex xs12>
+              <v-checkbox :label="'Like comments'" v-model="task.types" :value="'comments'"></v-checkbox>
+              <v-slider :label="task.settings.lastComments+' latest comment'+(task.settings.lastComments>1?'s':'')" v-model="task.settings.lastComments" :max="5" :min="1" v-if="task.types.includes('comments')"></v-slider>
             </v-flex>
           </v-layout>
-          <!-- </v-radio-group> -->
-          <l-comments :task="task" v-if="task.types.includes('comment')" />
         </v-card-text>
         <v-divider></v-divider>
         <v-card-actions>
@@ -196,12 +199,15 @@ export default {
       type: 'like',
       descs: {
         like: 'Liking my feed',
+        like: 'Liking my feed',
         follow: 'Follow all',
         unfollow: 'Unollow all',
-        comment: 'Comment latest posts'
+        comment: 'Comment latest posts',
+        comments: 'Like latest comments'
       },
       settings: {
       	frequency: 0,
+        lastComments: 1,
         amount: 50
       },
       enabled: !0

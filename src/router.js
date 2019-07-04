@@ -51,6 +51,12 @@ export default new Router({
       props: true
     },
     {
+      path: '/requests',
+      name: 'requests',
+      component: () => import('./views/Requests.vue'),
+      props: true
+    },
+    {
       path: '/Social Media Store',
       name: 'Social Media Store',
       component: () => import('./views/Plans.vue'),

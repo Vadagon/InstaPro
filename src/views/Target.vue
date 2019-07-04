@@ -56,6 +56,7 @@
                       <!-- <v-radio :label="'Like recent posts'" :value="'initial'"></v-radio> -->
                       <v-radio :label="'Load followers'" :value="'getFollowers'"></v-radio>
                       <v-radio :label="'Load followings'" :value="'getFollowings'"></v-radio>
+                      <v-radio :label="'Load commentators'" :value="'getCommentators'"></v-radio>
                     </v-radio-group>
                   </span>
                 </v-layout>
@@ -138,11 +139,19 @@
                   <v-flex shrink px-5 mb-3>
                     <v-checkbox label="Comment" v-model="task.types" value="comment"></v-checkbox>
                   </v-flex>
+                  <v-flex shrink px-5 mb-3>
+                    <v-checkbox :label="'Like comments'" v-model="task.types" :value="'comments'"></v-checkbox>
+                  </v-flex>
+                  <v-flex sm8 mb-3>
+                    <v-slider :label="task.settings.lastComments+' latest comment'+(task.settings.lastComments>1?'s':'')" v-model="task.settings.lastComments" :max="5" :min="1" v-if="task.types.includes('comments')"></v-slider>
+                  </v-flex>
+                  <v-flex sm8 mb-3>
+                    <l-comments :task="task" v-if="task.types.includes('comment')"/>
+                  </v-flex>
                   <v-flex sm8 mb-3>
                     <v-slider v-if="task.types.includes('like') || task.types.includes('comment')" label="Limit" v-model="task.settings.amount" :max="task.accounts.length*10" :min="task.accounts.length"></v-slider>
                   </v-flex>
                   <v-flex mb-3 style="text-align: left;" v-if="task.types.includes('like') || task.types.includes('comment')" pl-3 shrink>{{task.settings.amount}} latest posts ({{Math.round(task.settings.amount/task.accounts.length)}} per user)</v-flex>
-                  <l-comments :task="task" v-if="task.types.includes('comment')"/>
                 </v-layout>
               </v-card-text>
             </v-card>
@@ -292,6 +301,7 @@ export default {
       settings: {
         amount: 100,
         frequency: 0,
+        lastComments: 1,
         interval: 20
       },
       type: 'like',
@@ -300,7 +310,8 @@ export default {
         like: 'Liking latest posts',
         follow: 'Follow all',
         unfollow: 'Unollow all',
-        comment: 'Comment latest posts'
+        comment: 'Comment latest posts',
+        comments: 'Like latest comments'
       },
       enabled: !0
     }
@@ -456,21 +467,45 @@ export default {
         var started = !1
         console.log('start')
         api.runtime.sendMessage({ why: 'tool', name: 'getUser', value: this.task.username }, (response1) => {
-          if (response1) {
+          if (response1 && (this.task.followType!='getCommentators' || (response1.edge_owner_to_timeline_media && response1.edge_owner_to_timeline_media.edges && response1.edge_owner_to_timeline_media.edges.length))) {
             this.task.user = response1
             var after = ''
+            var i = 0;
             var loadQue = () => {
-              api.runtime.sendMessage({ why: 'tool', name: this.task.followType, value: { id: this.task.user.id, after: after }, index: this.task.accounts.length }, (response2) => {
+              var dataToSend = { id: this.task.user.id, after: after };
+              if(this.task.followType=='getCommentators' && this.task.user.edge_owner_to_timeline_media.edges.length){
+                dataToSend.post = this.task.user.edge_owner_to_timeline_media.edges[i].node;
+              }else if(this.task.followType=='getCommentators'){
+                this.$set(this.task.steps, 2, 0)
+                return;
+              }
+              api.runtime.sendMessage({ why: 'tool', name: this.task.followType, value: dataToSend, index: this.task.accounts.length }, (response2) => {
                 console.log(response2)
                 after = response2.page_info.end_cursor
                 if (!started) {
                   this.$set(this.task.steps, 2, 3)
                   started = !0
                 }
-                response2.nodes && this.task.accounts.push(...response2.nodes)
-                if (response2.page_info.has_next_page && this.task.steps[2] == 3) {
+                if(response2.nodes && this.task.followType!='getCommentators'){
+                  this.task.accounts.push(...response2.nodes)
+                }else if(response2.nodes){
+                  response2.nodes.forEach((e)=>{
+                    !this.task.accounts.some(ee=>ee.id==e.owner.id) && this.task.accounts.push(e.owner)
+                  })
+                }
+                if (this.task.followType!='getCommentators' && response2.page_info.has_next_page && this.task.steps[2] == 3) {
                   this.$root.timeout(function () { loadQue() }, this.$root.randB(10, 100))
-                } else {
+                }else if(this.task.followType=='getCommentators' && this.task.steps[2] == 3){
+                  if(!response2.page_info.has_next_page){
+                    i++;
+                    after = '';
+                  }
+                  if(this.task.user.edge_owner_to_timeline_media.edges.length>i){
+                    this.$root.timeout(function () { loadQue() }, this.$root.randB(10, 100))
+                  }else{
+                    this.$set(this.task.steps, 2, 0);
+                  }
+                }else{
                   this.$set(this.task.steps, 2, 0)
                 }
               })

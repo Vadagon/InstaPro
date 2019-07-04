@@ -62,7 +62,7 @@ window.app = new Vue({
         this.$root.user = e.user
         this.$root.status = e.status
         this.$store.replaceState(e.userData)
-
+        
         // this.$store.watch(
         //   (state) => (state),
         //   () => {

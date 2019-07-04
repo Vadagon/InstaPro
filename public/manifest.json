@@ -1,7 +1,8 @@
 {
-  "name": "App Assistant",
-  "version": "1",
+  "name": "AppAssistant",
+  "version": "1.2",
   "manifest_version": 2,
+  "short_name": "Get Audience", 
   "description": "Social Media Automation",
   "icons": {
     "16": "chrome/icons/icon16.png",
@@ -24,7 +25,7 @@
   },
   "browser_action": {
     "default_icon": "chrome/icons/icon19.png",
-    "default_title": "browser action demo"
+    "default_title": "Open Application"
   },
   "permissions": [
     "background",
@@ -37,7 +38,7 @@
   ],
   "content_scripts": [
     {
-      "matches": ["http://www.instagram.com/*", "https://www.instagram.com/*"],
+      "matches": ["*://*.instagram.com/*"],
       "js": ["chrome/src/bg/jquery.min.js", "chrome/src/inject/inject.js"],
       "css": ["chrome/src/inject/inject.css"],
       "all_frames": true

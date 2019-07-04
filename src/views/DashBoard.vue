@@ -101,6 +101,7 @@ export default {
           locations: 'location_on',
           hashtags: 'search',
           feed: 'rss_feed',
+          requests: 'person_add'
         }
       }
     },

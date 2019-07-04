@@ -84,6 +84,23 @@ a.tool = {
         cb&&cb(!0)
       })
   },
+  likeComments: function(post, count, cb){
+    a.tool.getCommentators({post: post}, function(e){
+      e && e.node && e.nodes.slice(0, count).forEach((e, index)=>{
+        setTimeout(function() {
+          jax({
+              url: 'https://www.instagram.com/web/comments/like/'+e.id+'/',
+              type: 'post',
+              headers: {
+                'x-csrftoken': data.user.csrf_token,
+                'x-instagram-ajax': '1'
+              }
+          }).fail(e=>_Fail(cb))
+        }, 160*index);
+      })
+      cb&&cb(!0)
+    })
+  },
   getPost: function(id, cb){
     var jsonvars = {
       shortcode: id, 
@@ -271,8 +288,8 @@ a.tool = {
     jax('https://www.instagram.com/'+user.replace('@', '')+'/?__a=1').done((e)=>{
       catcher(()=>{
         return e.graphql.user;
-      })?cb(e.graphql.user):_Fail(cb)
-    }).fail(()=>{_Fail(cb)})
+      })?cb(e.graphql.user):_Fail(cb, {})
+    }).fail(()=>{_Fail(cb, {})})
   },
   getUserPosts: function(data, cb){
     a.tool.getUser(data.name, (response)=>{
@@ -305,8 +322,10 @@ a.tool = {
           t.node.checked = !0;
           return t.node;
         })})
+      }else{
+        cb([])
       }
-    }).fail((e)=>{cb(!1)})
+    }).fail(()=>{_Fail(cb, [])})
   },
   getFollowings: function(e, cb){
     var jsonvars = {
@@ -327,7 +346,57 @@ a.tool = {
           t.node.checked = !0;
           return t.node;
         })})
+      }else{
+        cb([])
       }
-    }).fail((e)=>{cb(!1)})
+    }).fail(()=>{_Fail(cb, [])})
+  },
+  getCommentators: function(e, cb){
+    var jsonvars = {
+        shortcode: e.post.shortcode,
+        child_comment_count:3,
+        fetch_comment_count:40, 
+        parent_comment_count:24,
+        has_threaded_comments:true,
+        first: 48
+    }
+    if (typeof e.after == 'string' && e.after != '') {
+      jsonvars.after = e.after;
+    }else{
+      jsonvars.after = '';
+    }
+    var urljsonvars = JSON.stringify(jsonvars);
+    var url = 'https://www.instagram.com/graphql/query/?query_hash=477b65a610463740ccdb83135b2014db&variables=' + encodeURIComponent(urljsonvars);
+    jax(url).done(function(e){
+      if(e.status == 'ok'){
+        cb({page_info: e.data.shortcode_media.edge_media_to_parent_comment.page_info, nodes: e.data.shortcode_media.edge_media_to_parent_comment.edges.map((t)=>{
+          t.node.owner.checked = !0;
+          return t.node;
+        })})
+      }else{
+        cb([])
+      }
+    }).fail(()=>{_Fail(cb, [])})
+  },
+  getRequestsList: function(e, cb){
+    jax('https://www.instagram.com/accounts/activity/?__a=1&include_reel=true').done(function(e){
+      if(e && e.graphql && e.graphql.user && e.graphql.user.edge_follow_requests){
+        cb(e.graphql.user.edge_follow_requests.edges.map(t=>t.node))
+      }else{
+        cb([])
+      }
+    }).fail(()=>{_Fail(cb, [])})
+  },
+  approve: function(e, cb){
+    jax({
+      url: `https://www.instagram.com/web/friendships/${e.id}/approve/`,
+      type: 'post',
+      headers: {
+        'x-csrftoken': data.user.csrf_token,
+        'x-instagram-ajax': '1'
+      }
+    }).done(function(e){
+      console.log(e)
+    }).fail(()=>{_Fail(cb)})
   }
 }

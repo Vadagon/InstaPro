@@ -142,6 +142,16 @@ export default {
     }
   },
   mounted () {
+    console.log(this.$root.user)
+    setTimeout(()=>{
+      console.log(this.$root.user)
+      if(this.$root.user.isPrivate) this.links.splice(6,0, {
+          to: '/requests',
+          icon: 'person_add',
+          text: 'Follow requests'
+        });
+    }, 1400);
+
     this.onResponsiveInverted()
     window.addEventListener('resize', this.onResponsiveInverted)
   },

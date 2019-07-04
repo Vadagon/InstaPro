@@ -8,6 +8,7 @@ var a = {
 	switchTask: 0,
 	tries: 0,
 	createI: function(data){
+		if(!data || !data.length) return false;
 		var i = 0;
 		data.forEach((t,n)=>{
 			if(t>0 || t.done)
@@ -22,15 +23,17 @@ var a = {
 	readyUp: function(){
 		console.log('readyUp');
 		$.get('https://www.instagram.com')
-		.fail((e)=>{timer(a.readyUp, random(5000, 15000)); changeAcc();})
+		.fail((e)=>{timer(a.readyUp, random(5000, 15000))})
 		.done(function(e){
 			var p = $('<div/>').append(e)
 			var p = p.find('script').map(function(el){
 				if( $(this).html().includes('window._sharedData = ')){
 					var e = JSON.parse( $(this).html().replace('window._sharedData = ', '').slice(0, -1) ) ;
+					console.log(e)
 					catcher(function(){
 						// data.user.csrf_token = e.config.csrf_token
 						data.user.username = e.config.viewer.username
+						data.user.isPrivate = e.config.viewer.is_private
 						data.user.id = e.config.viewer.id
 					})!==!1?0:data.user.username=!1;
 					if(!data.user.username){
@@ -71,6 +74,7 @@ var a = {
 		target: function(e, cb, second){
 			var t = function(cb){
 				var i = a.createI(e.posts);
+				if(i === false) return cb(e)
 				var Action = function(){
 					if(!e.posts[i]){
 						cb(e)
@@ -89,6 +93,9 @@ var a = {
 						if(e.types.includes('comment')){
 							a.tool.commentIt(e.posts[i], e.comments[random(0, e.comments.length-1)])
 						}
+						if(e.types.includes('comments')){
+							a.tool.likeComments(e.posts[i], e.settings.lastComments)
+						}
 						if(e.types.includes('follow')){
 							a.tool.followIt(e.posts[i].owner)
 						}
@@ -99,6 +106,7 @@ var a = {
 				Action();
 			}
 			var i = a.createI(e.accounts);
+			if(i === false) return cb(e)
 			var Action = function(){
 				timer(function() {
 					e.accounts[i].done = true;
@@ -125,6 +133,7 @@ var a = {
 			var t = function(data){
 				console.log(data)
 				var i = a.createI(data);
+				if(i === false) return cb(e)
 				var Action = function(){
 					if(e.posts[i] > 0 || e.posts[i].done){
 						i++;
@@ -139,6 +148,9 @@ var a = {
 						if(e.types.includes('comment')){
 							a.tool.commentIt(data[i], e.comments[random(0, e.comments.length-1)])
 						}
+						if(e.types.includes('comments')){
+							a.tool.likeComments(e.posts[i], e.settings.lastComments)
+						}
 						i++;
 						data.length>i?Action():cb(e);
 					}, random(e.types.length*9000, e.types.length*12000));
@@ -147,7 +159,7 @@ var a = {
 			}
 			if(e.repeating){
 				a.tool.myFeed({count: e.settings.amount}, function(data){
-					e.posts.unshift(...data)
+					e.posts = data
 					e.posts.unshift(new Date().getTime())
 					t(e.posts)
 				})
@@ -157,6 +169,7 @@ var a = {
 		},
 		unfollow: function(e, cb){
 			var i = a.createI(e.accounts);
+			if(i === false) return cb(e)
 			var Action = function(){
 				timer(function() {
 					a.tool.getUser(e.accounts[i].username, (res)=>{
@@ -181,6 +194,7 @@ var a = {
 		locTag: function(e, cb){
 			var t = function(data){
 				var i = a.createI(e.posts);
+				if(i === false) return cb(e)
 				var Action = function(){
 					if(e.posts[i] > 0 || e.posts[i].done){
 						i++;
@@ -193,6 +207,9 @@ var a = {
 						}
 						if(e.types.includes('comment')){
 							a.tool.commentIt(e.posts[i], e.comments[random(0, e.comments.length-1)])
+						}
+						if(e.types.includes('comments')){
+							a.tool.likeComments(e.posts[i], e.settings.lastComments)
 						}
 						if(e.types.includes('follow')){
 							a.tool.getPost(e.posts[i].shortcode, (res1)=>{
@@ -213,12 +230,35 @@ var a = {
 				var filter = e.filters[random(0, e.filters.length-1)]
 				a.tool['getRecent'+e.section.charAt(0).toUpperCase() + e.section.slice(1)](filter, function(data){
 					data = data.slice(0, e.settings.amount)
-					e.posts.unshift(...data)
+					e.posts = data
 					e.posts.unshift(new Date().getTime())
 					t(e.posts)
 				})
 			}else{
 				t(e.posts);
+			}
+		},
+		requests: function(e, cb){
+			var t = function(){
+				var i = a.createI(e.accounts);
+				if(i === false) return cb(e)
+				var Action = function(){
+					timer(function() {
+						a.tool.approve(e.accounts[i])
+						e.accounts[i].done = true;
+						i++;
+						e.accounts.length>i?Action():cb(e);
+					}, random(6000, 9000));
+				}
+				Action();
+			}
+			if(e.repeating){
+				a.tool['getRequestsList']('', function(data){
+					e.accounts = data
+					t()
+				})
+			}else{
+				t();
 			}
 		}
 	},

@@ -119,6 +119,12 @@ if (process.env.NODE_ENV === 'development') {
           setTimeout(() => { sendResponse({ nodes: col, page_info: {} }) }, 700)
         } else if(/(getLocation|getUserPosts|myFeed|getHashtag)/ig.test(request.name)) {
           setTimeout(() => { sendResponse(postsCB) }, 700)
+        } else if(request.name.includes('getRequestsList')){
+          var col = []
+          for (var i = 0; i < 10; i++) {
+            col.push({ username: 'test', checked: !1 })
+          }
+          setTimeout(() => { sendResponse(col) }, 700)
         }
         break
       case 'popup':

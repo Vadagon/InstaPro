@@ -1,7 +1,28 @@
 .none{
   display: none;
 }
-
+.requestAvatar{
+  position: relative;
+  // &:hover {
+  //   .v-avatar::after{
+  //     background-color: rgba(0,0,0,.5);
+  //     position: absolute;
+  //     top: 0;
+  //     left: 0;
+  //     width: 40px;
+  //     height: 40px;
+  //     content: 'person_add';
+  //     font-family: "Material Icons";
+  //     cursor: pointer;
+  //     color: white;
+  //     font-size: 27px;
+  //     border-radius: 50%;
+  //   }
+  //   .v-avatar:hover::after{
+  //     color: #b44be4;
+  //   }
+  // }
+}
 .v-list__tile--buy{
   position: relative;
   > a > span{
