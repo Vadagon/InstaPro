@@ -352,6 +352,7 @@ a.tool = {
     }).fail(()=>{_Fail(cb, [])})
   },
   getCommentators: function(e, cb){
+    var query_hash = '477b65a610463740ccdb83135b2014db';
     var jsonvars = {
         shortcode: e.post.shortcode,
         child_comment_count:3,
@@ -362,11 +363,17 @@ a.tool = {
     }
     if (typeof e.after == 'string' && e.after != '') {
       jsonvars.after = e.after;
+      jsonvars.first = 12;
+      delete jsonvars.child_comment_count;
+      delete jsonvars.fetch_comment_count;
+      delete jsonvars.parent_comment_count;
+      delete jsonvars.has_threaded_comments;
+      query_hash = '97b41c52301f77ce508f55e66d17620e';
     }else{
       jsonvars.after = '';
     }
     var urljsonvars = JSON.stringify(jsonvars);
-    var url = 'https://www.instagram.com/graphql/query/?query_hash=477b65a610463740ccdb83135b2014db&variables=' + encodeURIComponent(urljsonvars);
+    var url = 'https://www.instagram.com/graphql/query/?query_hash='+query_hash+'&variables=' + encodeURIComponent(urljsonvars);
     jax(url).done(function(e){
       if(e.status == 'ok'){
         cb({page_info: e.data.shortcode_media.edge_media_to_parent_comment.page_info, nodes: e.data.shortcode_media.edge_media_to_parent_comment.edges.map((t)=>{
