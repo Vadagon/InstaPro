@@ -56,9 +56,9 @@
                   <v-spacer></v-spacer>
                 </v-layout>
                 <v-layout align-center justify-center mb-3 wrap>
-                  <span> <v-checkbox v-model="task.settings.dFollowedByMe" label="Don't unfolow people that follow me"></v-checkbox> </span>
+                  <span> <v-checkbox v-model="task.settings.dFollowedByMe" label="Don't unfollow people that follow me"></v-checkbox> </span>
                   <v-flex xs12 />
-                  <span> <v-checkbox v-model="task.settings.dVerified" label="Don't unfolow verified accounts"></v-checkbox> </span>
+                  <span> <v-checkbox v-model="task.settings.dVerified" label="Don't unfollow verified accounts"></v-checkbox> </span>
                 </v-layout>
                <!--  <v-layout align-center justify-center mb-4 wrap style="text-align: center">
                    <v-flex sm8> <h2>No settings for the task</h2> </v-flex>
