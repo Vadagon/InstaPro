@@ -387,5 +387,5 @@ var a = {
 	}
 }
 setInterval(function() {
-	a.buildQue(true);
+	a.init();
 }, 4000);

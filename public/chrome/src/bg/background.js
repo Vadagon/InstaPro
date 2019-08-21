@@ -111,8 +111,13 @@ chrome.storage.local.get(["data", "rss"], function(items) {
 //   }
 // });
 function memberShip(){
-	if(data.user.lastDay != dayToday())
+	if(data.user.lastDay != dayToday()){
 		a.rss = [];
+		data.userData.tasks.forEach((task)=>{
+			if(task.finished || task.repeating)
+				task.posts = [];
+		})
+	}
 	data.user.lastDay = dayToday();
 	data.user.daysLeft = data.user.firstDay - data.user.lastDay + 3;
 }

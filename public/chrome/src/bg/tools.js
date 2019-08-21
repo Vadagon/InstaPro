@@ -19,6 +19,27 @@ var _Fail = function(cb){
     return;
   }
 }
+function sortData(data, type){
+  function trashData(e){
+      delete e.edge_media_to_comment;
+      delete e.edge_media_preview_comment;
+      delete e.attribution;
+      delete e.accessibility_caption;
+      delete e.dimensions;
+      delete e.location;
+      delete e.tracking_token;
+      delete e.media_preview;
+      delete e.thumbnail_resources;
+      if(e.display_resources && e.display_resources.length) e.display_resources = [e.display_resources.shift()];
+
+      return e;
+  }
+  if(Array.isArray(data)){
+    return data.map(e=>trashData(e))
+  }else{
+    return trashData(data)
+  }
+}
 a.tool = {
   likeIt: function(post, cb){
     forceTimes = 0;
@@ -31,7 +52,7 @@ a.tool = {
             'x-instagram-ajax': '1'
           }
       }).fail(e=>_Fail(cb)).done((e)=>{
-        a.rss.push({type: 'like', value: post}) 
+        a.rss.push({type: 'like', value: sortData(post)}) 
         cb&&cb(!0)
       })
   },
@@ -80,7 +101,7 @@ a.tool = {
             xhr.setRequestHeader('x-instagram-ajax', '1');
         }
       }).fail(e=>_Fail(cb)).done((e)=>{
-        a.rss.push({type: 'comment', value: post, comment: comment}) 
+        a.rss.push({type: 'comment', value: sortData(post), comment: comment}) 
         cb&&cb(!0)
       })
   },
@@ -111,12 +132,12 @@ a.tool = {
     }
     var urljsonvars = JSON.stringify(jsonvars);
     jax('https://www.instagram.com/graphql/query/?query_hash=477b65a610463740ccdb83135b2014db&variables='+encodeURIComponent(urljsonvars))
-    .fail(e=>_Fail(cb)).done(e=>e.status=="ok"?cb(e.data.shortcode_media):_Fail(cb));
+    .fail(e=>_Fail(cb)).done(e=>e.status=="ok"?cb(sortData(e.data.shortcode_media)):_Fail(cb));
   },
   getRecentHashtags: function(tag, cb){
     jax('https://www.instagram.com/explore/tags/'+tag+'/?__a=1').done(function(e){
       cb(catcher(function(){
-        return e.graphql.hashtag.edge_hashtag_to_media.edges.map(t=>t.node);
+        return sortData(e.graphql.hashtag.edge_hashtag_to_media.edges.map(t=>t.node));
       }))
     }).fail(a.init.bind(!1))
   },
@@ -144,7 +165,7 @@ a.tool = {
         }
         jax(url)
         .fail(e=>{
-          cb(collection.slice(0, e.count));
+          cb(sortData(collection.slice(0, e.count)));
         })
         .done(data=>{
           if(!after){
@@ -152,7 +173,7 @@ a.tool = {
               collection.push(...data.graphql.hashtag.edge_hashtag_to_media.edges.map(t=>t.node));
               get(data.graphql.hashtag.edge_hashtag_to_media.page_info.end_cursor, data.graphql.hashtag.id)
             }else{
-              cb(collection.slice(0, e.count));
+              cb(sortData(collection.slice(0, e.count)));
             }
           }else{
             if(data.status=="ok"){
@@ -160,10 +181,10 @@ a.tool = {
               if(data.data.hashtag.edge_hashtag_to_media.page_info.has_next_page && collection.length < e.count){
                 get(data.data.hashtag.edge_hashtag_to_media.page_info.end_cursor, id)
               }else{
-                cb(collection.slice(0, e.count));
+                cb(sortData(collection.slice(0, e.count)));
               }
             }else{
-              cb(collection.slice(0, e.count));
+              cb(sortData(collection.slice(0, e.count)));
             }
             // e.status=="ok"?cb(e.data.user.edge_web_feed_timeline.edges.map(t=>t.node)):cb(collection)
           }
@@ -178,7 +199,7 @@ a.tool = {
   getRecentLocations: function(tag, cb) {
     jax('https://www.instagram.com/explore/tags/'+tag+'/?__a=1').done(function(e){
       cb(catcher(function(){
-        return e.graphql.hashtag.edge_hashtag_to_media.edges.map(t=>t.node);
+        return sortData(e.graphql.hashtag.edge_hashtag_to_media.edges.map(t=>t.node));
       }))
     }).fail(a.init.bind(!1))
 
@@ -206,7 +227,7 @@ a.tool = {
         }
         jax(url)
         .fail(e=>{
-          cb(collection.slice(0, e.count));
+          cb(sortData(collection.slice(0, e.count)));
         })
         .done(data=>{
           if(!after){
@@ -214,7 +235,7 @@ a.tool = {
               collection.push(...data.graphql.location.edge_location_to_media.edges.map(t=>t.node));
               get(data.graphql.location.edge_location_to_media.page_info.end_cursor, data.graphql.location.id)
             }else{
-              cb(collection.slice(0, e.count));
+              cb(sortData(collection.slice(0, e.count)));
             }
           }else{
             if(data.status=="ok"){
@@ -222,10 +243,10 @@ a.tool = {
               if(data.data.location.edge_location_to_media.page_info.has_next_page && collection.length < e.count){
                 get(data.data.location.edge_location_to_media.page_info.end_cursor, id)
               }else{
-                cb(collection.slice(0, e.count));
+                cb(sortData(collection.slice(0, e.count)));
               }
             }else{
-              cb(collection.slice(0, e.count));
+              cb(sortData(collection.slice(0, e.count)));
             }
             // e.status=="ok"?cb(e.data.user.edge_web_feed_timeline.edges.map(t=>t.node)):cb(collection)
           }
@@ -264,11 +285,11 @@ a.tool = {
             collected.push(...response);
             load(after);
           }else{
-            cb(collected.slice(0, e.count))
+            cb(sortData(collected.slice(0, e.count)))
           }
         })
       }else{
-        cb(collected.slice(0, e.count))
+        cb(sortData(collected.slice(0, e.count)))
       }
     }
     load('');
@@ -294,7 +315,7 @@ a.tool = {
   getUserPosts: function(data, cb){
     a.tool.getUser(data.name, (response)=>{
       if(response && response.edge_owner_to_timeline_media){
-        cb(response.edge_owner_to_timeline_media.edges.map(t=>t.node).slice(0, data.count));
+        cb(sortData(response.edge_owner_to_timeline_media.edges.map(t=>t.node).slice(0, data.count)));
       }else{
         cb([])
       }
