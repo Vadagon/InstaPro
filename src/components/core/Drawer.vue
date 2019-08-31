@@ -105,6 +105,11 @@ export default {
         icon: 'search',
         text: 'HashTags'
       },
+      {
+        to: '/story',
+        icon: 'query_builder',
+        text: 'Watch Stories'
+      },
       // {
       //   to: '/Social Media Store',
       //   icon: 'store',

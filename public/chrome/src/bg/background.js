@@ -12,6 +12,7 @@ chrome.browserAction.onClicked.addListener(function () {
 var data = {
 	tasks: [],
 	user: {
+		rateLimit: false,
 		daysLeft: 3,
 		lastDay: dayToday(),
 		firstDay: dayToday(),

@@ -20,45 +20,20 @@
               <v-card-text>
                 <v-layout align-center mb-3>
                   <v-avatar color="purple lighten-5" class="mr-3">
-                    <v-icon>account_circle</v-icon>
+                    <v-icon>query_builder</v-icon>
                   </v-avatar>
-                  <strong class="title">Target</strong>
+                  <strong class="title">Watch Stories</strong>
                   <v-spacer></v-spacer>
                 </v-layout>
                 <v-layout align-center mb-3>
                   <v-flex justify-center>
-                    <h3 class="subheading mb-4">Enter the name of person to load followers/followings</h3>
+                    <h3 class="subheading mb-4">Enter the name of person to load followers stories</h3>
                     <v-layout align-center justify-center class="mb-3">
                       <span>
                         <v-text-field label="username" placeholder="@the_rock" v-model="task.username" outline></v-text-field>
                       </span>
                     </v-layout>
                   </v-flex>
-                </v-layout>
-
-              </v-card-text>
-            </v-card>
-          </v-window-item>
-
-          <v-window-item :key="1">
-            <v-card flat>
-              <v-card-text>
-                <v-layout align-center mb-3>
-                  <v-avatar color="purple lighten-5" class="mr-3">
-                    <v-icon>account_circle</v-icon>
-                  </v-avatar>
-                  <strong class="title">Target</strong>
-                  <v-spacer></v-spacer>
-                </v-layout>
-                <v-layout align-center justify-center mb-3>
-                  <span>
-                    <v-radio-group v-model="task.followType">
-                      <!-- <v-radio :label="'Like recent posts'" :value="'initial'"></v-radio> -->
-                      <v-radio :label="'Load followers'" :value="'getFollowers'"></v-radio>
-                      <v-radio :label="'Load followings'" :value="'getFollowings'"></v-radio>
-                      <v-radio :label="'Load commenters'" :value="'getCommentators'"></v-radio>
-                    </v-radio-group>
-                  </span>
                 </v-layout>
 
               </v-card-text>
@@ -97,7 +72,7 @@
                     <v-flex xs4 md3 v-for="s in task.accounts" mb-2>
                       <v-layout align-left row wrap justify-left>
                         <v-list-tile-avatar>
-                          <img @click="s.checked = !s.checked" alt="profile" v-bind:src="s.profile_pic_url" v-bind:class="{'active-profile': s.checked}">
+                          <img @click="s.checked = !s.checked" alt="profile" style="border: 2px solid #d82c7c !important;" v-bind:src="s.profile_pic_url" v-bind:class="{'active-profile': s.checked}">
                         </v-list-tile-avatar>
                         <a v-bind:href="'https://www.instagram.com/'+s.username" target="_blank" class="body-2 mt-2 overflow-hidden" style="position: absolute; left: 55px; top: -14px; font-size: 12px !important; color: grey;">{{s.username}}</a>
                         <span class="body-2 mt-2 overflow-hidden" style="font-size: 14px!important; width: calc(100% - 80px); text-align: left; margin-top: 12px !important;">{{s.full_name}}</span>
@@ -105,54 +80,6 @@
                     </v-flex>
                 </v-layout>
 
-              </v-card-text>
-            </v-card>
-          </v-window-item>
-
-          <v-window-item :key="3">
-            <v-card flat>
-              <v-card-text>
-                <v-layout align-center mb-3>
-                  <v-avatar color="purple lighten-5" class="mr-3">
-                    <v-icon>group_work</v-icon>
-                  </v-avatar>
-                  <strong class="title">Actions</strong>
-                  <v-spacer></v-spacer>
-                </v-layout>
-                <!-- <v-layout align-center justify-center mb-3>
-                  <span>
-                    <v-radio-group v-model="task.type" v-on:change="descriptionChange()">
-                      <v-radio :label="'Like latest posts'" :value="'like'"></v-radio>
-                      <v-radio :label="'Follow all'" :value="'follow'"></v-radio>
-                      <v-radio :label="'Comment latest posts'" :value="'comment'"></v-radio>
-                    </v-radio-group>
-                  </span>
-                </v-layout> -->
-                <!-- <l-comments :task="task" v-if="task.type=='comment'" /> -->
-                <v-layout align-center justify-center wrap>
-                  <v-flex shrink px-5 mb-3>
-                    <v-checkbox label="Like" v-model="task.types" value="like"></v-checkbox>
-                  </v-flex>
-                  <v-flex shrink px-5 mb-3>
-                    <v-checkbox label="Follow" v-model="task.types" value="follow"></v-checkbox>
-                  </v-flex>
-                  <v-flex shrink px-5 mb-3>
-                    <v-checkbox label="Comment" v-model="task.types" value="comment"></v-checkbox>
-                  </v-flex>
-                  <v-flex shrink px-5 mb-3>
-                    <v-checkbox :label="'Like comments'" v-model="task.types" :value="'comments'"></v-checkbox>
-                  </v-flex>
-                  <v-flex sm8 mb-3>
-                    <v-slider :label="task.settings.lastComments+' latest comment'+(task.settings.lastComments>1?'s':'')" v-model="task.settings.lastComments" :max="5" :min="1" v-if="task.types.includes('comments')"></v-slider>
-                  </v-flex>
-                  <v-flex sm8 mb-3>
-                    <l-comments :task="task" v-if="task.types.includes('comment')"/>
-                  </v-flex>
-                  <v-flex sm8 mb-3>
-                    <v-slider v-if="task.types.includes('like') || task.types.includes('comment')" label="Limit" v-model="task.settings.amount" :max="task.accounts.length*10" :min="task.accounts.length"></v-slider>
-                  </v-flex>
-                  <v-flex mb-3 style="text-align: left;" v-if="task.types.includes('like') || task.types.includes('comment')" pl-3 shrink>{{task.settings.amount}} latest posts ({{Math.round(task.settings.amount/task.accounts.length)}} per user)</v-flex>
-                </v-layout>
               </v-card-text>
             </v-card>
           </v-window-item>
@@ -165,18 +92,18 @@
           <span v-if="window==task.steps.length-1">finish</span>
         </v-btn>
         <v-btn color="warning" class="next" @click="nextStep(window)" v-if="task.steps[window]==2">re continue</v-btn>
-        <v-btn @click="$set(task.steps, 2, 0)" v-if="task.steps[window]==3" style="min-width: 30px; margin-left: 0;" color="white" class="next"><v-icon color="red">close</v-icon></v-btn>
+        <v-btn @click="$set(task.steps, 1, 0)" v-if="task.steps[window]==3" style="min-width: 30px; margin-left: 0;" color="white" class="next"><v-icon color="red">close</v-icon></v-btn>
 
       </v-flex>
     </v-layout>
 
 
-
-    <v-layout align-center justify-center content-created row wrap white elevation-2 mx-5 pa-4 v-if="step > 0 && task.dateCreated && task.types.includes('follow') && task.types.length==1">
+    
+    <v-layout align-center justify-center content-created row wrap white elevation-2 mx-5 pa-4 v-if="step > 0 && task.dateCreated && task.types.includes('story') && task.types.length==1">
       <v-flex xs4 md3 v-for="s in task.accounts" mb-2>
         <v-layout align-left row wrap justify-left style="position: relative;">
           <v-list-tile-avatar v-bind:class="{'done-profile': s.done}">
-            <img alt="profile" v-bind:src="s.profile_pic_url" v-bind:class="{'active-profile': s.checked}">
+            <img alt="profile" v-bind:src="s.profile_pic_url" style="border: 2px solid #d82c7c !important;" v-bind:class="{'active-profile': s.checked}">
           </v-list-tile-avatar>
           <a v-bind:href="'https://www.instagram.com/'+s.username" target="_blank" class="body-2 mt-2 overflow-hidden" style="position: absolute; left: 55px; top: -14px; font-size: 12px !important; color: grey;">{{s.username}}</a>
           <span class="body-2 mt-2 overflow-hidden" style="font-size: 14px!important; width: calc(100% - 80px); text-align: left; margin-top: 12px !important;">{{s.full_name}}</span>
@@ -196,9 +123,9 @@
         <v-btn v-if="step==1" fab color="primary" @click="TaskModal = true;">
           <v-icon color="white">play_arrow</v-icon>
         </v-btn>
-        <v-btn v-if="step==2" fab color="primary" @click="BgTaskModal = true;">
+        <!-- <v-btn v-if="step==2" fab color="primary" @click="BgTaskModal = true;">
           <v-icon color="white">{{task.repeating?'settings':'repeat'}}</v-icon>
-        </v-btn>
+        </v-btn> -->
       </v-flex>
       <v-flex sm12></v-flex>
       <v-flex xs12 v-if="step==2 && !task.finished">
@@ -276,7 +203,7 @@
 import Comments from '@/components/Comments.vue'
 // import HelloWorld from '@/components/HelloWorld.vue'
 export default {
-  name: 'target',
+  name: 'story',
   data: () => ({
     length: 1,
     window: 0,
@@ -289,11 +216,11 @@ export default {
     task: {
       uni: new Date().getTime(),
       repeating: false,
-      steps: [0, 0, 0, 0],
+      steps: [0, 0],
       draft: !0,
-      followType: 'getFollowers',
+      followType: 'getFollowersStories',
       comments: [],
-      section: 'target',
+      section: 'story',
       username: '',
       user: {},
       posts: [],
@@ -304,10 +231,11 @@ export default {
         lastComments: 1,
         interval: 20
       },
-      type: 'like',
-      types: ['like'],
+      type: 'story',
+      types: ['story'],
       descs: {
         like: 'Liking latest posts',
+        story: 'Wathing stories',
         follow: 'Follow all',
         unfollow: 'Unollow all',
         comment: 'Comment latest posts',
@@ -439,8 +367,9 @@ export default {
           this.window = e + 1
           this.length = e + 2
           this.task.accounts = this.task.accounts.filter(e => e.checked)
-        }else {
+        }else{
           if(this.onlyFollow){
+            this.task.accounts = this.task.accounts.filter(e => e.checked)
             this.task.dateCreated = new Date().getTime();
             this.task.settings.frequency = 0
             this.task.repeating = false;
@@ -461,8 +390,8 @@ export default {
           this.$set(this.task.steps, i, 0)
         }
       }
-      if (e == 1) {
-        this.$set(this.task.steps, 2, 1)
+      if (e == 0) {
+        this.$set(this.task.steps, 1, 1)
         next()
         var started = !1
         console.log('start')
@@ -476,14 +405,14 @@ export default {
               if(this.task.followType=='getCommentators' && this.task.user.edge_owner_to_timeline_media.edges.length){
                 dataToSend.post = this.task.user.edge_owner_to_timeline_media.edges[i].node;
               }else if(this.task.followType=='getCommentators'){
-                this.$set(this.task.steps, 2, 0)
+                this.$set(this.task.steps, 1, 0)
                 return;
               }
               api.runtime.sendMessage({ why: 'tool', name: this.task.followType, value: dataToSend, index: this.task.accounts.length }, (response2) => {
                 console.log(response2)
                 after = response2.page_info.end_cursor
                 if (!started) {
-                  this.$set(this.task.steps, 2, 3)
+                  this.$set(this.task.steps, 1, 3)
                   started = !0
                 }
                 if(response2.nodes && this.task.followType!='getCommentators'){
@@ -493,9 +422,9 @@ export default {
                     !this.task.accounts.some(ee=>ee.id==e.owner.id) && this.task.accounts.push(e.owner)
                   })
                 }
-                if (this.task.followType!='getCommentators' && response2.page_info.has_next_page && this.task.steps[2] == 3) {
+                if (this.task.followType!='getCommentators' && response2.page_info.has_next_page && this.task.steps[1] == 3) {
                   this.$root.timeout(function () { loadQue() }, this.$root.randB(10, 100))
-                }else if(this.task.followType=='getCommentators' && this.task.steps[2] == 3){
+                }else if(this.task.followType=='getCommentators' && this.task.steps[1] == 3){
                   if(!response2.page_info.has_next_page){
                     i++;
                     after = '';
@@ -503,10 +432,10 @@ export default {
                   if(this.task.user.edge_owner_to_timeline_media.edges.length>i){
                     this.$root.timeout(function () { loadQue() }, this.$root.randB(10, 100))
                   }else{
-                    this.$set(this.task.steps, 2, 0);
+                    this.$set(this.task.steps, 1, 0);
                   }
                 }else{
-                  this.$set(this.task.steps, 2, 0)
+                  this.$set(this.task.steps, 1, 0)
                 }
               })
             }

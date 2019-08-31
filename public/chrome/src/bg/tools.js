@@ -1,20 +1,15 @@
 var forceTimes = 0;
-var forceReloadChecker =  function(){
-  setInterval(function() {
-    forceTimes++;
-    if(forceTimes>10)
-      a.resetOuts();
-  }, 600000);
-};
 jax = function(e){
   var aj = $.ajax(e);
   a.requests.push(aj)
   return aj;
 }
-var _Fail = function(cb){
+var _Fail = function(cb, res){
   cb&&cb(!1)
   a.tries++;
-  if(a.tries > 4){
+  if(a.tries > 1){
+    if(res.status == 403) data.user.rateLimit = 'soft';
+    if(res.status == 400) data.user.rateLimit = 'hard';
     a.resetOuts();
     return;
   }
@@ -51,7 +46,7 @@ a.tool = {
             'x-csrftoken': data.user.csrf_token,
             'x-instagram-ajax': '1'
           }
-      }).fail(e=>_Fail(cb)).done((e)=>{
+      }).fail(e=>_Fail(cb, e)).done((e)=>{
         a.rss.push({type: 'like', value: sortData(post)}) 
         cb&&cb(!0)
       })
@@ -66,7 +61,7 @@ a.tool = {
             xhr.setRequestHeader('x-csrftoken', data.user.csrf_token);
             xhr.setRequestHeader('x-instagram-ajax', '1');
         }
-      }).fail(e=>_Fail(cb)).done((e)=>{
+      }).fail(e=>_Fail(cb, e)).done((e)=>{
         a.rss.push({type: 'follow', value: user}) 
         cb&&cb(!0)
       })
@@ -81,7 +76,7 @@ a.tool = {
             xhr.setRequestHeader('x-csrftoken', data.user.csrf_token);
             xhr.setRequestHeader('x-instagram-ajax', '1');
         }
-      }).fail(e=>_Fail(cb)).done((e)=>{
+      }).fail(e=>_Fail(cb, e)).done((e)=>{
         a.rss.push({type: 'unfollow', value: user}) 
         cb&&cb(!0)
       })
@@ -100,7 +95,7 @@ a.tool = {
             xhr.setRequestHeader('x-csrftoken', data.user.csrf_token);
             xhr.setRequestHeader('x-instagram-ajax', '1');
         }
-      }).fail(e=>_Fail(cb)).done((e)=>{
+      }).fail(e=>_Fail(cb, e)).done((e)=>{
         a.rss.push({type: 'comment', value: sortData(post), comment: comment}) 
         cb&&cb(!0)
       })
@@ -116,11 +111,14 @@ a.tool = {
                 'x-csrftoken': data.user.csrf_token,
                 'x-instagram-ajax': '1'
               }
-          }).fail(e=>_Fail(cb))
+          }).fail(e=>_Fail(cb, e))
         }, 160*index);
       })
       cb&&cb(!0)
     })
+  },
+  watchUserStory: function(user, cb){
+
   },
   getPost: function(id, cb){
     var jsonvars = {
@@ -336,7 +334,7 @@ a.tool = {
     if (e.after != '') {
         url = url + '&after=' + e.after;
     }
-    jax(url).done(function(e){
+    $.ajax(url).done(function(e){
       console.log(e)
       if(e.status == 'ok'){
         cb({page_info: e.data.user.edge_followed_by.page_info, nodes: e.data.user.edge_followed_by.edges.map((t)=>{
@@ -360,13 +358,44 @@ a.tool = {
     }
     var urljsonvars = JSON.stringify(jsonvars);
     var url = 'https://www.instagram.com/graphql/query/?query_hash=58712303d941c6855d4e888c5f0cd22f&variables=' + encodeURIComponent(urljsonvars);
-    jax(url).done(function(e){
+    $.ajax(url).done(function(e){
       console.log(e)
       if(e.status == 'ok'){
         cb({page_info: e.data.user.edge_follow.page_info, nodes: e.data.user.edge_follow.edges.map((t)=>{
           t.node.checked = !0;
           return t.node;
         })})
+      }else{
+        cb([])
+      }
+    }).fail(()=>{_Fail(cb, [])})
+  },
+  getFollowersStories: function(e, cb){
+    var jsonvars = {
+        id: e.id.toString(),
+        include_reel: true,
+        first: 48
+    }
+    if (typeof e.after == 'string' && e.after != '') {
+      jsonvars.after = e.after;
+    }else{
+      jsonvars.after = '';
+    }
+    var urljsonvars = JSON.stringify(jsonvars);
+    var url = 'https://www.instagram.com/graphql/query/?query_hash=c76146de99bb02f6415203be841dd25a&variables=' + encodeURIComponent(urljsonvars);
+    if (e.after != '') {
+        url = url + '&after=' + e.after;
+    }
+    $.ajax(url).done(function(e){
+      console.log(e)
+      if(e.status == 'ok'){
+        cb({page_info: e.data.user.edge_followed_by.page_info, nodes: e.data.user.edge_followed_by.edges.map((t)=>{
+          t.node.checked = !0;
+          return t.node;
+        }).filter(e=>{
+          if(!e.reel || !e.reel.expiring_at) return false;
+          return ((Date.now()/1000/60/60 - e.reel.expiring_at/60/60) < 23)
+        }) })
       }else{
         cb([])
       }
@@ -395,7 +424,7 @@ a.tool = {
     }
     var urljsonvars = JSON.stringify(jsonvars);
     var url = 'https://www.instagram.com/graphql/query/?query_hash='+query_hash+'&variables=' + encodeURIComponent(urljsonvars);
-    jax(url).done(function(e){
+    $.ajax(url).done(function(e){
       if(e.status == 'ok'){
         cb({page_info: e.data.shortcode_media.edge_media_to_parent_comment.page_info, nodes: e.data.shortcode_media.edge_media_to_parent_comment.edges.map((t)=>{
           t.node.owner.checked = !0;

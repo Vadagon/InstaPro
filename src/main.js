@@ -41,6 +41,7 @@ window.app = new Vue({
   router,
   store,
   data: {
+    rateLimit: false,
     drawer: null,
     user: {},
     rss: {},

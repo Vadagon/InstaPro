@@ -39,6 +39,12 @@ export default new Router({
       props: true
     },
     {
+      path: '/story',
+      name: 'story',
+      component: () => import('./views/Stories.vue'),
+      props: true
+    },
+    {
       path: '/target',
       name: 'target',
       component: () => import('./views/Target.vue'),

@@ -1,5 +1,15 @@
 <template>
   <v-container class="dashboard" pa-0>
+
+
+    <v-alert dense type="info" class="primary alert-customize alert-soft" v-if="$root.user.rateLimit == 'soft'">
+      Soft rate limit encountered, waiting 10 minutes to continue
+    </v-alert>
+    <v-alert dense outlined type="error" class="primary alert-customize alert-hard" v-if="$root.user.rateLimit == 'hard'">
+      Hard rate limit encountered, waiting 1 hour to continue
+    </v-alert>
+
+
     <!-- {{$vuetify.breakpoint.name}} -->
     <v-layout align-start justify-left row fill-height wrap>
       <v-flex sm6 xs12 md6 lg3 v-for="x in statistic" px-2>
@@ -87,6 +97,7 @@
 <script>
 import Chart from 'chart.js';
 import StatsCard from '@/components/material/StatsCard.vue';
+import alert from '@/components/material/Notification.vue';
 export default {
   name: 'dashboard',
   // data: () => ({
@@ -101,7 +112,8 @@ export default {
           locations: 'location_on',
           hashtags: 'search',
           feed: 'rss_feed',
-          requests: 'person_add'
+          requests: 'person_add',
+          story: 'query_builder'
         }
       }
     },
@@ -178,7 +190,8 @@ export default {
     })
   },
   components: {
-    'material-stats-card': StatsCard
+    'material-stats-card': StatsCard,
+    'v-alert': alert
   },
   // computed: {
   //   data () {

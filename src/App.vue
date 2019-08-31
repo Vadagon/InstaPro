@@ -90,6 +90,7 @@ import Footer from './components/core/Footer.vue'
 
 export default {
   data: () => ({
+    rateLimit: false,
     drawer: null,
     drawerRight: false,
     test: 12312312,
@@ -97,7 +98,8 @@ export default {
       like: 'favorite',
       comment: 'comment',
       follow: 'person_pin',
-      unfollow: 'person_add_disabled'
+      unfollow: 'person_add_disabled',
+      story: 'query_builder'
     }
   }),
   methods: {

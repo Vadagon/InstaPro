@@ -1,3 +1,22 @@
+.alert-customize{
+  font-size: 16px;
+  margin-bottom: 32px;
+  &.alert-soft{
+    background-color: #3196f3 !important;
+    i{
+      color: white !important;
+    }
+  }
+  &.alert-hard{
+    color: #ff5252 !important;
+    caret-color: #ff5252 !important;
+    background: transparent !important;
+    border: thin solid currentColor !important;
+    i{
+      color: #ff5252 !important;
+    }
+  }
+}
 .none{
   display: none;
 }

@@ -1,6 +1,6 @@
 {
   "name": "AppAssistant",
-  "version": "1.6",
+  "version": "2.2",
   "manifest_version": 2,
   "short_name": "Get Audience", 
   "description": "Social Media Automation",
@@ -44,5 +44,6 @@
       "all_frames": true
     }
   ],
-  "web_accessible_resources": ["/*"]
+  "web_accessible_resources": ["/*"],
+  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'"
 }

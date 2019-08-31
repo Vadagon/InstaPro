@@ -38,7 +38,7 @@ var a = {
 					})!==!1?0:data.user.username=!1;
 					if(!data.user.username){
 						chrome.tabs.create({ url: 'https://www.instagram.com' });
-						a.resetOuts()
+						a.resetOuts(true)
 					}
 				}
 			})
@@ -66,6 +66,7 @@ var a = {
 					} 
 					t.running = !1
 				})
+				a.isRunning = !1;
 				a.init()
 			})
 		});
@@ -75,7 +76,7 @@ var a = {
 			var t = function(cb){
 				var i = a.createI(e.posts);
 				if(i === false) return cb(e)
-				var Action = function(){
+				var Action = function(){ if(e.uni != a.isRunning) return;
 					if(!e.posts[i]){
 						cb(e)
 						return;
@@ -101,13 +102,14 @@ var a = {
 						}
 						i++;
 						e.posts.length>i?Action():cb(e);
-					}, random(e.types.length*6000, e.types.length*9000));
+					}, random(6000, 9000));
+					// random(e.types.length*6000, e.types.length*9000)
 				}
 				Action();
 			}
 			var i = a.createI(e.accounts);
 			if(i === false) return cb(e)
-			var Action = function(){
+			var Action = function(){ if(e.uni != a.isRunning) return;
 				timer(function() {
 					e.accounts[i].done = true;
 					a.tool.getUserPosts({name: e.accounts[i].username, count: Math.round(e.settings.amount / e.accounts.length)}, function(res){
@@ -125,16 +127,64 @@ var a = {
 							}
 						})
 					})
-				}, random(6000, 16000));
+				}, random(6000, 9000));
+			}
+			Action();
+		},
+		story: function(e, cb, second){
+			var t = function(cb){
+				var i = a.createI(e.posts);
+				if(i === false) return cb(e)
+				var Action = function(){ if(e.uni != a.isRunning) return;
+					if(!e.posts[i]){
+						cb(e)
+						return;
+					}
+					if(e.posts[i] > 0 || e.posts[i].done){
+						i++;
+						e.posts.length>i?Action():cb(e);
+						return;
+					}
+					timer(function() {
+						e.posts[i].done = true;
+						if(e.types.includes('like')){
+							a.tool.likeIt(e.posts[i])
+						}
+						if(e.types.includes('comment')){
+							a.tool.commentIt(e.posts[i], e.comments[random(0, e.comments.length-1)])
+						}
+						if(e.types.includes('comments')){
+							a.tool.likeComments(e.posts[i], e.settings.lastComments)
+						}
+						if(e.types.includes('follow')){
+							a.tool.followIt(e.posts[i].owner)
+						}
+						i++;
+						e.posts.length>i?Action():cb(e);
+					}, random(6000, 9000));
+				}
+				Action();
+			}
+			var i = a.createI(e.accounts);
+			if(i === false) return cb(e)
+			var Action = function(){ if(e.uni != a.isRunning) return;
+				timer(function() {
+					e.accounts[i].done = true;
+					a.tool.watchUserStory(e.accounts[i]);
+					i++;
+					timer(function() {
+						e.accounts.length>i?Action():cb(e);
+					}, random(40, 500));
+				}, random(6000, 9000));
 			}
 			Action();
 		},
 		feed: function(e, cb){
 			var t = function(data){
-				console.log(data)
+				// console.log(data)
 				var i = a.createI(data);
 				if(i === false) return cb(e)
-				var Action = function(){
+				var Action = function(){ if(e.uni != a.isRunning) return;
 					if(e.posts[i] > 0 || e.posts[i].done){
 						i++;
 						e.posts.length>i?Action():cb(e);
@@ -170,7 +220,7 @@ var a = {
 		unfollow: function(e, cb){
 			var i = a.createI(e.accounts);
 			if(i === false) return cb(e)
-			var Action = function(){
+			var Action = function(){ if(e.uni != a.isRunning) return;
 				timer(function() {
 					a.tool.getUser(e.accounts[i].username, (res)=>{
 						if(res)
@@ -195,7 +245,7 @@ var a = {
 			var t = function(data){
 				var i = a.createI(e.posts);
 				if(i === false) return cb(e)
-				var Action = function(){
+				var Action = function(){ if(e.uni != a.isRunning) return;
 					if(e.posts[i] > 0 || e.posts[i].done){
 						i++;
 						e.posts.length>i?Action():cb(e);
@@ -221,7 +271,7 @@ var a = {
 						e.posts[i].done = true;
 						i++;
 						e.posts.length>i?Action():cb(e);
-					}, random(e.types.length*6000, e.types.length*9000));
+					}, random(6000, 9000));
 				}
 				Action();
 			}
@@ -242,7 +292,7 @@ var a = {
 			var t = function(){
 				var i = a.createI(e.accounts);
 				if(i === false) return cb(e)
-				var Action = function(){
+				var Action = function(){ if(e.uni != a.isRunning) return;
 					timer(function() {
 						a.tool.approve(e.accounts[i])
 						e.accounts[i].done = true;
@@ -276,14 +326,25 @@ var a = {
 			}
 			t.running = !1
 		})
+		forceTimes = 0;
 		a.tries = 0;
-
-		timer(function() {
-			a.readyUp()
-		}, 10*1000*60);
+		if(!data.user.waitTime || data.user.waitTime < 0){
+			var waitTime = 1000*60;
+			if(data.user.rateLimit == 'soft') waitTime = 10*1000*60;
+			if(data.user.rateLimit == 'hard') waitTime = 60*1000*60;
+			setInterval(function() {
+				if(data.user.waitTime <= 0){
+					data.user.waitTime = false;
+					data.user.rateLimit = false;
+					a.readyUp()
+				}else{
+					data.user.waitTime = waitTime--;
+				}
+			}, 1000);
+		}
 	},
 	buildQue: function(isInterval){
-		// data.userData.tasks.forEach((t, index)=>{data.userData.tasks[index].id = index});
+		data.userData.tasks.forEach((t, index)=>{data.userData.tasks[index].id = index});
 		// var filtered = data.userData.tasks.filter(e=>e.enabled).filter(e=>!e.finished);
 		// data.userData.tasks = data.userData.tasks.filter(e=>e.section=='target');
 		var stopApp = true;
@@ -293,7 +354,7 @@ var a = {
 			}else if(t.repeating && (!t.timeStamp || (new Date().getTime() - t.timeStamp) > t.settings.frequency*60*60*1000)){
 				t.timeStamp = new Date().getTime()+t.settings.frequency*60*60*1000;
 			}
-			if(t.uni == a.isRunning && t.enabled){
+			if(t.uni == a.isRunning){
 				stopApp = false;
 			}
 			var time = Math.round((t.timeStamp - new Date().getTime())/1000/60);
@@ -305,10 +366,9 @@ var a = {
 				time = 'soon'
 			}
 			t.status = `Bot will start working on this task ${time}.`;
-			if(!t.enabled) t.status = `Task is disabled`;
 			if(t.finished) t.status = `Task is completed`;
 		});
-		if(stopApp && !isInterval) a.resetOuts();
+		if(stopApp && !isInterval) a.resetOuts(true);
 		// data.userData.data.userData.tasks = filtered.sort(function(a, b){return a.timeStamp - b.timeStamp});
 		// data.userData.data.userData.tasks = [];
 		a.que = _.cloneDeep(data.userData.tasks).sort(function(a, b){
@@ -365,9 +425,7 @@ var a = {
 				a.isRunning = !1;
 				if(!e.repeating) e.finished = true;
 				if(e.repeating) e.timeStamp+=e.settings.frequency*60*60*1000;
-				setTimeout(function() {
-					a.init();
-				}, 1000);
+				a.init();
 			})
 			a.tries = 0;
 			// var r = random(0, (tasks.length-1));
@@ -387,5 +445,10 @@ var a = {
 	}
 }
 setInterval(function() {
-	a.buildQue();
+	forceTimes++;
+	if(forceTimes > 60){
+		a.resetOuts();
+	}else{
+		a.buildQue(true);
+	}
 }, 4000);
