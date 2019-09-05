@@ -31,6 +31,8 @@ var data = {
 chrome.extension.onMessage.addListener(function(request, sender, sendResponse) {
 	switch(request.why) {
 	    case 'getData':
+	    	data.user.rateLimit = a.rateLimit;
+	    	data.user.waitTimeMS = a.waitTime.ms
 	        sendResponse(data);
 	        break;
 	    case 'getRSS':

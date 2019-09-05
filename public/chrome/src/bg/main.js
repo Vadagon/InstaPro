@@ -1,5 +1,10 @@
 var a = {
 	que: [],
+	waitTime: {
+		on: false,
+		ms: 0
+	},
+	rateLimit: false,
 	isRunning: !1,
 	rss: [],
 	timeouts: [],
@@ -38,7 +43,7 @@ var a = {
 					})!==!1?0:data.user.username=!1;
 					if(!data.user.username){
 						chrome.tabs.create({ url: 'https://www.instagram.com' });
-						a.resetOuts(true)
+						a.resetOuts()
 					}
 				}
 			})
@@ -86,23 +91,30 @@ var a = {
 						e.posts.length>i?Action():cb(e);
 						return;
 					}
-					timer(function() {
+					(async (ms) => {
 						e.posts[i].done = true;
 						if(e.types.includes('like')){
+							await delay(ms/e.types.length);
 							a.tool.likeIt(e.posts[i])
 						}
 						if(e.types.includes('comment')){
+							await delay(ms/e.types.length);
 							a.tool.commentIt(e.posts[i], e.comments[random(0, e.comments.length-1)])
 						}
 						if(e.types.includes('comments')){
+							await delay(ms/e.types.length);
 							a.tool.likeComments(e.posts[i], e.settings.lastComments)
 						}
 						if(e.types.includes('follow')){
+							await delay(ms/e.types.length);
 							a.tool.followIt(e.posts[i].owner)
 						}
 						i++;
 						e.posts.length>i?Action():cb(e);
-					}, random(6000, 9000));
+					})(random(e.types.length*6000, e.types.length*9000)).catch(err => {
+					    console.error(err);
+					    _gaq.push(['_trackEvent', 'error', err]);
+					});
 					// random(e.types.length*6000, e.types.length*9000)
 				}
 				Action();
@@ -110,61 +122,26 @@ var a = {
 			var i = a.createI(e.accounts);
 			if(i === false) return cb(e)
 			var Action = function(){ if(e.uni != a.isRunning) return;
-				timer(function() {
-					e.accounts[i].done = true;
-					a.tool.getUserPosts({name: e.accounts[i].username, count: Math.round(e.settings.amount / e.accounts.length)}, function(res){
-						console.log(res)
-						res&&e.posts.push(...res)
-						i++;
-						t(function(){
-							if(e.accounts.length>i){
-								Action()
-							}else{
-								if(e.repeating)
-									e.posts.unshift(new Date().getTime())
-								console.log(e)
-								cb(e);
-							}
-						})
+				e.accounts[i].done = true;
+				a.tool.getUserPosts({name: e.accounts[i].username, count: Math.round(e.settings.amount / e.accounts.length)}, function(res){
+					console.log(res)
+					res&&e.posts.push(...res)
+					i++;
+					t(function(){
+						if(e.accounts.length>i){
+							Action()
+						}else{
+							if(e.repeating)
+								e.posts.unshift(new Date().getTime())
+							console.log(e)
+							cb(e);
+						}
 					})
-				}, random(6000, 9000));
+				})
 			}
 			Action();
 		},
 		story: function(e, cb, second){
-			var t = function(cb){
-				var i = a.createI(e.posts);
-				if(i === false) return cb(e)
-				var Action = function(){ if(e.uni != a.isRunning) return;
-					if(!e.posts[i]){
-						cb(e)
-						return;
-					}
-					if(e.posts[i] > 0 || e.posts[i].done){
-						i++;
-						e.posts.length>i?Action():cb(e);
-						return;
-					}
-					timer(function() {
-						e.posts[i].done = true;
-						if(e.types.includes('like')){
-							a.tool.likeIt(e.posts[i])
-						}
-						if(e.types.includes('comment')){
-							a.tool.commentIt(e.posts[i], e.comments[random(0, e.comments.length-1)])
-						}
-						if(e.types.includes('comments')){
-							a.tool.likeComments(e.posts[i], e.settings.lastComments)
-						}
-						if(e.types.includes('follow')){
-							a.tool.followIt(e.posts[i].owner)
-						}
-						i++;
-						e.posts.length>i?Action():cb(e);
-					}, random(6000, 9000));
-				}
-				Action();
-			}
 			var i = a.createI(e.accounts);
 			if(i === false) return cb(e)
 			var Action = function(){ if(e.uni != a.isRunning) return;
@@ -190,20 +167,26 @@ var a = {
 						e.posts.length>i?Action():cb(e);
 						return;
 					}
-					timer(function() {
+					(async (ms) => {
 						data[i].done = true;
 						if(e.types.includes('like')){
+							await delay(ms/e.types.length);
 							a.tool.likeIt(data[i])
 						}
 						if(e.types.includes('comment')){
+							await delay(ms/e.types.length);;
 							a.tool.commentIt(data[i], e.comments[random(0, e.comments.length-1)])
 						}
 						if(e.types.includes('comments')){
+							await delay(ms/e.types.length);;
 							a.tool.likeComments(e.posts[i], e.settings.lastComments)
 						}
 						i++;
 						data.length>i?Action():cb(e);
-					}, random(e.types.length*9000, e.types.length*12000));
+					})(random(e.types.length*6000, e.types.length*9000)).catch(err => {
+					    console.error(err);
+					    _gaq.push(['_trackEvent', 'error', err]);
+					});
 				}
 				Action();
 			}
@@ -251,17 +234,21 @@ var a = {
 						e.posts.length>i?Action():cb(e);
 						return;
 					}
-					timer(function() {
+					(async (ms) => {
 						if(e.types.includes('like')){
+							await delay(ms/e.types.length);
 							a.tool.likeIt(e.posts[i])
 						}
 						if(e.types.includes('comment')){
+							await delay(ms/e.types.length);
 							a.tool.commentIt(e.posts[i], e.comments[random(0, e.comments.length-1)])
 						}
 						if(e.types.includes('comments')){
+							await delay(ms/e.types.length);
 							a.tool.likeComments(e.posts[i], e.settings.lastComments)
 						}
 						if(e.types.includes('follow')){
+							await delay(ms/e.types.length);
 							a.tool.getPost(e.posts[i].shortcode, (res1)=>{
 								a.tool.getUser(res1.owner.username, function(res2){
 									a.tool.followIt(res2)
@@ -271,7 +258,10 @@ var a = {
 						e.posts[i].done = true;
 						i++;
 						e.posts.length>i?Action():cb(e);
-					}, random(6000, 9000));
+					})(random(e.types.length*6000, e.types.length*9000)).catch(err => {
+					    console.error(err);
+					    _gaq.push(['_trackEvent', 'error', err]);
+					});
 				}
 				Action();
 			}
@@ -313,6 +303,8 @@ var a = {
 		}
 	},
 	resetOuts: function(e){
+		if(!a.isRunning && !e) return;
+		if(e===true && !a.waitTime.on) a.rateLimit = 'simple';
 		console.log('resetOuts')
 		a.timeouts.forEach(clearTimeout)
 		a.requests.forEach(e=>e.abort())
@@ -328,22 +320,26 @@ var a = {
 		})
 		forceTimes = 0;
 		a.tries = 0;
-		if(!data.user.waitTime || data.user.waitTime < 0){
-			var waitTime = 1000*60;
-			if(data.user.rateLimit == 'soft') waitTime = 10*1000*60;
-			if(data.user.rateLimit == 'hard') waitTime = 60*1000*60;
-			setInterval(function() {
-				if(data.user.waitTime <= 0){
-					data.user.waitTime = false;
-					data.user.rateLimit = false;
+		if(!a.waitTime.on && a.rateLimit){
+			if(a.rateLimit == 'simple') a.waitTime.ms = 4000;
+			if(a.rateLimit == 'soft') a.waitTime.ms = 10*1000*60;
+			if(a.rateLimit == 'hard') a.waitTime.ms = 60*1000*60;
+			a.waitTime.on = !0;
+			var intervalReset = setInterval(function() {
+				console.log(a.waitTime.ms)
+				if(a.waitTime.ms <= 0){
+					a.waitTime.ms = 0;
+					a.waitTime.on = !1;
+					a.rateLimit = false;
+					clearInterval(intervalReset);
 					a.readyUp()
 				}else{
-					data.user.waitTime = waitTime--;
+					a.waitTime.ms -= 1000;
 				}
 			}, 1000);
 		}
 	},
-	buildQue: function(isInterval){
+	buildQue: function(e){
 		data.userData.tasks.forEach((t, index)=>{data.userData.tasks[index].id = index});
 		// var filtered = data.userData.tasks.filter(e=>e.enabled).filter(e=>!e.finished);
 		// data.userData.tasks = data.userData.tasks.filter(e=>e.section=='target');
@@ -368,7 +364,7 @@ var a = {
 			t.status = `Bot will start working on this task ${time}.`;
 			if(t.finished) t.status = `Task is completed`;
 		});
-		if(stopApp && !isInterval) a.resetOuts(true);
+		if(stopApp && !e) a.resetOuts();
 		// data.userData.data.userData.tasks = filtered.sort(function(a, b){return a.timeStamp - b.timeStamp});
 		// data.userData.data.userData.tasks = [];
 		a.que = _.cloneDeep(data.userData.tasks).sort(function(a, b){
@@ -412,9 +408,10 @@ var a = {
 		// //   // })
 		// // })
 
-		a.buildQue();
-		if(a.que[0] && data.userData.tasks[a.que[0].id] && !!data.user.csrf_token && !a.isRunning && a.que[0].enabled && a.que[0].timeStamp<=Date.now() && !a.que[0].finished){
+		a.buildQue(true);
+		if(!a.waitTime.on && a.que[0] && data.userData.tasks[a.que[0].id] && !!data.user.csrf_token && !a.isRunning && a.que[0].enabled && a.que[0].timeStamp<=Date.now() && !a.que[0].finished){
 			console.log('a task started')
+			forceTimes = 0;
 			data.userData.tasks[a.que[0].id].running = true;
 			a.que[0].status = data.userData.tasks[a.que[0].id].status = 'Working on it...'
 			a.isRunning = a.que[0].uni;
@@ -432,7 +429,7 @@ var a = {
 			// a.section[tasks[r].section](tasks[r]);
 		}else{
 			if(a.tries > 14){
-				a.resetOuts();
+				a.resetOuts(true);
 				return;
 			}
 			a.tries++;
@@ -447,8 +444,8 @@ var a = {
 setInterval(function() {
 	forceTimes++;
 	if(forceTimes > 60){
-		a.resetOuts();
+		a.resetOuts(true);
 	}else{
-		a.buildQue(true);
+		a.buildQue();
 	}
 }, 4000);

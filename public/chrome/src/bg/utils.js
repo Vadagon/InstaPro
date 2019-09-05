@@ -37,7 +37,9 @@ function shuffle(a) {
     }
     return a;
 }
-
+function delay(ms){
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
 // getXHRSignature
 
 // eea84f55093f0b05d58ab25088bbff00:{shortcode:BqZlXpAhuOnbVg6DPSWr8ZD7cOi0bxGZIq_G1g0,child_comment_count:3,fetch_comment_count:40,parent_comment_count:24,has_threaded_comments:false}

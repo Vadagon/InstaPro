@@ -3,16 +3,16 @@
 
 
     <v-alert dense type="info" class="primary alert-customize alert-soft" v-if="$root.user.rateLimit == 'soft'">
-      Soft rate limit encountered, waiting 10 minutes to continue
+      Soft rate limit encountered, waiting 10 minutes to continue ({{$root.user.waitTimeMS/1000}} seconds)
     </v-alert>
     <v-alert dense outlined type="error" class="primary alert-customize alert-hard" v-if="$root.user.rateLimit == 'hard'">
-      Hard rate limit encountered, waiting 1 hour to continue
+      Hard rate limit encountered, waiting 1 hour to continue ({{$root.user.waitTimeMS/1000}} seconds)
     </v-alert>
 
 
     <!-- {{$vuetify.breakpoint.name}} -->
-    <v-layout align-start justify-left row fill-height wrap>
-      <v-flex sm6 xs12 md6 lg3 v-for="x in statistic" px-2>
+    <v-layout align-start justify-center row fill-height wrap>
+      <v-flex sm6 xs12 md6 lg4 v-for="x in statistic" px-2>
         <div class="v-card--material-stats v-card v-sheet theme--light" style="margin-bottom: 24px; margin-top: 48px;">
           <div class="v-offset" style="top: -24px; margin-bottom: -24px;">
             <div class="pa-4 v-card v-sheet theme--dark green elevation-10" v-bind:style="{ background: x.color+' !important' }">
@@ -118,11 +118,16 @@ export default {
       }
     },
     statistic(){
+      var stories = 0;
+      this.$store.state.tasks.filter(e=>e.type == 'story').forEach(e=>{
+        stories += e.accounts.filter(e=>e.done).length;
+      })
       return [
         {name: 'Followed', value: this.$root.rss.filter(e=>e.type == 'follow').length, icon: 'person_pin', color: '#4ea750'},
         {name: 'Unfollowed', value: this.$root.rss.filter(e=>e.type == 'unfollow').length, icon: 'person_add_disabled', color: '#508eff'},
         {name: 'Liked', value: this.$root.rss.filter(e=>e.type == 'like').length, icon: 'favorite', color: '#ff4e4e'},
-        {name: 'Commented', value: this.$root.rss.filter(e=>e.type == 'comment').length, icon: 'comment', color: '#e05f99'}
+        {name: 'Commented', value: this.$root.rss.filter(e=>e.type == 'comment').length, icon: 'comment', color: '#e05f99'},
+        {name: 'Watched', value: stories, icon: 'query_builder', color: '#b15fe0'}
       ]
     }
   },

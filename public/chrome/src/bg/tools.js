@@ -7,9 +7,10 @@ jax = function(e){
 var _Fail = function(cb, res){
   cb&&cb(!1)
   a.tries++;
-  if(a.tries > 1){
-    if(res.status == 403) data.user.rateLimit = 'soft';
-    if(res.status == 400) data.user.rateLimit = 'hard';
+  if(a.tries > 3){
+    a.rateLimit = 'simple';
+    if(res.status == 403) a.rateLimit = 'soft';
+    if(res.status == 400) a.rateLimit = 'hard';
     a.resetOuts();
     return;
   }
