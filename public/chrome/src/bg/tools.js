@@ -1,4 +1,3 @@
-var forceTimes = 0;
 jax = function(e){
   var aj = $.ajax(e);
   a.requests.push(aj)
@@ -7,7 +6,7 @@ jax = function(e){
 var _Fail = function(cb, res){
   cb&&cb(!1)
   a.tries++;
-  if(a.tries > 3){
+  if(a.tries > 5){
     a.rateLimit = 'simple';
     if(res.status == 403) a.rateLimit = 'soft';
     if(res.status == 400) a.rateLimit = 'hard';
@@ -38,7 +37,7 @@ function sortData(data, type){
 }
 a.tool = {
   likeIt: function(post, cb){
-    forceTimes = 0;
+    a.forceTimes = 0;
     if(!a.rss.filter(e=>e.type=='like').some((e)=>e.value.id==post.id))
       jax({
           url: 'https://www.instagram.com/web/likes/'+post.id+'/like/',
@@ -48,12 +47,13 @@ a.tool = {
             'x-instagram-ajax': '1'
           }
       }).fail(e=>_Fail(cb, e)).done((e)=>{
+        a.tries = 0;
         a.rss.push({type: 'like', value: sortData(post)}) 
         cb&&cb(!0)
       })
   },
   followIt: function(user, cb){
-    forceTimes = 0;
+    a.forceTimes = 0;
     if(!a.rss.filter(e=>e.type=='follow').some((e)=>e.value.id==user.id))
       jax({
         url: 'https://www.instagram.com/web/friendships/'+user.id+'/follow/',
@@ -63,12 +63,13 @@ a.tool = {
             xhr.setRequestHeader('x-instagram-ajax', '1');
         }
       }).fail(e=>_Fail(cb, e)).done((e)=>{
+        a.tries = 0;
         a.rss.push({type: 'follow', value: user}) 
         cb&&cb(!0)
       })
   },
   unfollowIt: function(user, cb){
-    forceTimes = 0;
+    a.forceTimes = 0;
     if(!a.rss.filter(e=>e.type=='unfollow').some((e)=>e.value.id==user.id))
       jax({
         url: 'https://www.instagram.com/web/friendships/' + user.id + '/unfollow/',
@@ -78,12 +79,13 @@ a.tool = {
             xhr.setRequestHeader('x-instagram-ajax', '1');
         }
       }).fail(e=>_Fail(cb, e)).done((e)=>{
+        a.tries = 0;
         a.rss.push({type: 'unfollow', value: user}) 
         cb&&cb(!0)
       })
   },
   commentIt: function(post, comment, cb){
-    forceTimes = 0;
+    a.forceTimes = 0;
     if(!a.rss.filter(e=>e.type=='comment').some((e)=>e.value.id==post.id))
       jax({
         url: 'https://www.instagram.com/web/comments/'+post.id+'/add/',
@@ -97,6 +99,7 @@ a.tool = {
             xhr.setRequestHeader('x-instagram-ajax', '1');
         }
       }).fail(e=>_Fail(cb, e)).done((e)=>{
+        a.tries = 0;
         a.rss.push({type: 'comment', value: sortData(post), comment: comment}) 
         cb&&cb(!0)
       })

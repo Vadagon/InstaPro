@@ -11,6 +11,7 @@ var a = {
 	requests: [],
 	sleepTime: 0,
 	switchTask: 0,
+	forceTimes: 0,
 	tries: 0,
 	createI: function(data){
 		if(!data || !data.length) return false;
@@ -318,7 +319,7 @@ var a = {
 			}
 			t.running = !1
 		})
-		forceTimes = 0;
+		a.forceTimes = 0;
 		a.tries = 0;
 		if(!a.waitTime.on && a.rateLimit){
 			if(a.rateLimit == 'simple') a.waitTime.ms = 4000;
@@ -411,7 +412,7 @@ var a = {
 		a.buildQue(true);
 		if(!a.waitTime.on && a.que[0] && data.userData.tasks[a.que[0].id] && !!data.user.csrf_token && !a.isRunning && a.que[0].enabled && a.que[0].timeStamp<=Date.now() && !a.que[0].finished){
 			console.log('a task started')
-			forceTimes = 0;
+			a.forceTimes = 0;
 			data.userData.tasks[a.que[0].id].running = true;
 			a.que[0].status = data.userData.tasks[a.que[0].id].status = 'Working on it...'
 			a.isRunning = a.que[0].uni;
@@ -442,8 +443,8 @@ var a = {
 	}
 }
 setInterval(function() {
-	forceTimes++;
-	if(forceTimes > 60){
+	a.forceTimes++;
+	if(a.forceTimes > 60){
 		a.resetOuts(true);
 	}else{
 		a.buildQue();
