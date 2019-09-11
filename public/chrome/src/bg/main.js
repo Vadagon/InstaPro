@@ -26,6 +26,21 @@ var a = {
 		}
 		return i;
 	},
+	generateTime: function(e){
+		var avTi = 0;
+		e.forEach((el, id)=>{
+			if(el=='like'){
+				avTi += 6000;
+			}else if(el=='comment'){
+				avTi += 26000;
+			}else if(el=='comments'){
+				avTi += 6000;
+			}else if(el=='follow'){
+				avTi += 15000;
+			}
+		})
+		return random(avTi*0.6, avTi*1.4)
+	},
 	readyUp: function(){
 		console.log('readyUp');
 		$.get('https://www.instagram.com')
@@ -112,7 +127,7 @@ var a = {
 						}
 						i++;
 						e.posts.length>i?Action():cb(e);
-					})(random(e.types.length*6000, e.types.length*9000)).catch(err => {
+					})(a.generateTime(e.types)).catch(err => {
 					    console.error(err);
 					    _gaq.push(['_trackEvent', 'error', err]);
 					});
@@ -184,7 +199,7 @@ var a = {
 						}
 						i++;
 						data.length>i?Action():cb(e);
-					})(random(e.types.length*6000, e.types.length*9000)).catch(err => {
+					})(a.generateTime(e.types)).catch(err => {
 					    console.error(err);
 					    _gaq.push(['_trackEvent', 'error', err]);
 					});
@@ -259,7 +274,7 @@ var a = {
 						e.posts[i].done = true;
 						i++;
 						e.posts.length>i?Action():cb(e);
-					})(random(e.types.length*6000, e.types.length*9000)).catch(err => {
+					})(a.generateTime(e.types)).catch(err => {
 					    console.error(err);
 					    _gaq.push(['_trackEvent', 'error', err]);
 					});
