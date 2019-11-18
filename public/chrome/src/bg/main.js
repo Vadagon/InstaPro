@@ -30,11 +30,11 @@ var a = {
 		var avTi = 0;
 		e.forEach((el, id)=>{
 			if(el=='like'){
-				avTi += 6000;
+				avTi += 9000;
 			}else if(el=='comment'){
 				avTi += 26000;
 			}else if(el=='comments'){
-				avTi += 6000;
+				avTi += 9000;
 			}else if(el=='follow'){
 				avTi += 15000;
 			}
